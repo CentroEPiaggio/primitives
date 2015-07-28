@@ -1,9 +1,19 @@
 classdef PrimitiveFun
     properties
-        Params q;
-        Imagespace chi;
+        chi; % Imagespace
+%         Params q;
+%         Mapping f;
     end
     methods
+        % constructor
+        function obj = PrimitiveFun(V) % TODO: PrimitiveFun(chi,q,f)
+import primitive_library.*;
+            if nargin == 1
+                obj.chi = Imagespace(V);
+            elseif nargin < 1
+                obj.chi = Imagespace([-1 -1; -1 1; 1 -1; 1 1]*0.3);
+            end
+        end
         function eval(obj,q)
             % task-specific function that maps the parameter space to the
             % image space

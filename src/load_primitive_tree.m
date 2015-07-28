@@ -1,0 +1,11 @@
+P = tree;
+idx_primitive_next = 0;
+Forward = PrimitiveFun([-1 -1; -1 1; 1 -1; 1 1]*0.5);
+P = P.addnode(idx_primitive_next,Forward)
+idx_primitive_next = idx_primitive_next+1;
+Left = PrimitiveFun([-1 -1; -1 1; 1 -1; 1 1]*0.4);
+P = P.addnode(idx_primitive_next,Left)
+idx_primitive_next = idx_primitive_next+1;
+Right = PrimitiveFun([-1 -1; -1 1; 1 -1; 1 1]*0.3);
+P = P.addnode(idx_primitive_next,Right)
+idx_primitive_next = idx_primitive_next+1;
