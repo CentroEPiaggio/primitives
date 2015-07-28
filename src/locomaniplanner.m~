@@ -31,16 +31,13 @@ for ii=1:N_sample_max
     idx_nearest = knnsearch(points_mat',x_rand');
     % TODO: how to represent the space? I suggest sth like sparse matrices
     % with NaNs for non-intersecting (or not yet sampled) dimensions
-%     keyboard
-%     waitforbuttonpress
+    keyboard
+    % waitforbuttonpress
     
     % add new node to the tree
     T = T.addnode(idx_nearest,x_rand);
     % draw arc between newly sample and nearest
-    x_nearest = T.get(idx_nearest);
-    line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red');
-    drawnow
-    pause(0.01)
+    lin
 end
 return
 
