@@ -15,15 +15,15 @@ P2.plot('color','blue')
 %%
 x = sdpvar(2,1);
 A = eye(2);
-vincoli =  [x'*A*x<=1.4];
+vincoli =  [A*x<=.4];
 P3Set = YSet(x,vincoli);
 % P3 = P3Set.outerApprox
 % P3 = Polyhedron(vincoli)
 figure
-plot(P3Set)
+plot(P3)
 hold on
 plot(P3Set,'color','lightblue')
-% plot(P3.chebyCenter,'color','lightgreen')
+plot(P3.chebyCenter,'color','lightgreen')
 return
 %%
 Pintersect = P1 & P2;

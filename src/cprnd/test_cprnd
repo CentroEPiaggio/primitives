@@ -1,0 +1,22 @@
+close all;
+Chi0.P.plot;
+P1 = Chi0.P;
+P2 = Polyhedron([-1 -1;-1 1;1 -1; 1 1]*0.5);
+close all
+P1.plot('color','green')
+hold on
+P2.plot('color','red')
+P3 = P1\P2;
+P3.plot('color','blue')
+keyboard
+%%
+close all
+P3.plot('color','red')
+% Chi0.P.plot
+hold on;
+N = 10000;
+% x_rand = cprnd(N,Chi0.P.A,Chi0.P.b);
+for ii=1:N
+    x_rand = P1.randomPoint;
+    plot(x_rand(1),x_rand(2),'x');
+end

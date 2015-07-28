@@ -1,28 +1,32 @@
 clear all; close all; clc;
 
 V1 = [1 1; -1 1; -1 -1; 1 -1];
-    
-P1 = Polyhedron(V1)
+%     
+P1 = Polyhedron(V1);
 
-V2 = V1*0.5+1;
-
-P2 = Polyhedron(V2)
-
-P1.plot('color','red')
+V2 = [1 1 0; -1 1 0 ; -1 -1 0; 1 -1 0; 
+    1 1 1; -1 1 1 ; -1 -1 1; 1 -1 1; ];
+P2 = Polyhedron(V2);
+% V2 = V1*0.5+1;
 % 
-hold on
-P2.plot('color','blue')
+% P2 = Polyhedron(V2)
+% 
+% P1.plot('color','red')
+% % 
+% hold on
+% P2.plot('color','blue')
 %%
-x = sdpvar(2,1);
-A = eye(2);
-vincoli =  [x'*A*x<=1.4];
+x = sdpvar(3,1);
+A = eye(3);
+% vincoli =  [x'*A*x<=0.01];
+vincoli = [x(1)^2+x(2)^2<=1; -1<=x(3)<=1];
 P3Set = YSet(x,vincoli);
 % P3 = P3Set.outerApprox
 % P3 = Polyhedron(vincoli)
 figure
 plot(P3Set)
-hold on
-plot(P3Set,'color','lightblue')
+% hold on
+% plot(P3Set,'color','lightblue')
 % plot(P3.chebyCenter,'color','lightgreen')
 return
 %%
