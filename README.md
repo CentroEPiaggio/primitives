@@ -11,15 +11,21 @@ git clone https://github.com/CentroEPiaggio/primitives.git
 
 From a Matlab shell run:
 ```
-cd \path\to\primitives
+cd primitives
 install_mpt3.m
 ```
 
-To start using the package just run
+# Usage
+
+To start using the package move in the src directory. From a Matlab shell:
+```
+cd /path/to/primitives/src
+```
+and run
 ```
 init.m
 ```
-at Matlab startup.
+to initialize the library.
 
 Then the main script is
 ```
