@@ -32,6 +32,7 @@ end
 N_sample_max = 1000; % max number of samples
 % main loop
 for ii=1:N_sample_max
+    ii
     %% sample a point, randomly, in Chi0
     x_rand = Chi0.sample;
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
@@ -43,7 +44,7 @@ for ii=1:N_sample_max
     % TODO: how to represent the space? I suggest sth like sparse matrices
     % with NaNs for non-intersecting (or not yet sampled) dimensions
     %     keyboard
-    waitforbuttonpress
+    %waitforbuttonpress
     % TODO: valutare il miglior parametro per muoversi in Chi0
     
     %% add the new node to the tree
