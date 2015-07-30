@@ -4,7 +4,10 @@ Primitive library for loco-manipulation tasks
 At this stage we are working on ideas using tools like MPT toolbox and Yalmip.
 
 # Installation step-by-step instructrons
+Download the package with:
+```
 git clone https://github.com/CentroEPiaggio/primitives.git
+```
 
 From a Matlab shell run:
 ```
