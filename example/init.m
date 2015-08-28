@@ -33,6 +33,75 @@ q_reference = [time(:)';traj_x_cart(:)'];
 save primitiva_muovi.mat q_reference;
 % simulation total time
 Tend = T(end)*10;
+
+%% Using RSim Target for Batch Simulations
+
+%%
+% Make sure the current directory is writable because this example will be
+% creating files.
+[stat, fa] = fileattrib(pwd);
+if ~fa.UserWrite
+    disp('This script must be run in a writable directory');
+    return;
+end
+
+%%
+% Open the model and configure it to use the RSim target.
+mdlName = 'modello';
+open_system(mdlName);
+cs = getActiveConfigSet(mdlName);
+cs.switchTarget('rsim.tlc',[]);
+
+%%
+% The MAT-file rsim_tfdata.mat is required in the local directory.
+if ~isempty(dir('rsim_tfdata.mat')),
+    delete('rsim_tfdata.mat');
+end
+str1 = fullfile(matlabroot,'toolbox','rtw','rtwdemos','rsimdemos','rsim_tfdata.mat');
+str2 = ['copyfile(''', str1, ''',''rsim_tfdata.mat'',''writable'')'];
+eval(str2);
+
+%%
+% Build the RSim executable for the model. During the build process, a
+disp('Building compiled RSim simulation.')
+rtwbuild(mdlName);
+%%
+% Generate Primitive .mat files
+prim_path = 'prim/';
+if ~exist(prim_path,'dir')
+    mkdir(prim_path)
+end
+xf_vec = linspace(-10,10,10);
+disp('Generating primitives...');
+for ii=1:length(xf_vec)
+    xf = xf_vec(ii);
+    [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
+    q_reference = [time(:)';traj_x_cart(:)'];
+    savestr = strcat('save primitiva_muovi_',num2str(ii),'.mat q_reference');
+    eval(savestr);
+end
+disp('Generating primitives... DONE');
+
+%% Step 7. Run the RSim Compiled Simulation Using New Signal Data
+
+disp('Starting batch simulations.')
+
+tic
+for i = 1:length(xf_vec)
+  % Bang out and run the next set of data with RSim
+  runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_', ...
+            num2str(i),'.mat -v -tf 5.000'];
+  [status, result] = system(runstr);
+  if status ~= 0, error(result); end
+  % Load the data to MATLAB and plot the results.
+  load modello.mat
+  plot(rt_q); % now for example the q of the system are plotted
+  grid on
+  hold on
+end
+c=toc;
+disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
+
 %%
 prim_path = 'prim/';
 if ~exist(prim_path,'dir')
