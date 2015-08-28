@@ -38,7 +38,7 @@ prim_path = 'prim/';
 if ~exist(prim_path,'dir')
     mkdir(prim_path)
 end
-xf_vec = linspace(-10,10,100);
+xf_vec = linspace(-10,10,10);
 disp('Generating primitives...');
 for ii=1:length(xf_vec)
     xf = xf_vec(ii);
@@ -52,16 +52,39 @@ disp('Generating primitives... DONE');
 % first loop: between every 
 % possible reference value
 % for the primitive MUOVI
+out_path = 'output/';
+if ~exist(out_path,'dir')
+    mkdir(out_path)
+end
 disp(['Starting simulation loop for muovi: ' datestr(now)]);
 for ii=1:length(xf_vec)
     disp(num2str(ii));
-    load([prim_path 'primitiva_muovi_' num2str(ii) '.mat']);
+    % use variable primitiva_muovi to load the .mat file to be used within the
+    % current simulation
+    primitiva_muovi = [prim_path 'primitiva_muovi_' num2str(ii) '.mat'];
+    % (builds and) simulates the simulink file
     tic
     sim('modello')
     toc
+    % save output. The compiled version does it automatically
+    output = [t(:)';q(:,1)'];
+    save([out_path 'out_primitiva_muovi_' num2str(ii) '.mat'],'output');
 end
 disp(['Starting simulation loop for muovi: DONE at time ' datestr(now)]);
-return
+
+%% plot output
+figure
+for ii=1:length(xf_vec)
+    clear output;
+    disp(num2str(ii));
+    load([out_path 'out_primitiva_muovi_' num2str(ii) '.mat']);
+    time = output(1,:);
+    x = output(2,:);
+    plot(time,x);
+    hold on
+end
+xlabel('time [s]')
+title('cart position')
 %%
 % tic
 % !./modello

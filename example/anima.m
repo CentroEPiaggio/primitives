@@ -28,5 +28,5 @@ for ii=1:length(t)
     xaxis(assi_x);
     yaxis(assi_y);
     drawnow;
-    pause(0.1);
+    pause(0.0001);
 end
