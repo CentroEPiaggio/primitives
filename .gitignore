@@ -20,6 +20,8 @@ slprj/
 
 # Simulink build
 example/modello_grt_rtw/*
+example/modello_rsim_rtw/*
+prim/*.mat
 *.autosave
 
 ##---------------------------------------------------
