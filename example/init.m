@@ -19,6 +19,10 @@ masses=[m1;m2;m3];
 % sampling time for simulation (discrete time)
 Ts = 0.001;
 
+% dimensioni carrello (per anima.m e check ZMP)
+cart_width  = 2;
+cart_height = 0.4;
+
 % traiettorie carrello
 xi=q0(1);
 xf=1;
@@ -85,13 +89,14 @@ for ii=1:length(xf_vec)
 end
 xlabel('time [s]')
 title('cart position')
+return
 %%
 % tic
 % !./modello
 % toc
 %% load('modello.mat');
-warning('off')
-tic
-sim('modello')
-toc
+% warning('off')
+% tic
+% sim('modello')
+% toc
 plottini
