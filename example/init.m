@@ -86,7 +86,7 @@ for ii=1:length(xf_vec)
 end
 disp('Generating primitives... DONE');
 
-%% Step 7. Run the RSim Compiled Simulation Using New Signal Data
+%% Run the RSim Compiled Simulation Using New Signal Data
 
 disp('Starting batch simulations.')
 
@@ -105,6 +105,8 @@ for i = 1:length(xf_vec)
 end
 c=toc;
 disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
+
+return 
 
 %%
 prim_path = 'prim/';
