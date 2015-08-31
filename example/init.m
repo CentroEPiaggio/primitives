@@ -28,6 +28,10 @@ xi=q0(1);
 xf=1;
 xpi=0;
 xpf=0;
+
+yi=0;
+ypi=0;
+ypf=0;
 T = [0 1];
 [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
 % correct format for .mat loading:
@@ -75,14 +79,21 @@ prim_path = 'prim/';
 if ~exist(prim_path,'dir')
     mkdir(prim_path)
 end
+
+% Now using together x and y trajectories
 xf_vec = linspace(-10,10,10);
+yf_vec = linspace(0,10,10);
 disp('Generating primitives...');
-for ii=1:length(xf_vec)
-    xf = xf_vec(ii);
-    [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
-    q_reference = [time(:)';traj_x_cart(:)'];
-    savestr = strcat('save primitiva_muovi_',num2str(ii),'.mat q_reference');
-    eval(savestr);
+for k=1:length(yf_vec)
+    yf = yf_vec(k);
+    [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,T(end),Ts);
+    for i=1:length(xf_vec)
+        xf = xf_vec(i);
+        [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
+        q_reference = [time(:)';traj_x_cart(:)';traj_y_cart(:)'];
+        savestr = strcat('save primitiva_muovi_',num2str(i),'_',num2str(k),'.mat q_reference');
+        eval(savestr);
+    end
 end
 disp('Generating primitives... DONE');
 
@@ -91,24 +102,27 @@ disp('Generating primitives... DONE');
 disp('Starting batch simulations.')
 
 tic
-for i = 1:length(xf_vec)
-  % Bang out and run the next set of data with RSim
-  runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_', ...
-            num2str(i),'.mat -v -tf 5.000'];
-  [status, result] = system(runstr);
-  if status ~= 0, error(result); end
-  % Load the data to MATLAB and plot the results.
-  load modello.mat
-  plot(rt_q); % now for example the q of the system are plotted
-  grid on
-  hold on
+for k=1:length(yf_vec)
+    for i = 1:length(xf_vec)
+      % Bang out and run the next set of data with RSim
+      runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_', ...
+                num2str(i),'_',num2str(k),'.mat -v -tf 5.000'];
+      [status, result] = system(runstr);
+      if status ~= 0, error(result); end
+      % Load the data to MATLAB and plot the results.
+      load modello.mat
+      plot(rt_q); % now for example the q of the system are plotted
+      grid on
+      hold on
+    end
 end
 c=toc;
 disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
 
 return 
 
-%%
+%% OLD VERSION
+
 prim_path = 'prim/';
 if ~exist(prim_path,'dir')
     mkdir(prim_path)
