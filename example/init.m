@@ -65,9 +65,9 @@ cs.switchTarget('rsim.tlc',[]);
 if ~isempty(dir('rsim_tfdata.mat')),
     delete('rsim_tfdata.mat');
 end
-str1 = fullfile(matlabroot,'toolbox','rtw','rtwdemos','rsimdemos','rsim_tfdata.mat');
-str2 = ['copyfile(''', str1, ''',''rsim_tfdata.mat'',''writable'')'];
-eval(str2);
+%str1 = fullfile(matlabroot,'toolbox','rtw','rtwdemos','rsimdemos','rsim_tfdata.mat');
+%str2 = ['copyfile(''', str1, ''',''rsim_tfdata.mat'',''writable'')'];
+%eval(str2);
 
 %%
 % Build the RSim executable for the model. During the build process, a
@@ -110,14 +110,15 @@ for k=1:length(yf_vec)
       [status, result] = system(runstr);
       if status ~= 0, error(result); end
       % Load the data to MATLAB and plot the results.
-      load modello.mat
-      plot(rt_q); % now for example the q of the system are plotted
-      grid on
-      hold on
+    load modello.mat
+    plot(rt_q(1),rt_q(2)); % now for example the q of the system are plotted
+    grid on
+    hold on
     end
 end
 c=toc;
 disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
+
 
 return 
 
