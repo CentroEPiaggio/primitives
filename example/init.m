@@ -4,6 +4,7 @@ nq = 3;
 q0 = zeros(nq,1);
 q0(3) = 0.1; % altrimenti diventa singolare
 qp0 = zeros(nq,1);
+qp0 = rand(nq,1);
 q0 = rand(nq,1)
 q0(2)=0;
 q0(3)=1;
@@ -40,7 +41,7 @@ T = [0 1];
 q_reference = [time(:)';traj_x_cart(:)'];
 save primitiva_muovi.mat q_reference;
 % simulation total time
-Tend = T(end)*100;
+Tend = T(end)*10;
 
 %% Using RSim Target for Batch Simulations
 
@@ -102,6 +103,9 @@ disp('Generating primitives... DONE');
 close all
 disp('Starting batch simulations.')
 
+% test imagespace saving
+imagespace = zeros(length(yf_vec),length(xf_vec));
+
 tic
 for k=1:length(yf_vec)
     for i = 1:length(xf_vec)
@@ -116,13 +120,30 @@ for k=1:length(yf_vec)
     hold on 
     grid on
     % plot st
+    % save data in imagespace matrix
+    if rt_zmpflag(end)==1
+        imagespace(k,i) = 1;
+    end
     end
 end
 c=toc;
 disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
-
-
-return 
+%%
+figure
+imagesc(imagespace)
+colormap([1 1 1; 0 0 0])
+set(gca,'XTickLabel',round(xf_vec));
+set(gca,'YTickLabel',round(yf_vec));
+% set(gca,'XTickLabel',{'-3pi','-2pi','-pi','0','pi','2pi','3pi'})
+% set(gca,'YTickLabel',{'min = -1','-0.5','0','0.5','max = 1'})
+cbr=colorbar;
+set(cbr,'YTick',0:1)
+grid on
+xlabel('xf\_vec')
+ylabel('yf\_vec')
+title('MUOVI primitive imagespace')
+% save prim1.mat imagespace xf_vec yf_vec;
+return
 
 %% OLD VERSION
 
