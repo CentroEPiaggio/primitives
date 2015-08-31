@@ -40,7 +40,7 @@ T = [0 1];
 q_reference = [time(:)';traj_x_cart(:)'];
 save primitiva_muovi.mat q_reference;
 % simulation total time
-Tend = T(end)*10;
+Tend = T(end)*100;
 
 %% Using RSim Target for Batch Simulations
 
@@ -99,12 +99,12 @@ end
 disp('Generating primitives... DONE');
 
 %% Run the RSim Compiled Simulation Using New Signal Data
-
+close all
 disp('Starting batch simulations.')
 
 tic
-for k=4:4%length(yf_vec)
-    for i = 1:10%length(xf_vec)
+for k=1:length(yf_vec)
+    for i = 1:length(xf_vec)
       % Bang out and run the next set of data with RSim
       runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_', ...
                 num2str(k),'_',num2str(i),'.mat -v -tf 10.000'];
