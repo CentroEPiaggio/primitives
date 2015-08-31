@@ -68,7 +68,8 @@ end
 %str1 = fullfile(matlabroot,'toolbox','rtw','rtwdemos','rsimdemos','rsim_tfdata.mat');
 %str2 = ['copyfile(''', str1, ''',''rsim_tfdata.mat'',''writable'')'];
 %eval(str2);
-
+tudata = zeros(3,100);
+save('rsim_tfdata.mat','tudata')
 %%
 % Build the RSim executable for the model. During the build process, a
 disp('Building compiled RSim simulation.')
@@ -91,7 +92,7 @@ for k=1:length(yf_vec)
         xf = xf_vec(i);
         [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
         q_reference = [time(:)';traj_x_cart(:)';traj_y_cart(:)'];
-        savestr = strcat('save primitiva_muovi_',num2str(i),'_',num2str(k),'.mat q_reference');
+        savestr = strcat('save primitiva_muovi_',num2str(k),'_',num2str(i),'.mat q_reference');
         eval(savestr);
     end
 end
@@ -102,18 +103,19 @@ disp('Generating primitives... DONE');
 disp('Starting batch simulations.')
 
 tic
-for k=1:length(yf_vec)
-    for i = 1:length(xf_vec)
+for k=4:4%length(yf_vec)
+    for i = 1:10%length(xf_vec)
       % Bang out and run the next set of data with RSim
       runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_', ...
-                num2str(i),'_',num2str(k),'.mat -v -tf 5.000'];
+                num2str(k),'_',num2str(i),'.mat -v -tf 10.000'];
       [status, result] = system(runstr);
       if status ~= 0, error(result); end
       % Load the data to MATLAB and plot the results.
     load modello.mat
-    plot(rt_q(1),rt_q(2)); % now for example the q of the system are plotted
+    plot(rt_q)
+    hold on 
     grid on
-    hold on
+    % plot st
     end
 end
 c=toc;
