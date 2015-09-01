@@ -22,7 +22,9 @@ slprj/
 example/modello_grt_rtw/*
 example/modello_rsim_rtw/*
 example/output/
-example/prim/               
+example/prim/
+example/*.mat
+example               
 *.autosave
 
 ##---------------------------------------------------
