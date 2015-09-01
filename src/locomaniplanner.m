@@ -29,10 +29,11 @@ for jj=1:P.nnodes
 end
 
 % algorithm parameters
-N_sample_max = 1000; % max number of samples
+N_sample_max = 100; % max number of samples
 % main loop
 for ii=1:N_sample_max
     ii
+    %waitforbuttonpress
     %% sample a point, randomly, in Chi0
     x_rand = Chi0.sample;
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
