@@ -6,7 +6,7 @@ At this stage we are working on ideas using tools like MPT toolbox and Yalmip.
 # Installation step-by-step instructions
 Download the package with:
 ```
-git@github.com:CentroEPiaggio/primitives.git
+git clone git@github.com:CentroEPiaggio/primitives.git
 ```
 if you have a registered ssh-key in your Github account, otherwise you can use:
 ```
