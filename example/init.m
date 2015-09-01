@@ -84,7 +84,7 @@ end
 
 % Now using together x and y trajectories
 xf_vec = linspace(-10,10,10);
-yf_vec = linspace(0,10,10);
+yf_vec = linspace(1,10,5);
 disp('Generating primitives...');
 for k=1:length(yf_vec)
     yf = yf_vec(k);
@@ -116,13 +116,13 @@ for k=1:length(yf_vec)
       if status ~= 0, error(result); end
       % Load the data to MATLAB and plot the results.
     load modello.mat
-    plot(rt_q)
+%     plot(rt_q)
     hold on 
     grid on
-    % plot st
     % save data in imagespace matrix
-    if rt_zmpflag(end)==1
-        imagespace(k,i) = 1;
+    if rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
+        imagespace(k,i) = 0;    % exclude from imagespace
+    else imagespace(k,i) = 1;   % include into imagespace
     end
     end
 end
@@ -208,4 +208,4 @@ return
 % tic
 % sim('modello')
 % toc
-plottini
+% plottini
