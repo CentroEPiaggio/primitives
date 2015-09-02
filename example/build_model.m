@@ -8,11 +8,6 @@ if ~fa.UserWrite
     return;
 end
 
-% Open the model and configure it to use the RSim target.
-open_system(mdlName);
-cs = getActiveConfigSet(mdlName);
-cs.switchTarget('rsim.tlc',[]);
-
 % Set the Inline parameters option and specify as Tunable the variables of
 % interest (q0, qp0 in our case)
 set_param(mdlName,'RTWInlineParameters','on');

@@ -49,6 +49,11 @@ Tend = T(end)*10;
 % using chesksums
 
 mdlName = 'modello';
+% Open the model and configure it to use the RSim target.
+open_system(mdlName);
+cs = getActiveConfigSet(mdlName);
+cs.switchTarget('rsim.tlc',[]);
+
 cs1=Simulink.BlockDiagram.getChecksum(mdlName);
 if exist('checksum.mat','file')==2
     % tricky stuff
