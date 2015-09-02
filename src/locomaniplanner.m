@@ -1,8 +1,7 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
 
-% init % run init script just once to load all libraries. Customize this. TODO: make this  smarter
-% return
+run utils/startup_lmp.m;
 
 import primitive_library.*;
 
