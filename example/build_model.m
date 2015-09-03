@@ -1,4 +1,4 @@
-function build_model( mdlName )
+function build_model( mdlName , len_ic)
 % Make sure the current directory is writable because this example will be
 % creating files.
 
@@ -25,7 +25,7 @@ disp('Built RSim simulation')
 % Get the Default Parameter Set for the Model
 rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
 
-for i = 1:10
+for i = 1:len_ic
     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;

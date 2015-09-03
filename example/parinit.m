@@ -11,6 +11,8 @@ q0(3)=1;
 % qp0 = rand(nq,1)
 % q0 = [1,deg2rad(45),2];
 
+len_ic = 10;
+
 % parameters
 m1 = 100;
 m2 = 1;
@@ -80,7 +82,7 @@ if exist('checksum.mat','file')==2
 else
     disp(' -- Checksum never computed: creating file! -- ')
     save('checksum.mat','cs1');
-    build_model(mdlName);
+    build_model(mdlName, len_ic);
 end
 
 %%
@@ -109,7 +111,7 @@ for y=1:length(yf_vec)
                 [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
                 q_reference = [time(:)';traj_x_cart(:)';traj_y_cart(:)'];
                 savestr = strcat('save primitiva_muovi_',num2str(y),'_',num2str(x),...
-                                 '_',num2str(vi),'_',num2str(vf),'.mat q_reference');
+                    '_',num2str(vi),'_',num2str(vf),'.mat q_reference');
                 eval(savestr);
             end
         end
@@ -122,32 +124,32 @@ close all
 disp('Starting batch simulations.')
 
 % test imagespace saving
-imagespace = zeros(length(xf_vec),length(vxf_vec));
+imagespace = zeros(len_ic,length(xf_vec),length(vxf_vec));
 
 tic
-for i =1:10
-for y=1:1%length(yf_vec)
-    for x = 1:1%length(xf_vec)
-        for vi = 1:1%length(vx0_vec)
-            for vf = 1:1%length(vxf_vec)
-                  % Bang out and run the next set of data with RSim
-                  runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_',...
-                            num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat -p params',num2str(i),'.mat -v -tf 20.000'];
-                  [status, result] = system(runstr);
-                  if status ~= 0, error(result); end
-                  % Load the data to MATLAB and plot the results.
-%                load modello.mat
-%                plot(rt_q);
-%                hold on; grid on;
-%                % save data in imagespace matrix
-%                if rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
-%                    imagespace(x,vf) = 0;    % exclude from imagespace
-%                else imagespace(x,vf) = 1;   % include into imagespace
-%                end
+parfor i =1:len_ic
+    for y=1:1%length(yf_vec)
+        for x = 1:1%length(xf_vec)
+            for vi = 1:1%length(vx0_vec)
+                for vf = 1:1%length(vxf_vec)
+                    % Bang out and run the next set of data with RSim
+                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_',...
+                        num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat -p params',num2str(i),'.mat -v -tf 20.000'];
+                    [status, result] = system(runstr);
+                    if status ~= 0, error(result); end
+                    % Load the data to MATLAB and plot the results.
+%                                   rtdata=load('modello.mat');
+%                                   plot(rtdata.rt_q);
+                    %                hold on; grid on;
+                    % save data in imagespace matrix
+%                    if 1%rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
+%                        imagespace(i,x,vf) = 0;    % exclude from imagespace
+%                    else imagespace(i,x,vf) = 1;   % include into imagespace
+%                    end
+                end
             end
         end
     end
-end
 end
 c=toc;
 disp('Finished simulations.')
@@ -155,7 +157,9 @@ disp(['Total simulation time: ' num2str(c)])
 disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
 %%
 figure
-imagesc(imagespace)
+plotdata = imagespace(1,:,:);
+plotdata = squeeze(plotdata);
+imagesc(plotdata)
 colormap([1 1 1; 0 0 0])
 % set(gca,'XTickLabel',round(xf_vec));
 % set(gca,'YTickLabel',round(vxf_vec));
@@ -187,7 +191,7 @@ end
 disp('Generating primitives... DONE');
 
 %% loops!
-% first loop: between every 
+% first loop: between every
 % possible reference value
 % for the primitive MUOVI
 out_path = 'output/';
