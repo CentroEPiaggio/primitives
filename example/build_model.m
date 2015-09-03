@@ -15,13 +15,6 @@ set_param(mdlName,'TunableVars','q0,qp0');
 set_param(mdlName,'TunableVarsStorageClass','Auto,Auto');
 set_param(mdlName,'TunableVarsTypeQualifier',',');
 
-% The MAT-file rsim_tfdata.mat is required in the local directory.
-if ~isempty(dir('rsim_tfdata.mat')),
-    delete('rsim_tfdata.mat');
-end
-tudata = zeros(3,100);
-save('rsim_tfdata.mat','tudata')
-
 % Build the RSim executable for the model. During the build process, a
 evalin('base','q0 = [0,0,1];')
 evalin('base','qp0 = [0,0,0];')
@@ -40,14 +33,5 @@ for i = 1:10
     eval(savestr);
 end
 
-% disp('Creating rtP data files...')
-% for i=1:10
-%   % Extract current rtP structure using new damping factor.
-%   [rtpstruct]=evalin('base','rsimgetrtp(''rtwdemo_rsimtf'');');
-%   savestr = strcat('save params',num2str(i),'.mat rtpstruct');
-%   eval(savestr);
-%   evalin('base','theta = theta - .1;');
-% end
-% disp('Finished creating parameter data files.')
 end
 

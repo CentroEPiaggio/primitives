@@ -45,6 +45,14 @@ Tend = T(end)*10;
 
 %% Using RSim Target for Batch Simulations
 
+
+% The MAT-file rsim_tfdata.mat is required in the local directory.
+if ~isempty(dir('rsim_tfdata.mat')),
+    delete('rsim_tfdata.mat');
+end
+tudata = zeros(3,100);
+save('rsim_tfdata.mat','tudata')
+
 % Checking if the current version of the model has been already compiled
 % using chesksums
 
