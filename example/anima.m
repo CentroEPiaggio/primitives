@@ -12,7 +12,7 @@ py = d.*sin(theta);
 % plot routine
 figure
 set( gcf, 'DoubleBuffer', 'on' );
-for ii=1:10:length(rt_t)
+for ii=1:1:length(rt_t)
     clf
     % cart
     X_cart = [x_cart(ii)-cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)-cart_width/2];
@@ -24,7 +24,13 @@ for ii=1:10:length(rt_t)
     Y_pend = [0;py(ii)];
     patch(X_pend,Y_pend,'b');
     plot(px(ii),py(ii),'o','linewidth',4);
-%     plot(com(ii),0,'yo','linewidth',4);
+    if rt_zmpflag(ii) == 0
+        colorzmp = 'g';
+    else
+        colorzmp = 'r';
+    end
+    plot(rt_xzmp(ii),-cart_height,[colorzmp 'o'],'linewidth',4);
+     
     axis([-15 15 -1 5]);
     drawnow;
     pause(0.001);

@@ -11,6 +11,8 @@ q0(3)=1;
 % qp0 = rand(nq,1)
 % q0 = [1,deg2rad(45),2];
 
+len_ic = 10;
+
 % parameters
 m1 = 100;
 m2 = 1;
@@ -73,14 +75,14 @@ if exist('checksum.mat','file')==2
     if (cs1 ~= cs2)
         disp(' -- Checksums are different: rebuild! -- ')
         save('checksum.mat','cs1');
-        build_model(mdlName);
+        build_model(mdlName,len_ic);
     else
         disp(' -- Checksums are the same: thou shall not build! -- ')
     end
 else
     disp(' -- Checksum never computed: creating file! -- ')
     save('checksum.mat','cs1');
-    build_model(mdlName);
+    build_model(mdlName,len_ic);
 end
 
 %%
@@ -125,11 +127,11 @@ disp('Starting batch simulations.')
 imagespace = zeros(length(xf_vec),length(vxf_vec));
 
 tic
-for i =1:10
+for i =1:1
 for y=1:1%length(yf_vec)
     for x = 1:1%length(xf_vec)
         for vi = 1:1%length(vx0_vec)
-            for vf = 1:1%length(vxf_vec)
+            for vf = 4:4%length(vxf_vec)
                   % Bang out and run the next set of data with RSim
                   runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_',...
                             num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat -p params',num2str(i),'.mat -v -tf 20.000'];
