@@ -24,6 +24,7 @@ example/modello_rsim_rtw/*
 example/output/
 example/prim/
 example/*.mat
+example/*.autosave    # da fixare
 example/*.*.autosave    # da fixare
 example/modello 	# da fixare
 

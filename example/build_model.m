@@ -1,8 +1,8 @@
-function load_model( mdlName )
+function build_model( mdlName )
 % Make sure the current directory is writable because this example will be
 % creating files.
 
-[stat, fa] = fileattrib(pwd);
+[~, fa] = fileattrib(pwd);
 if ~fa.UserWrite
     disp('This script must be run in a writable directory');
     return;
