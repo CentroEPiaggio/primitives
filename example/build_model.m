@@ -48,14 +48,15 @@ end
 % Set the Inline parameters option and specify as Tunable the variables of
 % interest (q0, qp0 in our case)
 set_param(mdlName,'RTWInlineParameters','on');
-set_param(mdlName,'TunableVars','q0,qp0');
-set_param(mdlName,'TunableVarsStorageClass','Auto,Auto');
-set_param(mdlName,'TunableVarsTypeQualifier',',');
+set_param(mdlName,'TunableVars','q0,qp0,qref0');
+set_param(mdlName,'TunableVarsStorageClass','Auto,Auto,Auto');
+set_param(mdlName,'TunableVarsTypeQualifier',',,');
 
 % Build the RSim executable for the model. During the build process, a
 % evalin('base','q0 = [0,0,1];')
 evalin('base','q0 = [0,1.57,1];')
 evalin('base','qp0 = [0,0,0];')
+evalin('base','qref0 = [0,1.57,1];')
 disp('Building compiled RSim simulation...')
 rtwbuild(mdlName);
 disp('Built RSim simulation')

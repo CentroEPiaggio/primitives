@@ -28,6 +28,7 @@ example/*.autosave    # da fixare
 example/*.slx.autosave    # da fixare
 example/*.*.autosave    # da fixare
 example/modello 	# da fixare
+*.autosave
 
 ##---------------------------------------------------
 ## Remove .mat data files

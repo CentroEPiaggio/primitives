@@ -10,6 +10,7 @@ q0 = rand(nq,1)
 % q0(3)=1;
 % qp0 = rand(nq,1)
 q0 = [0,deg2rad(90),1];
+qref0=q0;
 
 len_ic = 1;
 
@@ -97,8 +98,8 @@ for i =1:len_ic
                     % Bang out and run the next set of data with RSim
                     test_codenum = [num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf)];
                     primitiva_muovi_loadstr = [filepath, 'primitiva_muovi_',test_codenum,'.mat'];
-%                     runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf ',num2str(Tend)];
-runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf 0.4'];
+                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf ',num2str(Tend)];
+% runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf 0.4'];
                     [status, result] = system(runstr);
                     if status ~= 0, error(result); end
                     % Load the data to MATLAB and plot the results.

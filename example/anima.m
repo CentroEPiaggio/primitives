@@ -12,7 +12,7 @@ py = d.*sin(theta);
 % plot routine
 figure
 set( gcf, 'DoubleBuffer', 'on' );
-for ii=1:1:length(rt_t)
+for ii=1:10:length(rt_t)
     clf
     % cart
     X_cart = [x_cart(ii)-cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)-cart_width/2];
@@ -32,6 +32,8 @@ for ii=1:1:length(rt_t)
     plot(rt_xzmp(ii),-cart_height,[colorzmp 'o'],'linewidth',4);
      
     axis([-15 15 -1 5]);
+    
+    text(x_cart(ii)+cart_width/2,cart_height/2,[num2str(rt_t(ii)) '/' num2str(rt_t(end))]); % clock
     drawnow;
     pause(0.001);
 end
