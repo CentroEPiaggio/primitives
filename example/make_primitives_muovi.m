@@ -1,6 +1,7 @@
 function make_primitives_muovi(prim_data)
 %% Extract data from struct
 xi = prim_data.xi;
+xf = prim_data.xf;
 yi = prim_data.yi;
 ypi = prim_data.ypi;
 ypf = prim_data.ypf;
@@ -18,6 +19,7 @@ end
 
 % Now using together x and y trajectories
 xf_vec = linspace(-3,3,xf_vec_len);
+xf_vec = linspace(-xf,xf,xf_vec_len);
 yf_vec = linspace(0,4,yf_vec_len);
 vx0_vec = linspace(0,4,vx0_vec_len);
 vxf_vec = linspace(0,4,vxf_vec_len);

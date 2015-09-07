@@ -29,7 +29,7 @@ cart_height = 0.4;
 
 % traiettorie carrello
 xi=q0(1);
-xf=1;
+xf=1; xf=.1;
 xpi=0;
 xpf=0;
 
@@ -46,13 +46,13 @@ T = [0 1];
 % simulation total time
 
 % Tend = T(end)*10;
-Tend = T(end);
+Tend = T(end)*10;
 
 %% build the model
 build_model( 'modello' , len_ic)
 
 %% Generate files with primitive trajectories to be used as input signals
-howfuckedweare = 2; % the larger this number the slower the generation of the primitive image spaces.
+howfuckedweare = 1; % the larger this number the slower the generation of the primitive image spaces.
 % Since we have nested for loop the time grows with
 % howfuckedweare^n
 xf_vec_len = howfuckedweare;     % how many points to sample for xf?
@@ -62,6 +62,7 @@ vxf_vec_len = howfuckedweare;    % how many points to sample for vxf?
 
 primitive_muovi_params = struct('name','muovi',    ...
     'xi',xi,            ...
+    'xf',xf,            ...
     'yi',yi,            ...
     'ypi',ypi,            ...
     'ypf',ypf,          ...
