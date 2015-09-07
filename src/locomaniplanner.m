@@ -5,7 +5,7 @@ run utils/startup_lmp.m;
 
 import primitive_library.*;
 
-load_primitive_tree; % builds a list with all available primitives
+load_primitive_tree_old; % builds a list with all available primitives
 
 x_I = [0;0]; % initial state
 x_G = [2;2]; % goal state
@@ -22,16 +22,16 @@ axis equal;
 plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
 
 % plotta gli spazi immagini delle primitive
-for jj=1:P.nnodes
-    prim = P.get(jj);
+for jj=1:Ptree.nnodes
+    prim = Ptree.get(jj);
     prim.chi.P.plot;
 end
 
 % algorithm parameters
-N_sample_max = 100; % max number of samples
+N_sample_max = 1000; % max number of samples
 % main loop
 for ii=1:N_sample_max
-    ii
+    %ii
     %waitforbuttonpress
     %% sample a point, randomly, in Chi0
     x_rand = Chi0.sample;
@@ -57,9 +57,9 @@ for ii=1:N_sample_max
     % TODO: check if other primitives are available from the new point
     
     %% check if other dimensions can be activated from the newest point (x_rand)
-    prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
-    for jj=1:P.nnodes % start looking between all available primitives
-        prim = P.get(jj); % prim is the current primitive
+    prim_cost = zeros(Ptree.nnodes,1); % cost vector, to choose between different primitives the cheaper one
+    for jj=1:Ptree.nnodes % start looking between all available primitives
+        prim = Ptree.get(jj); % prim is the current primitive
         if prim.chi.P.contains(x_rand) % is the new point contained here? % TODO: manage search over Chi0
             %              disp('beccato!')
             % TODO: sample in
@@ -76,7 +76,7 @@ for ii=1:N_sample_max
     if prim_cost(idx_p_opt) == Inf
         disp(['nessuna primitiva con costo finito disponibile']);
     else
-        prim_opt = P.get(idx_p_opt);
+        prim_opt = Ptree.get(idx_p_opt);
         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
     end
     %      sample(P.ge
