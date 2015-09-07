@@ -5,7 +5,7 @@ idx_primitive_next = 0;
 
 cost_table = rand(10,3);
 
-Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
+Forward = PrimitiveFun([-1 -1; -1 1; 1 -1; 1 1]*0.3,[1 0],cost_table,'Forward');
 Ptree = Ptree.addnode(idx_primitive_next,Forward)
 
 idx_primitive_next = idx_primitive_next+1;

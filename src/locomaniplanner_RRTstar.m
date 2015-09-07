@@ -16,35 +16,33 @@ T = T.addnode(0,x_I);
 % set initial image space
 angolo = pi/4;
 Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
+dimChi0 = Chi0.P.Dim;
 
 Chi0.P.plot('color','lightgreen');hold on;     % plot search region (piano)
 axis equal;
 plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
 
 % plotta gli spazi immagini delle primitive
-for jj=1:P.nnodes
-    prim = P.get(jj);
+for jj=1:Ptree.nnodes
+    prim = Ptree.get(jj);
     prim.chi.P.plot;
 end
 
 % algorithm parameters
 N_sample_max = 100; % max number of samples
+
+%%
 % main loop
 for ii=1:N_sample_max
-    %ii
+    ii
     %waitforbuttonpress
     %% sample a point in Chi0
     x_rand = Chi0.sample;
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-    %% find the nearest point, in Chi0
-    points_mat = cell2mat(T.Node');                                        % convert nodes in trees from cells to matrix
-    idx_nearest = knnsearch(points_mat',x_rand');                          % find nearest point
-    % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
-    % TODO: how to represent the space? I suggest sth like sparse matrices
-    % with NaNs for non-intersecting (or not yet sampled) dimensions
-    %waitforbuttonpress
-    % TODO: valutare il miglior parametro per muoversi in Chi0
-    T = localRRTstar(P,x_rand,idx_nearest,T);
+    
+    %% forall primitives living in Chi0
+    Chi = Chi0;
+    T = localRRTstar(Chi,Ptree,x_rand,T);
     
 %     %% check if other dimensions can be activated from the newest point (x_rand)
 %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
