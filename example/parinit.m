@@ -36,95 +36,41 @@ yi=0;
 ypi=0;
 ypf=0;
 T = [0 1];
-[time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
+%[time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
 % correct format for .mat loading:
 % [t(1) t(2) ... t(N);
 % [y(1) y(2) ... y(N)];
-q_reference = [time(:)';traj_x_cart(:)'];
-save primitiva_muovi.mat q_reference;
+%q_reference = [time(:)';traj_x_cart(:)'];
+%save primitiva_muovi.mat q_reference;
 % simulation total time
 Tend = T(end)*10;
 
-%% Using RSim Target for Batch Simulations
+%% build the model
+build_model( 'modello' , len_ic)
 
+%% Generate files with primitive trajectories to be used as input signals
+xf_vec_len = 4;     % how many points to sample for xf?
+vxf_vec_len = 4;    % how many points to sample for vxf?
+primitive_muovi_params = struct('name','muovi',    ...
+                        'xi',xi,            ...
+                        'yi',yi,            ...
+                        'ypi',ypi,            ...
+                        'ypf',ypf,          ...
+                        'Tend',Tend,        ...
+                        'Ts',Ts,            ...
+                        'xf_vec_len',xf_vec_len, ...
+                        'vxf_vec_len',vxf_vec_len, ...
+                        'filepath','prim/' ...
+                        )
+make_primitives_muovi(primitive_muovi_params)
 
-% The MAT-file rsim_tfdata.mat is required in the local directory.
-if ~isempty(dir('rsim_tfdata.mat')),
-    delete('rsim_tfdata.mat');
-end
-tudata = zeros(3,100);
-save('rsim_tfdata.mat','tudata')
-
-% Checking if the current version of the model has been already compiled
-% using chesksums
-
-mdlName = 'modello';
-% Open the model and configure it to use the RSim target.
-open_system(mdlName);
-cs = getActiveConfigSet(mdlName);
-cs.switchTarget('rsim.tlc',[]);
-
-cs1=Simulink.BlockDiagram.getChecksum(mdlName);
-if exist('checksum.mat','file')==2
-    % tricky stuff
-    temp=cs1;
-    load('checksum.mat');
-    cs2=cs1;
-    cs1=temp;
-    
-    if (cs1 ~= cs2)
-        disp(' -- Checksums are different: rebuild! -- ')
-        save('checksum.mat','cs1');
-        build_model(mdlName);
-    else
-        disp(' -- Checksums are the same: thou shall not build! -- ')
-    end
-else
-    disp(' -- Checksum never computed: creating file! -- ')
-    save('checksum.mat','cs1');
-    build_model(mdlName, len_ic);
-end
-
-%%
-% Generate Primitive .mat files
-prim_path = 'prim/';
-if ~exist(prim_path,'dir')
-    mkdir(prim_path)
-end
-
-% Now using together x and y trajectories
-xf_vec = linspace(-3,3,4);
-yf_vec = linspace(0,4,4);
-vx0_vec = linspace(0,4,4);
-vxf_vec = linspace(0,4,4);
-
-disp('Generating primitives...');
-for y=1:length(yf_vec)
-    yf = yf_vec(y);
-    [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,T(end),Ts);
-    for x=1:length(xf_vec)
-        xf = xf_vec(x);
-        for vi=1:length(vx0_vec)
-            xpi = vx0_vec(vi);
-            for vf=1:length(vxf_vec)
-                xpf = vxf_vec(vf);
-                [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,T(end),Ts);
-                q_reference = [time(:)';traj_x_cart(:)';traj_y_cart(:)'];
-                savestr = strcat('save primitiva_muovi_',num2str(y),'_',num2str(x),...
-                    '_',num2str(vi),'_',num2str(vf),'.mat q_reference');
-                eval(savestr);
-            end
-        end
-    end
-end
-disp('Generating primitives... DONE');
 
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
 disp('Starting batch simulations.')
 
 % test imagespace saving
-imagespace = zeros(len_ic,length(xf_vec),length(vxf_vec));
+imagespace = zeros(len_ic,primitive_muovi_params.xf_vec_len,primitive_muovi_params.vxf_vec_len);
 
 tic
 parfor i =1:len_ic
@@ -133,8 +79,8 @@ parfor i =1:len_ic
             for vi = 1:1%length(vx0_vec)
                 for vf = 1:1%length(vxf_vec)
                     % Bang out and run the next set of data with RSim
-                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=primitiva_muovi_',...
-                        num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat -p params',num2str(i),'.mat -v -tf 20.000'];
+                    primitiva_muovi_loadstr = [primitive_muovi_params.filepath, 'primitiva_muovi_',num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat'];
+                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -v -tf 10.000'];
                     [status, result] = system(runstr);
                     if status ~= 0, error(result); end
                     % Load the data to MATLAB and plot the results.
@@ -154,7 +100,7 @@ end
 c=toc;
 disp('Finished simulations.')
 disp(['Total simulation time: ' num2str(c)])
-disp(strcat('Average computation time',{': '},num2str(c/length(xf_vec))));
+disp(strcat('Average computation time',{': '},num2str(c/primitive_muovi_params.xf_vec_len)));
 %%
 figure
 plotdata = imagespace(1,:,:);
