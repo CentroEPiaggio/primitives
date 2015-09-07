@@ -53,7 +53,8 @@ set_param(mdlName,'TunableVarsStorageClass','Auto,Auto');
 set_param(mdlName,'TunableVarsTypeQualifier',',');
 
 % Build the RSim executable for the model. During the build process, a
-evalin('base','q0 = [0,0,1];')
+% evalin('base','q0 = [0,0,1];')
+evalin('base','q0 = [0,1.57,1];')
 evalin('base','qp0 = [0,0,0];')
 disp('Building compiled RSim simulation...')
 rtwbuild(mdlName);
@@ -61,14 +62,16 @@ disp('Built RSim simulation')
 
 %% Get the Default Parameter Set for the Model
 rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
-
-for i = 1:len_ic
-    rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
-    rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
-    rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
-    savestr = strcat('save params',num2str(i),'.mat rtp');
+i=1;
+savestr = strcat('save params',num2str(i),'.mat rtp');
     eval(savestr);
-end
+% for i = 1:len_ic
+%     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
+%     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
+%     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
+%     savestr = strcat('save params',num2str(i),'.mat rtp');
+%     eval(savestr);
+% end
 %% Using RSim Target for Batch Simulations
 % The MAT-file rsim_tfdata.mat is required in the local directory.
 if ~isempty(dir('rsim_tfdata.mat')),

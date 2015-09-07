@@ -4,14 +4,14 @@ nq = 3;
 q0 = zeros(nq,1);
 q0(3) = 0.1; % altrimenti diventa singolare
 qp0 = zeros(nq,1);
-qp0 = rand(nq,1);
+% qp0 = rand(nq,1);
 q0 = rand(nq,1)
-q0(2)=0;
-q0(3)=1;
+% q0(2)=0;
+% q0(3)=1;
 % qp0 = rand(nq,1)
-% q0 = [1,deg2rad(45),2];
+q0 = [0,deg2rad(90),1];
 
-len_ic = 10;
+len_ic = 1;
 
 % parameters
 m1 = 100;
@@ -43,25 +43,35 @@ T = [0 1];
 %q_reference = [time(:)';traj_x_cart(:)'];
 %save primitiva_muovi.mat q_reference;
 % simulation total time
-Tend = T(end)*10;
+
+% Tend = T(end)*10;
+Tend = T(end);
 
 %% build the model
 build_model( 'modello' , len_ic)
 
 %% Generate files with primitive trajectories to be used as input signals
-xf_vec_len = 4;     % how many points to sample for xf?
-vxf_vec_len = 4;    % how many points to sample for vxf?
+howfuckedweare = 2; % the larger this number the slower the generation of the primitive image spaces.
+% Since we have nested for loop the time grows with
+% howfuckedweare^n
+xf_vec_len = howfuckedweare;     % how many points to sample for xf?
+yf_vec_len = howfuckedweare;     % how many points to sample for yf?
+vx0_vec_len = howfuckedweare;    % how many points to sample for vx0?
+vxf_vec_len = howfuckedweare;    % how many points to sample for vxf?
+
 primitive_muovi_params = struct('name','muovi',    ...
-                        'xi',xi,            ...
-                        'yi',yi,            ...
-                        'ypi',ypi,            ...
-                        'ypf',ypf,          ...
-                        'Tend',Tend,        ...
-                        'Ts',Ts,            ...
-                        'xf_vec_len',xf_vec_len, ...
-                        'vxf_vec_len',vxf_vec_len, ...
-                        'filepath','prim/' ...
-                        )
+    'xi',xi,            ...
+    'yi',yi,            ...
+    'ypi',ypi,            ...
+    'ypf',ypf,          ...
+    'Tend',Tend,        ...
+    'Ts',Ts,            ...
+    'xf_vec_len',xf_vec_len, ...
+    'yf_vec_len',yf_vec_len,    ...
+    'vx0_vec_len',vx0_vec_len,  ...
+    'vxf_vec_len',vxf_vec_len, ...
+    'filepath','prim/' ...
+    )
 make_primitives_muovi(primitive_muovi_params)
 
 
@@ -69,29 +79,37 @@ make_primitives_muovi(primitive_muovi_params)
 close all
 disp('Starting batch simulations.')
 
-% test imagespace saving
-imagespace = zeros(len_ic,primitive_muovi_params.xf_vec_len,primitive_muovi_params.vxf_vec_len);
+% trick for speeding up the parfor loops: define variables as local, hence
+% not using a shared structure.
+y_len=primitive_muovi_params.yf_vec_len;
+xf_len=primitive_muovi_params.xf_vec_len;
+vx0_len=primitive_muovi_params.vx0_vec_len;
+vxf_len=primitive_muovi_params.vxf_vec_len;
+filepath=primitive_muovi_params.filepath;
 
+% main for loop
 tic
-parfor i =1:len_ic
-    for y=1:1%length(yf_vec)
-        for x = 1:1%length(xf_vec)
-            for vi = 1:1%length(vx0_vec)
-                for vf = 1:1%length(vxf_vec)
+for i =1:len_ic
+    for y=1:y_len
+        for x = 1:xf_len
+            for vi = 1:vx0_len
+                for vf = 1:vxf_len
                     % Bang out and run the next set of data with RSim
-                    primitiva_muovi_loadstr = [primitive_muovi_params.filepath, 'primitiva_muovi_',num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf),'.mat'];
-                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -v -tf 10.000'];
+                    test_codenum = [num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf)];
+                    primitiva_muovi_loadstr = [filepath, 'primitiva_muovi_',test_codenum,'.mat'];
+%                     runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf ',num2str(Tend)];
+runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf 0.4'];
                     [status, result] = system(runstr);
                     if status ~= 0, error(result); end
                     % Load the data to MATLAB and plot the results.
-%                                   rtdata=load('modello.mat');
-%                                   plot(rtdata.rt_q);
+                    %                                   rtdata=load('modello.mat');
+                    %                                   plot(rtdata.rt_q);
                     %                hold on; grid on;
                     % save data in imagespace matrix
-%                    if 1%rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
-%                        imagespace(i,x,vf) = 0;    % exclude from imagespace
-%                    else imagespace(i,x,vf) = 1;   % include into imagespace
-%                    end
+                    %                    if rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
+                    %                        imagespace(i,x,vf) = 0;    % exclude from imagespace
+                    %                    else imagespace(i,x,vf) = 1;   % include into imagespace
+                    %                    end
                 end
             end
         end
@@ -101,9 +119,33 @@ c=toc;
 disp('Finished simulations.')
 disp(['Total simulation time: ' num2str(c)])
 disp(strcat('Average computation time',{': '},num2str(c/primitive_muovi_params.xf_vec_len)));
+
+%% data post-processing
+% test imagespace saving
+% for MUOVI we sample in final position and velocity
+imagespace = zeros(len_ic,y_len,xf_len,vx0_len,vxf_len);
+% save data in imagespace matrix from all the runs
+for i =1:len_ic
+    for y=1:y_len
+        for x = 1:xf_len
+            for vi = 1:vx0_len
+                for vf = 1:vxf_len
+                    test_codenum = [num2str(x),'_',num2str(y),'_',num2str(vi),'_',num2str(vf)];
+                    load(['run_muovi_' test_codenum '.mat']);
+%                     keyboard
+                    % save data in imagespace matrix
+                    if rt_zmpflag(end)==1       % simulation stopped due to ZMP violation
+                        imagespace(i,x,vf) = 0;    % exclude from imagespace
+                    else imagespace(i,x,vf) = 1;   % include into imagespace
+                    end
+                end
+            end
+        end
+    end
+end
 %%
 figure
-plotdata = imagespace(1,:,:);
+plotdata = imagespace(1,1,1,:,:);
 plotdata = squeeze(plotdata);
 imagesc(plotdata)
 colormap([1 1 1; 0 0 0])

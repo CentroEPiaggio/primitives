@@ -7,6 +7,8 @@ ypf = prim_data.ypf;
 Tend = prim_data.Tend;
 Ts = prim_data.Ts;
 xf_vec_len = prim_data.xf_vec_len;
+yf_vec_len = prim_data.yf_vec_len;
+vx0_vec_len = prim_data.vx0_vec_len;
 vxf_vec_len = prim_data.vxf_vec_len;
 filepath = prim_data.filepath;
 %% Generate Primitive .mat files
@@ -16,8 +18,8 @@ end
 
 % Now using together x and y trajectories
 xf_vec = linspace(-3,3,xf_vec_len);
-yf_vec = linspace(0,4,4);
-vx0_vec = linspace(0,4,4);
+yf_vec = linspace(0,4,yf_vec_len);
+vx0_vec = linspace(0,4,vx0_vec_len);
 vxf_vec = linspace(0,4,vxf_vec_len);
 
 disp('Generating primitives...');
