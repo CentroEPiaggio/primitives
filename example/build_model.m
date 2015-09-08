@@ -1,4 +1,4 @@
-function build_model( mdlName , len_ic)
+function build_model( mdlName , len_ic, params)
 % HARDFIX for fixing compilation error when the file rsim_tfdata.mat does
 % not exists yet. Also checking if a file exists with esist(filename)
 % returns false positives... bad implementation on mathworks side?
@@ -15,15 +15,15 @@ open_system(mdlName);
 cs = getActiveConfigSet(mdlName);
 cs.switchTarget('rsim.tlc',[]);
 
-cs1=Simulink.BlockDiagram.getChecksum(mdlName);
+checksum1=Simulink.BlockDiagram.getChecksum(mdlName);
 if exist('checksum.mat','file')==2
     % tricky stuff
-    temp=cs1;
+    temp=checksum1;
     load('checksum.mat');
-    cs2=cs1;
-    cs1=temp;
+    checksum2=checksum1;
+    checksum1=temp;
     
-    if (cs1 ~= cs2)
+    if (checksum1 ~= checksum2)
         disp(' -- Checksums are different: rebuild! -- ')
         save('checksum.mat','cs1');
 %         build_model(mdlName,len_ic);
@@ -33,7 +33,7 @@ if exist('checksum.mat','file')==2
     end
 else
     disp(' -- Checksum never computed: creating file! -- ')
-    save('checksum.mat','cs1');
+    save('checksum.mat','checksum1');
 %     build_model(mdlName, len_ic);
 end
 
@@ -54,25 +54,26 @@ set_param(mdlName,'TunableVarsTypeQualifier',',,');
 
 % Build the RSim executable for the model. During the build process, a
 % evalin('base','q0 = [0,0,1];')
-evalin('base','q0 = [0,1.57,1];')
-evalin('base','qp0 = [0,0,0];')
-evalin('base','qref0 = [0,1.57,1];')
+evalin('base',['q0 = [' num2str(params.q0(:)') '];'])
+evalin('base',['qp0 = [' num2str(params.qp0(:)') '];'])
+evalin('base',['qref0 = [' num2str(params.qref0(:)') '];'])
 disp('Building compiled RSim simulation...')
 rtwbuild(mdlName);
 disp('Built RSim simulation')
 
-%% Get the Default Parameter Set for the Model
-rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
-i=1;
-savestr = strcat('save params',num2str(i),'.mat rtp');
-    eval(savestr);
-% for i = 1:len_ic
-%     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
-%     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
-%     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
-%     savestr = strcat('save params',num2str(i),'.mat rtp');
-%     eval(savestr);
-% end
+% %% Get the Default Parameter Set for the Model
+% rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
+% 
+% i=1;
+% savestr = strcat('save params',num2str(i),'.mat rtp');
+% eval(savestr);
+% % for i = 1:len_ic
+% %     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
+% %     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
+% %     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
+% %     savestr = strcat('save params',num2str(i),'.mat rtp');
+% %     eval(savestr);
+% % end
 %% Using RSim Target for Batch Simulations
 % The MAT-file rsim_tfdata.mat is required in the local directory.
 if ~isempty(dir('rsim_tfdata.mat')),
@@ -80,10 +81,6 @@ if ~isempty(dir('rsim_tfdata.mat')),
 end
 tudata = zeros(3,100);
 save('rsim_tfdata.mat','tudata')
-
-
-
-
 
 end
 

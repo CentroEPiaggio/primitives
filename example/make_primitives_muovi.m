@@ -18,8 +18,7 @@ if ~exist(filepath,'dir')
 end
 
 % Now using together x and y trajectories
-xf_vec = linspace(-3,3,xf_vec_len);
-xf_vec = linspace(-xf,xf,xf_vec_len);
+xf_vec = linspace(0,xf,xf_vec_len);
 yf_vec = linspace(0,4,yf_vec_len);
 vx0_vec = linspace(0,4,vx0_vec_len);
 vxf_vec = linspace(0,4,vxf_vec_len);
@@ -27,7 +26,8 @@ vxf_vec = linspace(0,4,vxf_vec_len);
 disp('Generating primitives...');
 for y=1:length(yf_vec)
     yf = yf_vec(y);
-    [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,Tend,Ts);
+    [~,traj_y_cart] = muovi(yi,yf,ypi,ypf,Tend,Ts);
+    [~,traj_y_cart] = muovi(0,1,0,0,Tend/2,Ts);
     for x=1:length(xf_vec)
         xf = xf_vec(x);
         for vi=1:length(vx0_vec)
@@ -35,6 +35,7 @@ for y=1:length(yf_vec)
             for vf=1:length(vxf_vec)
                 xpf = vxf_vec(vf);
                 [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,Tend,Ts);
+                [time,traj_x_cart] = muovi(0,2,0,0,Tend/2,Ts);
                 q_reference = [time(:)';traj_x_cart(:)';traj_y_cart(:)'];
                 savestr = strcat('save', [' ', filepath], 'primitiva_muovi_',num2str(y),'_',num2str(x),...
                     '_',num2str(vi),'_',num2str(vf),'.mat q_reference');
@@ -44,3 +45,4 @@ for y=1:length(yf_vec)
     end
 end
 disp('Generating primitives... DONE');
+

@@ -10,6 +10,7 @@ q0 = rand(nq,1)
 % q0(3)=1;
 % qp0 = rand(nq,1)
 q0 = [0,deg2rad(90),1];
+q0 = [0,deg2rad(0),1];
 qref0=q0;
 
 len_ic = 1;
@@ -49,7 +50,10 @@ T = [0 1];
 Tend = T(end)*10;
 
 %% build the model
-build_model( 'modello' , len_ic)
+% setup ic structure for building
+ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
+% build
+build_model( 'modello' , len_ic, ic)
 
 %% Generate files with primitive trajectories to be used as input signals
 howfuckedweare = 1; % the larger this number the slower the generation of the primitive image spaces.
@@ -75,7 +79,7 @@ primitive_muovi_params = struct('name','muovi',    ...
     'filepath','prim/' ...
     )
 make_primitives_muovi(primitive_muovi_params)
-
+make_ic('modello',len_ic)
 
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
