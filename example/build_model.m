@@ -8,35 +8,36 @@ if ~any(findstr(ls,'rsim_tfdata.mat'))
     system('cp prim/primitiva_muovi_1_1_1_1.mat rsim_tfdata.mat');
 end
 
-%% Checking if the current version of the model has been already compiled
-% using chesksums
 % Open the model and configure it to use the RSim target.
 open_system(mdlName);
 cs = getActiveConfigSet(mdlName);
+% Switch target to rsim
 cs.switchTarget('rsim.tlc',[]);
 
-checksum1=Simulink.BlockDiagram.getChecksum(mdlName);
-if exist('checksum.mat','file')==2
-    % tricky stuff
-    temp=checksum1;
-    load('checksum.mat');
-    checksum2=checksum1;
-    checksum1=temp;
-    
-    if (checksum1 ~= checksum2)
-        disp(' -- Checksums are different: rebuild! -- ')
-        save('checksum.mat','cs1');
-%         build_model(mdlName,len_ic);
-    else
-        disp(' -- Checksums are the same: thou shall not build! -- ')
-        return
-    end
-else
-    disp(' -- Checksum never computed: creating file! -- ')
-    save('checksum.mat','checksum1');
-%     build_model(mdlName, len_ic);
-end
-
+% %% Checking if the current version of the model has been already compiled
+% % using chesksums
+% checksum1=Simulink.BlockDiagram.getChecksum(mdlName);
+% if exist('checksum.mat','file')==2
+%     % tricky stuff
+%     temp=checksum1;
+%     load('checksum.mat');
+%     checksum2=checksum1;
+%     checksum1=temp;
+%     
+%     if (checksum1 ~= checksum2)
+%         disp(' -- Checksums are different: rebuild! -- ')
+%         save('checksum.mat','cs1');
+% %         build_model(mdlName,len_ic);
+%     else
+%         disp(' -- Checksums are the same: thou shall not build! -- ')
+%         return
+%     end
+% else
+%     disp(' -- Checksum never computed: creating file! -- ')
+%     save('checksum.mat','checksum1');
+% %     build_model(mdlName, len_ic);
+% end
+% 
 %% Make sure the current directory is writable because this example will be
 % creating files.
 [~, fa] = fileattrib(pwd);
@@ -54,6 +55,7 @@ set_param(mdlName,'TunableVarsTypeQualifier',',,');
 
 % Build the RSim executable for the model. During the build process, a
 % evalin('base','q0 = [0,0,1];')
+
 evalin('base',['q0 = [' num2str(params.q0(:)') '];'])
 evalin('base',['qp0 = [' num2str(params.qp0(:)') '];'])
 evalin('base',['qref0 = [' num2str(params.qref0(:)') '];'])
@@ -61,19 +63,28 @@ disp('Building compiled RSim simulation...')
 rtwbuild(mdlName);
 disp('Built RSim simulation')
 
-% %% Get the Default Parameter Set for the Model
-% rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
-% 
-% i=1;
+%% Get the Default Parameter Set for the Model
+% keyboard
+rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
+
+n_indep_coords = length(params.q0);
+rtp.parameters.values(1:n_indep_coords) = params.q0(:)';
+rtp.parameters.values(n_indep_coords+1:2*n_indep_coords) = params.qp0(:)';
+rtp.parameters.values(2*n_indep_coords+1:3*n_indep_coords) = params.qref0(:)';
+
 % savestr = strcat('save params',num2str(i),'.mat rtp');
 % eval(savestr);
-% % for i = 1:len_ic
-% %     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
-% %     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
-% %     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
-% %     savestr = strcat('save params',num2str(i),'.mat rtp');
-% %     eval(savestr);
-% % end
+increment = 0.1;
+for i = 1:len_ic
+%     rtp.parameters.values(1) = rtp.parameters.values(1) + 0.1;
+%     rtp.parameters.values(2) = rtp.parameters.values(1) + 0.1;
+%     rtp.parameters.values(3) = rtp.parameters.values(1) + 0.1;
+    rtp.parameters.values(1:n_indep_coords) = rtp.parameters.values(1:n_indep_coords) + increment*(i-1);
+    rtp.parameters.values(n_indep_coords+1:2*n_indep_coords) = rtp.parameters.values(n_indep_coords+1:2*n_indep_coords) + increment*(i-1);
+    rtp.parameters.values(2*n_indep_coords+1:3*n_indep_coords) = rtp.parameters.values(2*n_indep_coords+1:3*n_indep_coords) + increment*(i-1);
+    savestr = strcat('save params',num2str(i),'.mat rtp');
+    eval(savestr);
+end
 %% Using RSim Target for Batch Simulations
 % The MAT-file rsim_tfdata.mat is required in the local directory.
 if ~isempty(dir('rsim_tfdata.mat')),

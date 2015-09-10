@@ -10,7 +10,7 @@ q0 = rand(nq,1)
 % q0(3)=1;
 % qp0 = rand(nq,1)
 q0 = [0,deg2rad(90),1];
-q0 = [0,deg2rad(0),1];
+q0 = [0,deg2rad(10),1];
 qref0=q0;
 
 len_ic = 1;
@@ -79,7 +79,7 @@ primitive_muovi_params = struct('name','muovi',    ...
     'filepath','prim/' ...
     )
 make_primitives_muovi(primitive_muovi_params)
-make_ic('modello',len_ic)
+% make_ic('modello',len_ic)
 
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
