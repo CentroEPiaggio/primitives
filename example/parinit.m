@@ -79,7 +79,6 @@ primitive_muovi_params = struct('name','muovi',    ...
     'filepath','prim/' ...
     )
 make_primitives_muovi(primitive_muovi_params)
-% make_ic('modello',len_ic)
 
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
