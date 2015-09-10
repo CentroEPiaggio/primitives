@@ -5,7 +5,9 @@ function build_model( mdlName , len_ic, params)
 if ~any(findstr(ls,'rsim_tfdata.mat'))
     % to compute the checksum of a simulink model it needs the
     % rsim_tfdata.mat file to exist.
-    system('cp prim/primitiva_muovi_1_1_1_1.mat rsim_tfdata.mat');
+    q_reference=zeros(3,10);
+    save('rsim_tfdata.mat','q_reference');
+%     system('cp prim/primitiva_muovi_1_1_1_1.mat rsim_tfdata.mat');
 end
 
 % Open the model and configure it to use the RSim target.
