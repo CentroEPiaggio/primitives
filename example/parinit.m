@@ -79,7 +79,8 @@ primitive_muovi_params = struct('name','muovi',    ...
     'filepath','prim/' ...
     )
 make_primitives_muovi(primitive_muovi_params)
-
+make_primitives_abbassa(primitive_muovi_params)
+% return
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
 disp('Starting batch simulations.')
