@@ -26,8 +26,8 @@ yf_vec = linspace(0,4,yf_vec_len);
 disp(['Generating ' prim_data.name ' primitives...']);
 for y=1:length(yf_vec)
     yf = yf_vec(y);
-    [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,Tend,Ts);
-    [time,traj_y_cart] = muovi(0,1,0,0,Tend/2,Ts);
+%     [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,Tend,Ts);
+    [time,traj_y_cart] = trajectory(0,1,0,0,Tend/2,Ts);
 %     for x=1:length(xf_vec)
 %         xf = xf_vec(x);
 %         for vi=1:length(vx0_vec)

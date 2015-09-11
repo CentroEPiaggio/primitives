@@ -34,8 +34,8 @@ disp(['Generating ' prim_data.name ' primitives...']);
             xpi = vx0_vec(vi);
             for vf=1:length(vxf_vec)
                 xpf = vxf_vec(vf);
-                [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,Tend,Ts);
-                [time,traj_x_cart] = muovi(0,2,0,0,Tend/2,Ts);
+%                 [time,traj_x_cart] = muovi(xi,xf,xpi,xpf,Tend,Ts);
+                [time,traj_x_cart] = trajectory(0,2,0,0,Tend/2,Ts);
                 q_reference = [time(:)';traj_x_cart(:)'];
                 savestr = strcat('save', [' ', filepath], 'primitiva_', prim_data.name,'_',num2str(x),...
                     '_',num2str(vi),'_',num2str(vf),'.mat q_reference');
