@@ -78,7 +78,7 @@ for ii=1:N_sample_max
 end
 %% simulate the optimal plan that has been found
 source_node = 1;
-goal_node = 12; % just to try
+goal_node = 21; % just to try
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);

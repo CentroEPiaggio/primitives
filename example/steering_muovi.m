@@ -74,12 +74,12 @@ gen_ic(ic);
 q_reference = [time(:)';
     traj_x_cart(:)';
     traj_y_cart(:)'];
-save('runna.mat','q_reference');
+save('../example/runna.mat','q_reference');
 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
 % check if feasible
-load('modello.mat');
+load('../example/modello.mat');
 disp(num2str(rt_zmpflag(end)))
 if rt_zmpflag(end)==0
     feasible = 1;
