@@ -1,4 +1,4 @@
-function T = localRRTstar(Chi,Ptree,x_rand,T)
+function [T,G] = localRRTstar(Chi,Ptree,x_rand,T,Graph)
 prim_cost = zeros(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 %% check if other dimensions can be activated from the newest point (x_rand)
@@ -47,6 +47,9 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
             T = T.addnode(idx_nearest,x_rand);
+            
+            Graph(idx_nearest,length(T.Node)) = cost;
+            
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
         else
             disp('No primitives found')
@@ -63,7 +66,9 @@ if prim_cost(idx_p_opt) == Inf
 elseif feasible
     prim_opt = Ptree.get(idx_p_opt);
     disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
-end
+    % add the node and the edge to the graph
 
+end
+G = Graph; % update graph
 end
 

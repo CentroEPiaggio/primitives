@@ -35,6 +35,8 @@ plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
 % algorithm parameters
 N_sample_max = 10; % max number of samples
 
+% empty search graph
+G = sparse(1,1,0);
 %%
 % main loop
 for ii=1:N_sample_max
@@ -46,7 +48,7 @@ for ii=1:N_sample_max
     
     %% forall primitives living in Chi0
     Chi = Chi0;
-    T = localRRTstar(Chi,Ptree,x_rand,T);
+    [T,G] = localRRTstar(Chi,Ptree,x_rand,T,G);
 %     keyboard
 %     %% check if other dimensions can be activated from the newest point (x_rand)
 %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
@@ -74,9 +76,20 @@ for ii=1:N_sample_max
 
 end
 %% simulate the optimal plan that has been found
-idx_start = 1;
-idx_goal = 3; % just to try
-Plan = return_path(T,idx_start,idx_goal);
-return
+source_node = 1;
+goal_node = 3; % just to try
+% [G,W] = make_graph(T);
+% Plan = return_path(T,idx_start,idx_goal);
+% make the sparse matrix square
 
-disp(T.tostring)
+sizeG = size(G);
+[~,shorterDim]=min(sizeG)
+G(sizeG(shorterDim)+1:max(sizeG),:)=0
+
+h = view(biograph(G,[],'ShowWeights','on'))
+[dist,path,pred] = graphshortestpath(G,source_node,goal_node)
+set(h.Nodes(path),'Color',[1 0.4 0.4])
+edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
+set(edges,'LineColor',[1 0 0])
+set(edges,'LineWidth',1.5)
+
