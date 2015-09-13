@@ -1,6 +1,8 @@
-function [T,G] = localRRTstar(Chi,Ptree,x_rand,T,Graph)
+function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges)
 prim_cost = zeros(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
+prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
+actions = cell(Ptree.nnodes,1);
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     jj
@@ -39,22 +41,28 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         %             the steering function
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
+        q = [xi xf vi vf];
         [feasible,cost]=steering_muovi(xi,xf,vi,vf);
         if feasible
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
+            prim_params{jj} = q;
             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
             T = T.addnode(idx_nearest,x_rand);
             
             Graph(idx_nearest,length(T.Node)) = cost;
-            
+            action = struct('source_node', ,...
+                'dest_node', ,...
+                'primitive',prim_opt.name,...
+                'primitive_q',prim_params_opt);
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
         else
             disp('No primitives found')
             prim_feasible(jj) = 0;
             prim_cost(jj) = Inf;
+            prim_params{jj} = 0;
         end
     end
     
@@ -63,12 +71,20 @@ end
 [~,idx_p_opt] = min(prim_cost);
 if prim_cost(idx_p_opt) == Inf
     disp('nessuna primitiva con costo finito disponibile');
-elseif feasible
+% elseif feasible
+else
     prim_opt = Ptree.get(idx_p_opt);
-    disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
+    prim_params_opt = prim_params{idx_p_opt};
+    action = struct('source_node', ,...
+        'dest_node', ,...
+        'primitive',prim_opt.name,...
+        'primitive_q',prim_params_opt);
+    
+    disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
     % add the node and the edge to the graph
 
 end
 G = Graph; % update graph
+E = Edges;
 end
 

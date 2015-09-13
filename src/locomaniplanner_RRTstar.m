@@ -14,8 +14,8 @@ for jj=1:Ptree.nnodes
     hold on
 end
 
-x_I = [0;0;NaN;NaN]; % initial state. Position and speed of cart are both zeros
-x_G = [NaN;NaN;1]; % goal state. Button shall be pressed
+x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
+x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 % initialize an empty tree
 T = tree;
 % add inial state to the tree
@@ -33,10 +33,11 @@ axis equal;
 plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
 
 % algorithm parameters
-N_sample_max = 10; % max number of samples
+N_sample_max = 20; % max number of samples
 
 % empty search graph
 G = sparse(1,1,0);
+E = cell(1,1,1);
 %%
 % main loop
 for ii=1:N_sample_max
@@ -48,7 +49,7 @@ for ii=1:N_sample_max
     
     %% forall primitives living in Chi0
     Chi = Chi0;
-    [T,G] = localRRTstar(Chi,Ptree,x_rand,T,G);
+    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E);
 %     keyboard
 %     %% check if other dimensions can be activated from the newest point (x_rand)
 %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
@@ -78,18 +79,27 @@ end
 %% simulate the optimal plan that has been found
 source_node = 1;
 goal_node = 3; % just to try
-% [G,W] = make_graph(T);
-% Plan = return_path(T,idx_start,idx_goal);
 % make the sparse matrix square
-
 sizeG = size(G);
-[~,shorterDim]=min(sizeG)
-G(sizeG(shorterDim)+1:max(sizeG),:)=0
-
-h = view(biograph(G,[],'ShowWeights','on'))
-[dist,path,pred] = graphshortestpath(G,source_node,goal_node)
+[~,shorterDim]=min(sizeG);
+G(sizeG(shorterDim)+1:max(sizeG),:)=0;
+% show the graph
+h = view(biograph(G,[],'ShowWeights','on'));
+% find the shortest path
+[dist,path,pred] = graphshortestpath(G,source_node,goal_node);
+% draw shortest path
 set(h.Nodes(path),'Color',[1 0.4 0.4])
 edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
 set(edges,'LineColor',[1 0 0])
 set(edges,'LineWidth',1.5)
-
+%% obtain plan as the shortest path in the graph
+opt_plan = tree;
+prim_name = 'Standby';
+prim_params = 0;
+pi_I = struct('primitive',prim_name, ...
+    'primitive_q',prim_params);
+opt_plan = opt_plan.addnode(0,pi_I);
+return
+for ii=1:length(path)
+    opt_plan.addnode(ii,T.get(path(ii)));
+end
