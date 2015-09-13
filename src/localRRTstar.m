@@ -7,6 +7,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     prim = Ptree.get(jj);                   % prim is the current primitive
     %% find the nearest point, in Chi0
     % convert nodes in trees from cells to matrix
+    keyboard
     points_mat = cell2mat(T.Node');
     points_mat(isnan(points_mat)) = []; % remove NaN from points
     % find nearest point
@@ -38,6 +39,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         if feasible
             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             %% add the new node to the tree
+            x_rand = fix_nans(x_rand,prim.dimensions);
             T = T.addnode(idx_nearest,x_rand);
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
             prim_feasible(jj) = feasible;

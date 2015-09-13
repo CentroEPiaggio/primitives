@@ -15,7 +15,7 @@ run_filepath = '../example/';
 prim_filepath = [run_filepath 'prim/'];
 
 
-Tend = 5; % TODO porcata. Il tempo va parametrizzato.
+Tend = 10; % TODO porcata. Il tempo va parametrizzato.
 Ts = 0.01;
 
 enable_muovi = true;
