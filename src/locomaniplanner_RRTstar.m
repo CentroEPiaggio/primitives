@@ -7,15 +7,17 @@ import primitive_library.*;
 
 load_primitive_tree; % builds a list with all available primitives
 
-x_I = [0;0]; % initial state
-x_G = [2;2]; % goal state
+x_I = [0;0;NaN]; % initial state. Position and speed of cart are both zeros
+x_G = [NaN;NaN;1]; % goal state. Button shall be pressed
 % initialize an empty tree
 T = tree;
 % add inial state to the tree
 T = T.addnode(0,x_I);
+
 % set initial image space
 angolo = pi/4;
-Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
+% Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
+Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
 dimChi0 = Chi0.P.Dim;
 
 Chi0.P.plot('color','lightgreen');hold on;     % plot search region (piano)
@@ -27,7 +29,7 @@ for jj=1:Ptree.nnodes
     prim = Ptree.get(jj);
     prim.chi.P.plot;
 end
-
+return
 % algorithm parameters
 N_sample_max = 100; % max number of samples
 
