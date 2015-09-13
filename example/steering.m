@@ -13,7 +13,11 @@
 prim_filepath = 'prim/';
 
 enable_muovi = true;
-enable_alza  = false;
+enable_alza  = true;
+if enable_muovi==false && enable_alza==false % what's your game?
+    return;
+end
+
 xi = 0;
 xf = 10;
 yi = rand;
@@ -47,6 +51,8 @@ if enable_alza
         'filepath',prim_filepath ...
         );
     [time,traj_y_cart]=gen_primitives_abbassa(primitive_abbassa_params);
+else
+    traj_y_cart = zeros(size(traj_x_cart));
 end
 % simulate
 q_reference = [time(:)';
