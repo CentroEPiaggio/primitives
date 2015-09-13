@@ -32,7 +32,7 @@ for ii=1:10:length(rt_t)
     end
     plot(rt_xzmp(ii),-cart_height,[colorzmp 'o'],'linewidth',4);
     
-    axis([-15 15 -1 5]);
+    axis([-5 25 -1 5]);
     
     text(x_cart(ii)+cart_width/2,cart_height/2,[num2str(rt_t(ii)) '/' num2str(rt_t(end))]); % clock
     drawnow;

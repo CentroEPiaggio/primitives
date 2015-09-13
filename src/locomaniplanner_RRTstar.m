@@ -144,7 +144,19 @@ for ii=1:length(opt_plan.Node)
             disp('standby');
     end
 end
-save('runna.mat','q_reference');
+save([run_filepath 'runna.mat'],'q_reference');
+save([run_filepath 'rsim_tfdata.mat'],'q_reference');
+Tend = q_reference(1,end);
+q0 = [0;deg2rad(90);2];
+qp0 = [0;0;0];
+qref0 = q0;
+ic = struct('q0',q0,'qp0',qp0,'qref0',qref0);
+gen_ic(ic);
+m1 = 100;
+m2 = 1;
+m3 = 100;
+masses=[m1;m2;m3];
+nq=length(q0);
 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
