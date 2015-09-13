@@ -14,7 +14,7 @@ for jj=1:Ptree.nnodes
     hold on
 end
 
-x_I = [0;0;NaN]; % initial state. Position and speed of cart are both zeros
+x_I = [0;0;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;1]; % goal state. Button shall be pressed
 % initialize an empty tree
 T = tree;
@@ -47,7 +47,7 @@ for ii=1:N_sample_max
     %% forall primitives living in Chi0
     Chi = Chi0;
     T = localRRTstar(Chi,Ptree,x_rand,T);
-    keyboard
+%     keyboard
 %     %% check if other dimensions can be activated from the newest point (x_rand)
 %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
 %     for jj=1:P.nnodes % start looking between all available primitives

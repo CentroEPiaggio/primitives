@@ -11,4 +11,5 @@ function x = fix_nans(x_sampled,dimensions)
 idx=~dimensions;
 x = nan(size(dimensions));
 x(~idx) = x_sampled;
+x = x(:); % column vector
 end

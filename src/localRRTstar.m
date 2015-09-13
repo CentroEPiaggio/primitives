@@ -7,10 +7,14 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     prim = Ptree.get(jj);                   % prim is the current primitive
     %% find the nearest point, in Chi0
     % convert nodes in trees from cells to matrix
-    keyboard
+%     keyboard
     points_mat = cell2mat(T.Node');
+    % now since we want to search in Chi0 we can remove all rows from
+    % points_mat that does contain a NaN
+%     points_mat(~any(isnan(points_mat)),:)=[]
     points_mat(isnan(points_mat)) = []; % remove NaN from points
-    % find nearest point
+    points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
+    % find nearest pointisp
     idx_nearest = knnsearch(points_mat',x_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
     x_nearest = T.get(idx_nearest);
     x_nearest(isnan(x_nearest)) = []; % remove NaN
@@ -37,13 +41,13 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         [feasible,cost]=steering_muovi(xi,xf,vi,vf);
         if feasible
+            prim_feasible(jj) = feasible;
+            prim_cost(jj) = cost;
             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
             T = T.addnode(idx_nearest,x_rand);
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
-            prim_feasible(jj) = feasible;
-            prim_cost(jj) = cost;
         else
             disp('No primitives found')
             prim_feasible(jj) = 0;
