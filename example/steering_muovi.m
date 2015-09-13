@@ -64,12 +64,18 @@ if enable_alza
 else
     traj_y_cart = zeros(size(traj_x_cart));
 end
+% generate initial condition file for simulation
+q0 = [xi(:);deg2rad(90);2];
+qp0 = [vi(:);0;0];
+qref0 = q0;
+ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
+gen_ic(ic);
 % simulate
 q_reference = [time(:)';
     traj_x_cart(:)';
     traj_y_cart(:)'];
 save('runna.mat','q_reference');
-runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params',num2str(1),'.mat -v -tf ',num2str(Tend)];
+runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
 % check if feasible

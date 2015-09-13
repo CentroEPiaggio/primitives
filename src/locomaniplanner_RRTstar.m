@@ -73,6 +73,10 @@ for ii=1:N_sample_max
 %     end
 
 end
+%% simulate the optimal plan that has been found
+idx_start = 1;
+idx_goal = 3; % just to try
+Plan = return_path(T,idx_start,idx_goal);
 return
 
 disp(T.tostring)
