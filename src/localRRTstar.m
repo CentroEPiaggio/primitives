@@ -1,8 +1,8 @@
 function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges)
-prim_cost = zeros(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
+prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
-actions = cell(Ptree.nnodes,1);
+actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     jj
@@ -51,18 +51,21 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
             T = T.addnode(idx_nearest,x_rand);
-            
-            Graph(idx_nearest,length(T.Node)) = cost;
-            action = struct('source_node', ,...
-                'dest_node', ,...
-                'primitive',prim_opt.name,...
-                'primitive_q',prim_params_opt);
+            idx_last_added_node = length(T.Node);
+            Graph(idx_nearest,idx_last_added_node) = cost;
+            keyboard;
+
+            actions{jj} = struct('source_node', idx_nearest,...
+                'dest_node', idx_last_added_node,...
+                'primitive',prim.name,...
+                'primitive_q',q);
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
         else
             disp('No primitives found')
             prim_feasible(jj) = 0;
             prim_cost(jj) = Inf;
             prim_params{jj} = 0;
+            actions{jj} = NaN;
         end
     end
     
@@ -75,16 +78,14 @@ if prim_cost(idx_p_opt) == Inf
 else
     prim_opt = Ptree.get(idx_p_opt);
     prim_params_opt = prim_params{idx_p_opt};
-    action = struct('source_node', ,...
-        'dest_node', ,...
-        'primitive',prim_opt.name,...
-        'primitive_q',prim_params_opt);
-    
+    keyboard
+    idx_parent = actions{idx_p_opt}.source_node;
+    idx_child  = actions{idx_p_opt}.dest_node;
+    Edges{idx_parent,idx_child} = actions{idx_p_opt};
+
     disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
     % add the node and the edge to the graph
-
 end
 G = Graph; % update graph
-E = Edges;
+E = Edges; % update edges
 end
-

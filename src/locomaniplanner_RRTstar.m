@@ -37,7 +37,7 @@ N_sample_max = 20; % max number of samples
 
 % empty search graph
 G = sparse(1,1,0);
-E = cell(1,1,1);
+E = cell(1,1);
 %%
 % main loop
 for ii=1:N_sample_max
@@ -99,7 +99,8 @@ prim_params = 0;
 pi_I = struct('primitive',prim_name, ...
     'primitive_q',prim_params);
 opt_plan = opt_plan.addnode(0,pi_I);
-return
-for ii=1:length(path)
-    opt_plan.addnode(ii,T.get(path(ii)));
+for ii=2:length(path)
+    idx_child = path(ii);
+    idx_parent = T.Parent(idx_child); % because tree class uses 0 as starting index
+    opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
 end
