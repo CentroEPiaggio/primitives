@@ -3,6 +3,7 @@ function make_primitives_abbassa(prim_data)
 % xi = prim_data.xi;
 % xf = prim_data.xf;
 yi = prim_data.yi;
+yf = prim_data.yf;
 ypi = prim_data.ypi;
 ypf = prim_data.ypf;
 Tend = prim_data.Tend;
@@ -27,7 +28,8 @@ disp(['Generating ' prim_data.name ' primitives...']);
 for y=1:length(yf_vec)
     yf = yf_vec(y);
 %     [time,traj_y_cart] = muovi(yi,yf,ypi,ypf,Tend,Ts);
-    [time,traj_y_cart] = trajectory(0,1,0,0,Tend/2,Ts);
+%     [time,traj_y_cart] = trajectory(0,1,0,0,Tend/2,Ts);
+[time,traj_y_cart] = trajectory(yi,yf,ypi,ypf,Tend,Ts);
 %     for x=1:length(xf_vec)
 %         xf = xf_vec(x);
 %         for vi=1:length(vx0_vec)
