@@ -6,6 +6,13 @@ run utils/startup_lmp.m;
 import primitive_library.*;
 
 load_primitive_tree; % builds a list with all available primitives
+% plotta gli spazi immagini delle primitive (tutti schiacciati nello stesso
+% piano)
+for jj=1:Ptree.nnodes
+    prim = Ptree.get(jj);
+    prim.chi.P.plot;
+    hold on
+end
 
 x_I = [0;0;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;1]; % goal state. Button shall be pressed
@@ -15,23 +22,18 @@ T = tree;
 T = T.addnode(0,x_I);
 
 % set initial image space
-angolo = pi/4;
+% angolo = pi/4;
 % Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
 Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
 dimChi0 = Chi0.P.Dim;
 
+figure
 Chi0.P.plot('color','lightgreen');hold on;     % plot search region (piano)
 axis equal;
 plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
 
-% plotta gli spazi immagini delle primitive
-for jj=1:Ptree.nnodes
-    prim = Ptree.get(jj);
-    prim.chi.P.plot;
-end
-return
 % algorithm parameters
-N_sample_max = 100; % max number of samples
+N_sample_max = 10; % max number of samples
 
 %%
 % main loop
@@ -45,7 +47,7 @@ for ii=1:N_sample_max
     %% forall primitives living in Chi0
     Chi = Chi0;
     T = localRRTstar(Chi,Ptree,x_rand,T);
-    
+    keyboard
 %     %% check if other dimensions can be activated from the newest point (x_rand)
 %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
 %     for jj=1:P.nnodes % start looking between all available primitives

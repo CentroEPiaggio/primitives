@@ -6,16 +6,18 @@ classdef PrimitiveFun
 %         Mapping f;
 cost_coeff;  % replace with an abstract function or sth else
 cost_table;
+dimensions; % tracks what dimensions are used by a primitive
     end
     methods
         % constructor
-        function obj = PrimitiveFun(V,cost_coeff,cost_table,name) % TODO: PrimitiveFun(chi,q,f)
+        function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions) % TODO: PrimitiveFun(chi,q,f)
 import primitive_library.*;
-            if nargin == 4
+            if nargin == 5
                 obj.chi = Imagespace(V);
                 obj.cost_coeff = cost_coeff;
                 obj.cost_table = cost_table;
                 obj.name = name;
+                obj.dimensions = dimensions;
             elseif nargin < 1
                 obj.chi = Imagespace([-1 -1; -1 1; 1 -1; 1 1]*0.3);
             end
