@@ -24,13 +24,14 @@ for ii=1:10:length(rt_t)
     Y_pend = [0;py(ii)];
     patch(X_pend,Y_pend,'b');
     plot(px(ii),py(ii),'o','linewidth',4);
+    plot(rt_com(ii,1),rt_com(ii,3),'k+');
     if rt_zmpflag(ii) == 0
         colorzmp = 'g';
     else
         colorzmp = 'r';
     end
     plot(rt_xzmp(ii),-cart_height,[colorzmp 'o'],'linewidth',4);
-     
+    
     axis([-15 15 -1 5]);
     
     text(x_cart(ii)+cart_width/2,cart_height/2,[num2str(rt_t(ii)) '/' num2str(rt_t(end))]); % clock

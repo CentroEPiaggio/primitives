@@ -10,7 +10,7 @@ q0 = rand(nq,1)
 % q0(3)=1;
 % qp0 = rand(nq,1)
 q0 = [0,deg2rad(90),1];
-q0 = [0,deg2rad(10),2];
+% q0 = [0,deg2rad(10),1];
 qref0=q0;
 
 len_ic = 1;
@@ -124,7 +124,7 @@ q_reference = [muovi.q_reference(1,:);
     muovi.q_reference(2,:);
     abbassa.q_reference(2,:)];
 save('runna.mat','q_reference');
-                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=runna.mat -p params',num2str(i),'.mat -o run_muovi_',test_codenum_muovi,'_',test_codenum_abbassa,'.mat -v -tf ',num2str(Tend)];
+                    runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=runna.mat -p params',num2str(i),'.mat -o run_',test_codenum_muovi,'_',test_codenum_abbassa,'.mat -v -tf ',num2str(Tend)];
 % runstr = ['.', filesep, 'modello -f rsim_tfdata.mat=',primitiva_muovi_loadstr,' -p params',num2str(i),'.mat -o run_muovi_',test_codenum,'.mat -v -tf 0.4'];
                     [status, result] = system(runstr);
                     if status ~= 0, error(result); end
