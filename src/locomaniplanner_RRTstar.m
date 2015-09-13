@@ -50,35 +50,35 @@ for ii=1:N_sample_max
     %% forall primitives living in Chi0
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E);
-%     keyboard
-%     %% check if other dimensions can be activated from the newest point (x_rand)
-%     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
-%     for jj=1:P.nnodes % start looking between all available primitives
-%         prim = P.get(jj); % prim is the current primitive
-%         if prim.chi.P.contains(x_rand) % is the new point contained here? % TODO: manage search over Chi0
-%             %              disp('beccato!')
-%             % TODO: sample in
-%             %             x_rand_new = sample(prim.chi.P\Chi0.P)
-%             % evaluate best parameter for the primitive
-%             %              prim_cost(jj) = prim.findbest(x_nearest,x_rand);
-%             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
-%         else
-%             disp('No primitives found')
-%             prim_cost(jj) = Inf;
-%         end
-%     end
-%     [~,idx_p_opt] = min(prim_cost);
-%     if prim_cost(idx_p_opt) == Inf
-%         disp(['nessuna primitiva con costo finito disponibile']);
-%     else
-%         prim_opt = P.get(idx_p_opt);
-%         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
-%     end
-
+    %     keyboard
+    %     %% check if other dimensions can be activated from the newest point (x_rand)
+    %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
+    %     for jj=1:P.nnodes % start looking between all available primitives
+    %         prim = P.get(jj); % prim is the current primitive
+    %         if prim.chi.P.contains(x_rand) % is the new point contained here? % TODO: manage search over Chi0
+    %             %              disp('beccato!')
+    %             % TODO: sample in
+    %             %             x_rand_new = sample(prim.chi.P\Chi0.P)
+    %             % evaluate best parameter for the primitive
+    %             %              prim_cost(jj) = prim.findbest(x_nearest,x_rand);
+    %             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
+    %         else
+    %             disp('No primitives found')
+    %             prim_cost(jj) = Inf;
+    %         end
+    %     end
+    %     [~,idx_p_opt] = min(prim_cost);
+    %     if prim_cost(idx_p_opt) == Inf
+    %         disp(['nessuna primitiva con costo finito disponibile']);
+    %     else
+    %         prim_opt = P.get(idx_p_opt);
+    %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
+    %     end
+    
 end
 %% simulate the optimal plan that has been found
 source_node = 1;
-goal_node = 3; % just to try
+goal_node = 12; % just to try
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);
@@ -104,3 +104,47 @@ for ii=2:length(path)
     idx_parent = T.Parent(idx_child); % because tree class uses 0 as starting index
     opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
 end
+
+%% go to test the plan
+% assemble the optimal plan
+Tend = 10; % TODO porcata. Il tempo va parametrizzato.
+Ts = 0.01;
+run_filepath = '../example/';
+prim_filepath = [run_filepath 'prim/'];
+% init
+q_reference = [0;0;0];
+% loop
+for ii=1:length(opt_plan.Node)
+    ii
+    switch opt_plan.Node{ii}.primitive
+        case 'Muovi'
+            xi = opt_plan.Node{ii}.primitive_q(1);
+            xf = opt_plan.Node{ii}.primitive_q(2);
+            vi = opt_plan.Node{ii}.primitive_q(3);
+            vf = opt_plan.Node{ii}.primitive_q(4);
+            primitive_muovi_params = struct('name','muovi',    ...
+                'xi',xi,            ...
+                'xf',xf,            ...
+                'vi',vi, ...
+                'vf',vf, ...
+                'Tend',Tend,        ...
+                'Ts',Ts,            ...
+                'xf_vec_len',1, ...
+                'vx0_vec_len',1,  ...
+                'vxf_vec_len',1, ...
+                'filepath',prim_filepath ...
+                );
+            [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
+            traj_y_cart = zeros(size(traj_x_cart));
+            q_reference_add = [q_reference(1,end)+time(:)';
+                traj_x_cart(:)';
+                traj_y_cart(:)'];
+            q_reference = [q_reference, q_reference_add];
+        otherwise
+            disp('standby');
+    end
+end
+save('runna.mat','q_reference');
+runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
+[status, result] = system(runstr);
+if status ~= 0, error(result); end

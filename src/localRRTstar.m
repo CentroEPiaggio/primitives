@@ -17,6 +17,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     points_mat(isnan(points_mat)) = []; % remove NaN from points
     points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
     % find nearest pointisp
+%     keyboard
     idx_nearest = knnsearch(points_mat',x_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
     x_nearest = T.get(idx_nearest);
     x_nearest(isnan(x_nearest)) = []; % remove NaN
@@ -53,7 +54,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             T = T.addnode(idx_nearest,x_rand);
             idx_last_added_node = length(T.Node);
             Graph(idx_nearest,idx_last_added_node) = cost;
-            keyboard;
+%             keyboard;
 
             actions{jj} = struct('source_node', idx_nearest,...
                 'dest_node', idx_last_added_node,...
@@ -78,7 +79,7 @@ if prim_cost(idx_p_opt) == Inf
 else
     prim_opt = Ptree.get(idx_p_opt);
     prim_params_opt = prim_params{idx_p_opt};
-    keyboard
+%     keyboard
     idx_parent = actions{idx_p_opt}.source_node;
     idx_child  = actions{idx_p_opt}.dest_node;
     Edges{idx_parent,idx_child} = actions{idx_p_opt};
