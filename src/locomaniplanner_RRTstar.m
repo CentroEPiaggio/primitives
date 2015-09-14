@@ -69,6 +69,7 @@ for ii=1:N_sample_max
     % check if has added the goal as last node
     dim = ~isnan(x_G);
     if reached(T.Node{end},x_G)
+        idx_goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Raggiunto!');
         break
     end
@@ -101,7 +102,7 @@ end
 disp('PLANNING COMPLETATO')
 %% simulate the optimal plan that has been found
 source_node = 1;
-goal_node = 20; % just to try
+goal_node = idx_goal; % just to try
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);
@@ -171,7 +172,7 @@ for ii=1:length(opt_plan.Node)
 end
 save([run_filepath 'runna.mat'],'q_reference');
 save([run_filepath 'rsim_tfdata.mat'],'q_reference');
-Tend = q_reference(1,end);
+Tend = q_reference(1,end)*1.1; % 10 percent more time, for the show
 q0 = [0;deg2rad(90);2];
 qp0 = [0;0;0];
 qref0 = q0;
@@ -185,3 +186,6 @@ nq=length(q0);
 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
+% and the show must go on!
+load ../example/optimal.mat;
+anima
