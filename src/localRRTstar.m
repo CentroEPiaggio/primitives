@@ -26,6 +26,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     % nearest point found
     x_rand_temp=x_rand;
     x_nearest_temp=x_nearest;
+    keyboard
     % TODO: how to represent the space? I suggest sth like sparse matrices
     % with NaNs for non-intersecting (or not yet sampled) dimensions.
     % UPDATE: this is how it's being implemented right now
