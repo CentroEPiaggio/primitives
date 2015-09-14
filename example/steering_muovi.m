@@ -10,7 +10,14 @@
 % feasible: true or false
 % cost: the cost of performing such action
 % data: the data to be added to the plan tree?
-function [feasible,cost,traj_pos_cart,traj_vel_cart]=steering_muovi(xi,xf,vi,vf)
+function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_muovi(xi,xf,vi,vf)
+% initialization
+feasible=0;
+cost=Inf;
+q=[xi,xf,vi,vf];
+traj_pos_cart=NaN;
+traj_vel_cart=NaN;
+
 run_filepath = '../example/';
 prim_filepath = [run_filepath 'prim/'];
 
@@ -46,10 +53,16 @@ if enable_muovi
         'filepath',prim_filepath ...
         );
 %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
-    [time,traj_x_cart]=gen_primitives_muovi_local(primitive_muovi_params);
+    [time,traj_x_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
+    if any(isnan(time)) || any(isnan(traj_x_cart))
+        feasible=0;
+        cost=Inf;
+        return
+    end
     if nargout > 2 % if requested...
         traj_pos_cart = xi+cumtrapz(time,traj_x_cart); % ...returns both the position trajectory...
         traj_vel_cart = traj_x_cart;                % ...and the velocity trajectory
+        q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
     end
 %     keyboard
 end

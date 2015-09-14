@@ -26,7 +26,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     % nearest point found
     x_rand_temp=x_rand;
     x_nearest_temp=x_nearest;
-    keyboard
+%     keyboard
     % TODO: how to represent the space? I suggest sth like sparse matrices
     % with NaNs for non-intersecting (or not yet sampled) dimensions.
     % UPDATE: this is how it's being implemented right now
@@ -46,7 +46,10 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         q = [xi xf vi vf];
-        [feasible,cost,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
+        [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
+        x_new=x_rand;
+        x_new(1) = q(2);
+        x_new(2) = q(4);
         if feasible
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
@@ -54,7 +57,9 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
-            T = T.addnode(idx_nearest,x_rand);
+            x_new = fix_nans(x_new,prim.dimensions);
+%             T = T.addnode(idx_nearest,x_rand);
+            T = T.addnode(idx_nearest,x_new);
             idx_last_added_node = length(T.Node);
             Graph(idx_nearest,idx_last_added_node) = cost;
 %             keyboard;
@@ -65,9 +70,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 'primitive_q',q);
             
             % visualize tree-connection
-%             keyboard
+            keyboard
             figure(fig_points)
-            line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
+            line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+            line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
+            plot(x_new(1),x_new(2),'mx','linewidth',2)
             % visualize path in image space
             figure(fig_trajectories)
             plot(traj_pos,traj_vel);
