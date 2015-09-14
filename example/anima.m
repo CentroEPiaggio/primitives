@@ -1,6 +1,6 @@
 % setup
-% cart_width  = 2;
-% cart_height = 0.4;
+cart_width  = 2;
+cart_height = 0.4;
 assi_x = [-10 10]*1;
 assi_y = [-1 5];
 %

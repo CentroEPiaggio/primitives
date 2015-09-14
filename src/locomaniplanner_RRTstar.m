@@ -78,7 +78,7 @@ for ii=1:N_sample_max
 end
 %% simulate the optimal plan that has been found
 source_node = 1;
-goal_node = 21; % just to try
+goal_node = 20; % just to try
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);
@@ -122,6 +122,8 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
+            keyboard
+            
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
                 'xf',xf,            ...

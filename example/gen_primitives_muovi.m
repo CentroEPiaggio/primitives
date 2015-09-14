@@ -2,8 +2,8 @@ function [time,traj_x_cart]=gen_primitives_muovi(prim_data)
 %% Extract data from struct
 xi = prim_data.xi;
 xf = prim_data.xf;
-xpi = 0;%prim_data.xpi;
-xpf = 0;%prim_data.xpf;
+xpi = prim_data.vi;%0;
+xpf = prim_data.vf;%0;
 
 Tend = prim_data.Tend;
 Ts = prim_data.Ts;
