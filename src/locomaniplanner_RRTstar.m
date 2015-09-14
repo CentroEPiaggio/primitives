@@ -146,7 +146,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-            keyboard
+%             keyboard
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
@@ -189,3 +189,6 @@ if status ~= 0, error(result); end
 % and the show must go on!
 load ../example/optimal.mat;
 anima
+figure
+plot(rt_t,rt_q_ref,rt_t,rt_q,q_reference(1,:),q_reference(2,:))
+grid on
