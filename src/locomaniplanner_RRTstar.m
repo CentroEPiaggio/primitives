@@ -42,7 +42,7 @@ plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
 plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
 
 % algorithm parameters
-N_sample_max = 20; % max number of samples
+N_sample_max = 2000; % max number of samples
 
 % empty search graph
 G = sparse(1,1,0);
@@ -52,16 +52,26 @@ E = cell(1,1);
 for ii=1:N_sample_max
     ii
     %waitforbuttonpress
-    %% sample a point in Chi0.
-    x_rand = Chi0.sample;
+    %% sampling
+    if mod(ii,10)==0
+        x_rand = x_G(1:2); % every once in a while push in a known number
+    else
+        x_rand = Chi0.sample; % sample a point in Chi0.
+    end
     figure(fig_points)
-    plot(x_rand(1),x_rand(2),'x','linewidth',2)
+%     plot(x_rand(1),x_rand(2),'x','linewidth',2)
     figure(fig_trajectories)
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
     
     %% forall primitives living in Chi0
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E);
+    % check if has added the goal as last node
+    dim = ~isnan(x_G);
+    if reached(T.Node{end},x_G)
+        disp('Raggiunto!');
+        break
+    end
     %     keyboard
     %     %% check if other dimensions can be activated from the newest point (x_rand)
     %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one

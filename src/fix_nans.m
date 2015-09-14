@@ -7,9 +7,17 @@
 % we return x=[4 7 NaN];
 % or by calling x=fix_nans(x_sampled,[1 0 1])
 % we return x=[4 NaN 7];
+% 
+% In the opposite case we just remove NaNs from the vector,
+% e.g. x_sampled = [4 NaN 7]
+% we return x=[4 7];
 function x = fix_nans(x_sampled,dimensions)
-idx=~dimensions;
-x = nan(size(dimensions));
-x(~idx) = x_sampled;
-x = x(:); % column vector
+if length(x_sampled)<length(dimensions) % we have been asked to add nans in proper place
+    idx=~dimensions;
+    x = nan(size(dimensions));
+    x(~idx) = x_sampled;
+    x = x(:); % column vector
+else % we have been asked to remove nans from a vector
+    x = x_sampled(dimensions>0);
+end
 end

@@ -18,6 +18,7 @@ function [time,traj,amax,amin] = trajectory_ks(xi,xf,xpi,xpf,T,Ts,amax_desired,T
 coeff=[a5,a4,a3,a2,a1,a0];
 coeffp=polyder(coeff);
 time=0:Ts:T;
+% traj = polyval(coeffp,time);
 traj = polyval(coeffp,time);
 % returns amax and amin as extra params for diagnostic
 t_amax=-(2*a4 + 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
@@ -37,6 +38,7 @@ while(abs(amax)>abs(amax_desired)) && jj<100
     coeff=[a5,a4,a3,a2,a1,a0];
     coeffp=polyder(coeff);
     time=0:Ts:T;
+    % traj = polyval(coeffp,time);
     traj = polyval(coeffp,time);
     t_amax=-(2*a4 + 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
     t_amin=-(2*a4 - 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
@@ -57,6 +59,7 @@ if nargin==8 % ok, so you also want a maximum time for your trajectory? No probl
     coeff=[a5,a4,a3,a2,a1,a0];
     coeffp=polyder(coeff);
     time=0:Ts:Tmax;
+    % traj = polyval(coeffp,time);
     traj = polyval(coeffp,time);
     t_amax=-(2*a4 + 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
     t_amin=-(2*a4 - 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
@@ -72,6 +75,7 @@ if nargin==8 % ok, so you also want a maximum time for your trajectory? No probl
         coeff=[a5,a4,a3,a2,a1,a0];
         coeffp=polyder(coeff);
         time=0:Ts:Tmax;
+        % traj = polyval(coeffp,time);
         traj = polyval(coeffp,time);
         t_amax=-(2*a4 + 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);
         t_amin=-(2*a4 - 2^(1/2)*(2*a4^2 - 5*a3*a5)^(1/2))/(10*a5);

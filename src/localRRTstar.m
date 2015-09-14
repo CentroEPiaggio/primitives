@@ -50,7 +50,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         x_new=x_rand;
         x_new(1) = q(2);
         x_new(2) = q(4);
-        if feasible
+        if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
             prim_params{jj} = q;
@@ -70,13 +70,14 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 'primitive_q',q);
             
             % visualize tree-connection
-            keyboard
+%             keyboard
             figure(fig_points)
             line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-            line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
+%             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
             plot(x_new(1),x_new(2),'mx','linewidth',2)
             % visualize path in image space
             figure(fig_trajectories)
+            plot(x_new(1),x_new(2),'mx','linewidth',2)
             plot(traj_pos,traj_vel);
 %             keyboard
         else

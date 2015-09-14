@@ -53,15 +53,15 @@ if enable_muovi
         'filepath',prim_filepath ...
         );
 %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
-    [time,traj_x_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
-    if any(isnan(time)) || any(isnan(traj_x_cart))
+    [time,traj_vel_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
+    if any(isnan(time)) || any(isnan(traj_vel_cart))
         feasible=0;
         cost=Inf;
         return
     end
     if nargout > 2 % if requested...
-        traj_pos_cart = xi+cumtrapz(time,traj_x_cart); % ...returns both the position trajectory...
-        traj_vel_cart = traj_x_cart;                % ...and the velocity trajectory
+        traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
+        traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
         q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
     end
 %     keyboard
@@ -81,7 +81,7 @@ if enable_alza
         );
     [time,traj_y_cart]=gen_primitives_abbassa(primitive_abbassa_params);
 else
-    traj_y_cart = zeros(size(traj_x_cart));
+    traj_y_cart = zeros(size(traj_vel_cart));
 end
 % generate initial condition file for simulation
 q0 = [xi(:);deg2rad(90);2];
@@ -91,7 +91,7 @@ ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
 gen_ic(ic);
 % simulate
 q_reference = [time(:)';
-    traj_x_cart(:)';
+    traj_vel_cart(:)';
     traj_y_cart(:)'];
 save('../example/runna.mat','q_reference');
 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
