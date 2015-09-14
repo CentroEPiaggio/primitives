@@ -16,6 +16,7 @@ end
 
 x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
+x_G = [17;   0;NaN;NaN]; % goal state for debug
 % initialize an empty tree
 T = tree;
 % add inial state to the tree
@@ -28,9 +29,10 @@ Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
 dimChi0 = Chi0.P.Dim;
 
 figure
-Chi0.P.plot('color','lightgreen');hold on;     % plot search region (piano)
+Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
-plot(x_I(1),x_I(2),'kx','linewidth',2) % plot initial point
+plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
+plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
 
 % algorithm parameters
 N_sample_max = 20; % max number of samples
