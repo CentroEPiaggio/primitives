@@ -10,7 +10,7 @@
 % feasible: true or false
 % cost: the cost of performing such action
 % data: the data to be added to the plan tree?
-function [feasible,cost]=steering_muovi(xi,xf,vi,vf)
+function [feasible,cost,traj_pos_cart,traj_vel_cart]=steering_muovi(xi,xf,vi,vf)
 run_filepath = '../example/';
 prim_filepath = [run_filepath 'prim/'];
 
@@ -26,8 +26,8 @@ if enable_muovi==false && enable_alza==false % what's your game?'
     return;
 end
 
-xi = 0;
-xf = 10;
+% xi = 0;
+% xf = 10;
 yi = rand;
 yf = yi*2;
 % prepare data for muovi
@@ -45,7 +45,13 @@ if enable_muovi
         'vxf_vec_len',1, ...
         'filepath',prim_filepath ...
         );
-    [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
+%     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
+    [time,traj_x_cart]=gen_primitives_muovi_local(primitive_muovi_params);
+    if nargout > 2 % if requested...
+        traj_pos_cart = cumtrapz(time,traj_x_cart); % ...returns both the position trajectory...
+        traj_vel_cart = traj_x_cart;                % ...and the velocity trajectory
+    end
+%     keyboard
 end
 
 % prepare data for alza
@@ -79,7 +85,7 @@ runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
 % check if feasible
-load('../example/modello.mat');
+load('../src/modello.mat');
 disp(num2str(rt_zmpflag(end)))
 if rt_zmpflag(end)==0
     feasible = 1;

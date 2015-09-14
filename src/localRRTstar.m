@@ -3,6 +3,8 @@ prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
+fig_points=2;
+fig_trajectories=3;
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     jj
@@ -43,7 +45,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         q = [xi xf vi vf];
-        [feasible,cost]=steering_muovi(xi,xf,vi,vf);
+        [feasible,cost,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         if feasible
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
@@ -60,7 +62,15 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 'dest_node', idx_last_added_node,...
                 'primitive',prim.name,...
                 'primitive_q',q);
+            
+            % visualize tree-connection
+%             keyboard
+            figure(fig_points)
             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','red'); % just for visualization
+            % visualize path in image space
+            figure(fig_trajectories)
+            plot(traj_pos,traj_vel);
+%             keyboard
         else
             disp('No primitives found')
             prim_feasible(jj) = 0;

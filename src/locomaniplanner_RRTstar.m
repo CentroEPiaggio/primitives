@@ -28,7 +28,14 @@ T = T.addnode(0,x_I);
 Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
 dimChi0 = Chi0.P.Dim;
 
-figure
+fig_points = 2;
+fig_trajectories = 3;
+figure(fig_points)
+Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
+axis equal;
+plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
+plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
+figure(fig_trajectories)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
 plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
@@ -47,6 +54,9 @@ for ii=1:N_sample_max
     %waitforbuttonpress
     %% sample a point in Chi0.
     x_rand = Chi0.sample;
+    figure(fig_points)
+    plot(x_rand(1),x_rand(2),'x','linewidth',2)
+    figure(fig_trajectories)
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
     
     %% forall primitives living in Chi0
@@ -78,6 +88,7 @@ for ii=1:N_sample_max
     %     end
     
 end
+disp('PLANNING COMPLETATO')
 %% simulate the optimal plan that has been found
 source_node = 1;
 goal_node = 20; % just to try

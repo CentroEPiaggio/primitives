@@ -40,4 +40,5 @@ while(abs(amax)>abs(amax_desired))
     coeffpp=polyder(coeffp);
     amax = polyval(coeffpp,t_amax);
     amin = polyval(coeffpp,t_amin);
+%     keyboard
 end
