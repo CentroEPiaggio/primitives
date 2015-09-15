@@ -1,4 +1,4 @@
-function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges)
+function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges,Obstacles,verbose)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -7,27 +7,27 @@ fig_points=2;
 fig_trajectories=3;
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
-    jj
+%     jj
     prim = Ptree.get(jj);                   % prim is the current primitive
     %% find the nearest point, in Chi0
     % convert nodes in trees from cells to matrix
-%     keyboard
+    %     keyboard
     points_mat = cell2mat(T.Node');
     % now since we want to search in Chi0 we can remove all rows from
     % points_mat that does contain a NaN
-%     points_mat(~any(isnan(points_mat)),:)=[]
+    %     points_mat(~any(isnan(points_mat)),:)=[]
     points_mat(isnan(points_mat)) = []; % remove NaN from points
     points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
     % find nearest pointisp
-%     keyboard
+    %     keyboard
     idx_nearest = knnsearch(points_mat',x_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
     x_nearest = T.get(idx_nearest);
     x_nearest(isnan(x_nearest)) = []; % remove NaN
-%     keyboard
+    %     keyboard
     % nearest point found
     x_rand_temp=x_rand;
     x_nearest_temp=x_nearest;
-%     keyboard
+    %     keyboard
     % TODO: how to represent the space? I suggest sth like sparse matrices
     % with NaNs for non-intersecting (or not yet sampled) dimensions.
     % UPDATE: this is how it's being implemented right now
@@ -51,38 +51,69 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         x_new=x_rand;
         x_new(1) = q(2);
         x_new(2) = q(4);
+        %         keyboard
+        % collision checker loop
+        if feasible
+            kk=1;
+            nested_feasible = false; nested_cost = Inf; nested_q = q; nested_traj_pos = traj_pos; nested_traj_vel = traj_vel;
+            while any(Obstacles.Node{1}.P.contains([nested_traj_pos(:)'; nested_traj_vel(:)'])) && kk<=10 % tries only 10 times to shring the trajectory
+                % ~nested_feasible &&
+                kk = kk+1;
+                q = [xi xf vi vf];
+                start = [xi,vi];
+                fin = [xf,vf];
+                alpha = 1-0.1*kk; % decreases of 10 percent along the line connecting initial and final point
+                point = (1-alpha)*start+(alpha)*fin;
+                [nested_feasible,nested_cost,nested_q,nested_traj_pos,nested_traj_vel]=steering_muovi(xi,point(1),vi,point(2));
+                %                 x_new=x_rand;
+                x_new(1) = nested_traj_pos(end);%q(2);
+                x_new(2) = nested_traj_vel(end);%q(4);
+%                 keyboard
+            end
+            feasible = nested_feasible;
+            cost = nested_cost;
+            q = nested_q;
+            traj_pos = nested_traj_pos;
+            traj_vel = nested_traj_vel;
+        end
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
             prim_params{jj} = q;
-            disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
+            if verbose
+                disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
+            end
             %% add the new node to the tree
             x_rand = fix_nans(x_rand,prim.dimensions);
             x_new = fix_nans(x_new,prim.dimensions);
-%             T = T.addnode(idx_nearest,x_rand);
+            %             T = T.addnode(idx_nearest,x_rand);
             T = T.addnode(idx_nearest,x_new);
             idx_last_added_node = length(T.Node);
             Graph(idx_nearest,idx_last_added_node) = cost;
-%             keyboard;
-
+            %             keyboard;
+            
             actions{jj} = struct('source_node', idx_nearest,...
                 'dest_node', idx_last_added_node,...
                 'primitive',prim.name,...
                 'primitive_q',q);
             
             % visualize tree-connection
-%             keyboard
-            figure(fig_points)
-            line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-%             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
-            plot(x_new(1),x_new(2),'mx','linewidth',2)
-            % visualize path in image space
-            figure(fig_trajectories)
-            plot(x_new(1),x_new(2),'mx','linewidth',2)
-            plot(traj_pos,traj_vel);
-%             keyboard
+            %             keyboard
+            if verbose
+                figure(fig_points)
+                line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+                %             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
+                plot(x_new(1),x_new(2),'mx','linewidth',2)
+                % visualize path in image space
+                figure(fig_trajectories)
+                plot(x_new(1),x_new(2),'mx','linewidth',2)
+                plot(traj_pos,traj_vel);
+            end
+            %             keyboard
         else
-            disp('No primitives found')
+            if verbose
+                disp('No primitives found')
+            end
             prim_feasible(jj) = 0;
             prim_cost(jj) = Inf;
             prim_params{jj} = 0;
@@ -94,17 +125,20 @@ end
 
 [~,idx_p_opt] = min(prim_cost);
 if prim_cost(idx_p_opt) == Inf
-    disp('nessuna primitiva con costo finito disponibile');
-% elseif feasible
+    if verbose
+        disp('nessuna primitiva con costo finito disponibile');
+    end
+    % elseif feasible
 else
     prim_opt = Ptree.get(idx_p_opt);
     prim_params_opt = prim_params{idx_p_opt};
-%     keyboard
+    %     keyboard
     idx_parent = actions{idx_p_opt}.source_node;
     idx_child  = actions{idx_p_opt}.dest_node;
     Edges{idx_parent,idx_child} = actions{idx_p_opt};
-
-    disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
+    if verbose
+        disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
+    end
     % add the node and the edge to the graph
 end
 G = Graph; % update graph

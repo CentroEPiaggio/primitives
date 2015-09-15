@@ -1,6 +1,8 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
 
+verbose = 1;
+
 run utils/startup_lmp.m;
 
 import primitive_library.*;
@@ -28,8 +30,8 @@ T = T.addnode(0,x_I);
 Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
 dimChi0 = Chi0.P.Dim;
 
-fig_points = 2;
-fig_trajectories = 3;
+fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
+fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
@@ -41,6 +43,18 @@ axis equal;
 plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
 plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
 
+% define obstacles
+Obstacles = tree;
+speed_limit = 4;
+obstacle_speed_limit = Imagespace(([5 speed_limit;5 10;10 speed_limit; 10 10]'*1)');
+Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
+% plot obstacles
+figure(fig_points)
+obstacle_speed_limit.P.plot('color','black','alpha',1);
+figure(fig_trajectories)
+obstacle_speed_limit.P.plot('color','black','alpha',1);
+
+
 % algorithm parameters
 N_sample_max = 2000; % max number of samples
 
@@ -50,7 +64,7 @@ E = cell(1,1);
 %%
 % main loop
 for ii=1:N_sample_max
-    ii
+%     ii
     %waitforbuttonpress
     %% sampling
     if mod(ii,10)==0
@@ -58,14 +72,16 @@ for ii=1:N_sample_max
     else
         x_rand = Chi0.sample; % sample a point in Chi0.
     end
+    
+    if verbose
     figure(fig_points)
 %     plot(x_rand(1),x_rand(2),'x','linewidth',2)
     figure(fig_trajectories)
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-    
+    end
     %% forall primitives living in Chi0
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E);
+    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E,Obstacles,verbose);
     % check if has added the goal as last node
     dim = ~isnan(x_G);
     if reached(T.Node{end},x_G)

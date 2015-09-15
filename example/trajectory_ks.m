@@ -51,7 +51,7 @@ end
 % elseif nargin==8 % ok, so you also want a maximum time for your trajectory? No problema!
 if nargin==8 % ok, so you also want a maximum time for your trajectory? No problema!
     %     xf = xf*Tmax/T;
-    keyboard
+%     keyboard
     % rescale coordinates in a linear fashion
     xf = xf*Tmax/T;
     xpf = xpf*Tmax/T;
@@ -66,7 +66,7 @@ if nargin==8 % ok, so you also want a maximum time for your trajectory? No probl
     coeffpp=polyder(coeffp);
     amax = polyval(coeffpp,t_amax);
     amin = polyval(coeffpp,t_amin);
-    jj=0
+    jj=0;
     while (abs(amax)>abs(amax_desired)) && jj<100
         jj=jj+1;
         xf= 0.9*xf;
