@@ -17,7 +17,7 @@ traj_vel_cart = traj_vel_cart(:)';
 
 % keyboard
 % restrict the trajectory to be local
-% Tmax = 1; % local trajectory by restricting the integration time
+% Tmax = 100; % local trajectory by restricting the integration time
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax,Tmax);
 
 

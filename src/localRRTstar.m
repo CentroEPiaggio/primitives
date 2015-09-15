@@ -1,4 +1,4 @@
-function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges)
+function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges,Obstacles)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -51,6 +51,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         x_new=x_rand;
         x_new(1) = q(2);
         x_new(2) = q(4);
+%         keyboard
+        % collision checker
+        if feasible && any(Obstacles.Node{1}.P.contains([traj_pos(:)'; traj_vel(:)']))
+            feasible = false;
+        end
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
