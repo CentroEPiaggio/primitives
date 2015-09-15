@@ -1,6 +1,8 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
 
+verbose = 1;
+
 run utils/startup_lmp.m;
 
 import primitive_library.*;
@@ -62,7 +64,7 @@ E = cell(1,1);
 %%
 % main loop
 for ii=1:N_sample_max
-    ii
+%     ii
     %waitforbuttonpress
     %% sampling
     if mod(ii,10)==0
@@ -70,14 +72,16 @@ for ii=1:N_sample_max
     else
         x_rand = Chi0.sample; % sample a point in Chi0.
     end
+    
+    if verbose
     figure(fig_points)
 %     plot(x_rand(1),x_rand(2),'x','linewidth',2)
     figure(fig_trajectories)
     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-    
+    end
     %% forall primitives living in Chi0
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E,Obstacles);
+    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E,Obstacles,verbose);
     % check if has added the goal as last node
     dim = ~isnan(x_G);
     if reached(T.Node{end},x_G)
