@@ -99,7 +99,9 @@ runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p
 if status ~= 0, error(result); end
 % check if feasible
 load('../src/modello.mat');
-% disp(num2str(rt_zmpflag(end))) % display feasibility bit
+disp(['zmp flag(end): ' num2str(rt_zmpflag(end))]) % display feasibility bit
+disp('In steering_muovi:')
+% keyboard
 if rt_zmpflag(end)==0
     feasible = 1;
     cost = rt_cost(end);

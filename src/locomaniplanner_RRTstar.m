@@ -56,7 +56,7 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 
 
 % algorithm parameters
-N_sample_max = 2000; % max number of samples
+N_sample_max = 20000; % max number of samples
 
 % empty search graph
 G = sparse(1,1,0);

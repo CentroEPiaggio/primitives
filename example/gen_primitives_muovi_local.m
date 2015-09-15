@@ -11,6 +11,7 @@ Ts = prim_data.Ts;
 % keyboard
 amax = 10;
 % [time,traj_x_cart] = trajectory(xi,xf,xpi,xpf,Tend,Ts);
+% [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 time = time(:)';
 traj_vel_cart = traj_vel_cart(:)';

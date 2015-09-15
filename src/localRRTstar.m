@@ -69,14 +69,23 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 x_new(1) = nested_traj_pos(end);%q(2);
                 x_new(2) = nested_traj_vel(end);%q(4);
 %                 keyboard
-            end
             feasible = nested_feasible;
             cost = nested_cost;
             q = nested_q;
             traj_pos = nested_traj_pos;
             traj_vel = nested_traj_vel;
+            end
+
         end
-        if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+        if feasible
+            plot(traj_pos,traj_vel,'k');
+        else
+            plot(traj_pos,traj_vel,'r');
+        end
+        disp('In localRRTstar:')
+%         keyboard
+        
+        if feasible %&& all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
             prim_params{jj} = q;
