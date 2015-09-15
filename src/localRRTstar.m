@@ -23,6 +23,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     idx_nearest = knnsearch(points_mat',x_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
     x_nearest = T.get(idx_nearest);
     x_nearest(isnan(x_nearest)) = []; % remove NaN
+%     keyboard
     % nearest point found
     x_rand_temp=x_rand;
     x_nearest_temp=x_nearest;

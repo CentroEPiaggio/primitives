@@ -160,7 +160,7 @@ for ii=1:length(opt_plan.Node)
                 'vxf_vec_len',1, ...
                 'filepath',prim_filepath ...
                 );
-            [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
+            [time,traj_x_cart]=gen_primitives_muovi_local(primitive_muovi_params);
             traj_y_cart = zeros(size(traj_x_cart));
             q_reference_add = [q_reference(1,end)+time(:)';
                 traj_x_cart(:)';

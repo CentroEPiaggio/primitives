@@ -51,7 +51,7 @@ end
 % elseif nargin==8 % ok, so you also want a maximum time for your trajectory? No problema!
 if nargin==8 % ok, so you also want a maximum time for your trajectory? No problema!
     %     xf = xf*Tmax/T;
-    % keyboard
+    keyboard
     % rescale coordinates in a linear fashion
     xf = xf*Tmax/T;
     xpf = xpf*Tmax/T;

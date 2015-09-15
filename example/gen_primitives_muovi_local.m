@@ -9,7 +9,7 @@ xpf = prim_data.vf;%0;
 Tend = prim_data.Tend;
 Ts = prim_data.Ts;
 % keyboard
-amax = 1;
+amax = 10;
 % [time,traj_x_cart] = trajectory(xi,xf,xpi,xpf,Tend,Ts);
 [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 time = time(:)';
@@ -17,7 +17,7 @@ traj_vel_cart = traj_vel_cart(:)';
 
 % keyboard
 % restrict the trajectory to be local
-% Tmax = 5; % local trajectory by restricting the integration time
+% Tmax = 1; % local trajectory by restricting the integration time
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax,Tmax);
 
 
