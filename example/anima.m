@@ -10,9 +10,12 @@ d       = rt_q(:,3);
 px = x_cart + d.*cos(theta);
 py = d.*sin(theta);
 % plot routine
-figure
+  fh=findall(0,'type','figure');
+  fnum = length(fh)+1;
+figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 for ii=1:10:length(rt_t)
+    figure(fnum)
     clf
     % cart
     X_cart = [x_cart(ii)-cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)-cart_width/2];

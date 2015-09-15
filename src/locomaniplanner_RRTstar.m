@@ -188,7 +188,7 @@ runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p
 if status ~= 0, error(result); end
 % and the show must go on!
 load ../example/optimal.mat;
-anima
 figure
-plot(rt_t,rt_q_ref,rt_t,rt_q,q_reference(1,:),q_reference(2,:))
+plot(rt_t,rt_qp_ref,rt_t,rt_qp,q_reference(1,:),q_reference(2,:))
 grid on
+anima
