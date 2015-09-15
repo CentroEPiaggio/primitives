@@ -18,7 +18,7 @@ end
 
 x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
-x_G = [17;   0;NaN;NaN]; % goal state for debug
+x_G = [20;   2;NaN;NaN]; % goal state for debug
 % initialize an empty tree
 T = tree;
 % add inial state to the tree
@@ -87,6 +87,7 @@ for ii=1:N_sample_max
     if reached(T.Node{end},x_G)
         idx_goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Raggiunto!');
+%         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
     %     keyboard
@@ -115,7 +116,9 @@ for ii=1:N_sample_max
     %     end
     
 end
+
 disp('PLANNING COMPLETATO')
+
 %% simulate the optimal plan that has been found
 source_node = 1;
 goal_node = idx_goal; % just to try
@@ -143,6 +146,17 @@ for ii=2:length(path)
     idx_child = path(ii);
     idx_parent = T.Parent(idx_child); % because tree class uses 0 as starting index
     opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
+end
+
+x_values=x_I(1);
+y_values=x_I(2);
+for k=2:length(opt_plan.Node)
+    x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
+    y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
+    figure(fig_points)
+    line(x_values, y_values,'color','yellow','LineWidth',4);
+    figure(fig_trajectories)
+    line(x_values, y_values,'color','yellow','LineWidth',4);
 end
 
 %% go to test the plan

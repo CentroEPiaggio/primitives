@@ -90,6 +90,7 @@ primitive_abbassa_params = struct('name','abbassa',    ...
 make_primitives_muovi(primitive_muovi_params)
 make_primitives_abbassa(primitive_abbassa_params)
 
+return
 %% Run the RSim Compiled Simulation Using New Signal Data
 close all
 disp('Starting batch simulations.')
