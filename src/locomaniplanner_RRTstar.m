@@ -18,7 +18,7 @@ end
 
 x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
-x_G = [20;   2;NaN;NaN]; % goal state for debug
+x_G = [17;   0;NaN;NaN]; % goal state for debug
 % initialize an empty tree
 T = tree;
 % add inial state to the tree
@@ -45,10 +45,11 @@ plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
 
 % define obstacles
 Obstacles = tree;
-speed_limit = 8;
+speed_limit = -1;
+speed_limit_top = 1;
 speed_limit_entry = 10;
 speed_limit_exit = 15;
-obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit;speed_limit_entry 10;speed_limit_exit speed_limit; speed_limit_exit 10]'*1)');
+obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit; speed_limit_exit speed_limit_top]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 % plot obstacles
 figure(fig_points)
