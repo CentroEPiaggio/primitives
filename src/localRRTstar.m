@@ -1,17 +1,19 @@
 function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges,Obstacles,verbose)
+
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_points=2;
 fig_trajectories=3;
+
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
 %     jj
     prim = Ptree.get(jj);                   % prim is the current primitive
     %% find the nearest point, in Chi0
     % convert nodes in trees from cells to matrix
-    %     keyboard
+%         keyboard
     points_mat = cell2mat(T.Node');
     % now since we want to search in Chi0 we can remove all rows from
     % points_mat that does contain a NaN
@@ -49,11 +51,12 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         q = [xi xf vi vf];
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         x_new=x_rand;
-        x_new(1) = q(2);
-        x_new(2) = q(4);
-        %         keyboard
+%         x_new(1) = q(2);
+%         x_new(2) = q(4);
+
         % collision checker loop
         if feasible
+            
             kk=1;
             nested_feasible = false; nested_cost = Inf; nested_q = q; nested_traj_pos = traj_pos; nested_traj_vel = traj_vel;
             while any(Obstacles.Node{1}.P.contains([nested_traj_pos(:)'; nested_traj_vel(:)'])) && kk<=10 % tries only 10 times to shring the trajectory
@@ -75,8 +78,29 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             traj_pos = nested_traj_pos;
             traj_vel = nested_traj_vel;
             end
-
         end
+        
+        if feasible
+            
+%             %% TODO: add RRT* stuff 
+%             % - Find nearby vertices (n meaning is not clear)
+%             n = 10;
+%             
+%             idX_near = rangesearch(points_mat',x_new',n); % QUESTO NON TORNA
+%             % - Choose Parent
+%             % the function can return either x_min or its ID
+%             idx_min = ChooseParent(idX_near, idx_nearest, T, Graph, x_new, cost);
+%             % x_min = T.get(idx_min); % get the value from index
+%             % - Insert Node
+%             x_min = T.get(idx_min);
+%             x_new = fix_nans(x_new,prim.dimensions);
+%             T = T.addnode(idx_min,x_new);
+%             % - Rewire
+% %             T = ReWire(T, idX_near, x_min, x_new);
+            
+        end
+        
+%%        
         if feasible
             plot(traj_pos,traj_vel,'k');
         else
@@ -96,7 +120,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             x_rand = fix_nans(x_rand,prim.dimensions);
             x_new = fix_nans(x_new,prim.dimensions);
             %             T = T.addnode(idx_nearest,x_rand);
-            T = T.addnode(idx_nearest,x_new);
+            T = T.addnode(idx_nearest,x_new);% REMOVE THIS WHEN USING RRT* STUFF
             idx_last_added_node = length(T.Node);
             Graph(idx_nearest,idx_last_added_node) = cost;
             %             keyboard;
