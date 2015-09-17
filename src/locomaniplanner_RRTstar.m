@@ -67,8 +67,10 @@ E = cell(1,1);
 %% Fictitious points (to be removed). Used for debug purposes.
 PUNTI_FINTI = [6 1;
                6 2;
-               6 3]';
-           PUNTI_FINTI = [6 3]';
+               6 3;
+               5 3;
+               5 2]';
+%            PUNTI_FINTI = [6 3]';
 N_sample_max = size(PUNTI_FINTI,2);
 %%
 % main loop

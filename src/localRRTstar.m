@@ -9,11 +9,11 @@ fig_trajectories=3;
 
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
-%     jj
+    %     jj
     prim = Ptree.get(jj);                   % prim is the current primitive
     %% find the nearest point, in Chi0
     % convert nodes in trees from cells to matrix
-%         keyboard
+    %         keyboard
     points_mat = cell2mat(T.Node');
     % now since we want to search in Chi0 we can remove all rows from
     % points_mat that does contain a NaN
@@ -51,9 +51,9 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         q = [xi xf vi vf];
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         x_new=x_rand;
-%         x_new(1) = q(2);
-%         x_new(2) = q(4);
-
+        %         x_new(1) = q(2);
+        %         x_new(2) = q(4);
+        
         % collision checker loop
         % checks for feasibility of the returned steering function and, if
         % not feasible, looks for an intermediate point that might be able
@@ -74,47 +74,69 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 %                 x_new=x_rand;
                 x_new(1) = nested_traj_pos(end);%q(2);
                 x_new(2) = nested_traj_vel(end);%q(4);
-%                 keyboard
-            feasible = nested_feasible;
-            cost = nested_cost;
-            q = nested_q;
-            traj_pos = nested_traj_pos;
-            traj_vel = nested_traj_vel;
+                %                 keyboard
+                feasible = nested_feasible;
+                cost = nested_cost;
+                q = nested_q;
+                traj_pos = nested_traj_pos;
+                traj_vel = nested_traj_vel;
             end
         end
         
         if feasible
-%             %% TODO: add RRT* stuff 
-%             % - Find nearby vertices (n meaning is not clear)
-%             n = 10;
-        %% TEST Usage rangesearch
-                X=[1 1; 2 2;3 3;4 4]
-                Y=[2.1,2.1]
-                idX_near = rangesearch(X,Y,.1*sqrt(2))
-                idX_near = rangesearch(X,Y,.1001*sqrt(2))
+            %             %% TODO: add RRT* stuff
+            %             % - Find nearby vertices (n meaning is not clear)
+            %             n = 10;
+            % Check for nearest point inside a certain bubble
+            cardV = T.nnodes; % number of vertices in the graph
+            [idx_near_bubble,raggio] = near(T,Graph,Edges,x_new,cardV);
+            disp('###')
+            idx_near_bubble % get all the nodes with T.get(idx_near_bubble{1})
+            if raggio>0
+                centro = x_new-raggio;
+                diameter = 2*raggio;
+                % Draw a circle around the 10 nearest neighbors.
                 %%
-%             idX_near = rangesearch(points_mat',x_new',n); % QUESTO NON TORNA
-%             % - Choose Parent
-%             % the function can return either x_min or its ID
-%             idx_min = ChooseParent(idX_near, idx_nearest, T, Graph, x_new, cost);
-%             % x_min = T.get(idx_min); % get the value from index
-%             % - Insert Node
-%             x_min = T.get(idx_min);
-%             x_new = fix_nans(x_new,prim.dimensions);
-%             T = T.addnode(idx_min,x_new);
-%             % - Rewire
-% %             T = ReWire(T, idX_near, x_min, x_new);
+                figure(fig_points)
+                cerchio = rectangle('position',[centro',diameter,diameter],...
+                    'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
+%                 figure(fig_trajectories)
+%                 cerchio = rectangle('position',[centro',diameter,diameter],...
+%                     'curvature',[1 1],'EdgeColor','b','LineStyle',':'); % 'LineStyle',':'
+%                 keyboard
+%                 set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+            end
+            disp('###')
+%             keyboard
+%             %% TEST Usage rangesearch
+%             X=[1 1; 2 2;3 3;4 4]
+%             Y=[2.1,2.1]
+%             idX_near = rangesearch(X,Y,.1*sqrt(2))
+%             idX_near = rangesearch(X,Y,.1001*sqrt(2))
+            %%
+            %             idX_near = rangesearch(points_mat',x_new',n); % QUESTO NON TORNA
+            %             % - Choose Parent
+            %             % the function can return either x_min or its ID
+            %             idx_min = ChooseParent(idX_near, idx_nearest, T, Graph, x_new, cost);
+            %             % x_min = T.get(idx_min); % get the value from index
+            %             % - Insert Node
+            %             x_min = T.get(idx_min);
+            %             x_new = fix_nans(x_new,prim.dimensions);
+            %             T = T.addnode(idx_min,x_new);
+            %             % - Rewire
+            % %             T = ReWire(T, idX_near, x_min, x_new);
             
         end
         
-%%        
+        %%
+        figure(fig_trajectories)
         if feasible
             plot(traj_pos,traj_vel,'k');
         else
             plot(traj_pos,traj_vel,'r');
         end
         disp('In localRRTstar:')
-%         keyboard
+        %         keyboard
         
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
