@@ -64,6 +64,12 @@ N_sample_max = 20000; % max number of samples
 % empty search graph
 G = sparse(1,1,0);
 E = cell(1,1);
+%% Fictitious points (to be removed). Used for debug purposes.
+PUNTI_FINTI = [6 1;
+               6 2;
+               6 3]';
+           PUNTI_FINTI = [6 3]';
+N_sample_max = size(PUNTI_FINTI,2);
 %%
 % main loop
 for ii=1:N_sample_max
@@ -74,6 +80,7 @@ for ii=1:N_sample_max
         x_rand = x_G(1:2); % every once in a while push in a known number
     else
         x_rand = Chi0.sample; % sample a point in Chi0.
+        x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
     end
     
     if verbose
