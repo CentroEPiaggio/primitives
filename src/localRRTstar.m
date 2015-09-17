@@ -55,8 +55,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 %         x_new(2) = q(4);
 
         % collision checker loop
+        % checks for feasibility of the returned steering function and, if
+        % not feasible, looks for an intermediate point that might be able
+        % to satisfy feasibility in the sense of no collisions along the
+        % path
         if feasible
-            
             kk=1;
             nested_feasible = false; nested_cost = Inf; nested_q = q; nested_traj_pos = traj_pos; nested_traj_vel = traj_vel;
             while any(Obstacles.Node{1}.P.contains([nested_traj_pos(:)'; nested_traj_vel(:)'])) && kk<=10 % tries only 10 times to shring the trajectory
@@ -81,7 +84,6 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         end
         
         if feasible
-            
 %             %% TODO: add RRT* stuff 
 %             % - Find nearby vertices (n meaning is not clear)
 %             n = 10;

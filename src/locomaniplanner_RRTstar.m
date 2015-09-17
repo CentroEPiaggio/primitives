@@ -158,8 +158,8 @@ for k=2:length(opt_plan.Node)
     y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
     figure(fig_points)
     line(x_values, y_values,'color','yellow','LineWidth',4);
-    figure(fig_trajectories)
-    line(x_values, y_values,'color','yellow','LineWidth',4);
+%     figure(fig_trajectories)
+%     line(x_values, y_values,'color','yellow','LineWidth',4);
 end
 
 %% go to test the plan
@@ -199,6 +199,11 @@ for ii=1:length(opt_plan.Node)
                 traj_x_cart(:)';
                 traj_y_cart(:)'];
             q_reference = [q_reference, q_reference_add];
+            % plot the trajectory on the phase plane
+            figure(fig_trajectories)
+            traj_pos = xi+cumtrapz(time,traj_x_cart);
+            traj_vel = traj_x_cart;
+            line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
         otherwise
             disp('standby');
     end
