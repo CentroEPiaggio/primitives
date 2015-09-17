@@ -85,7 +85,12 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 %             %% TODO: add RRT* stuff 
 %             % - Find nearby vertices (n meaning is not clear)
 %             n = 10;
-%             
+        %% TEST Usage rangesearch
+                X=[1 1; 2 2;3 3;4 4]
+                Y=[2.1,2.1]
+                idX_near = rangesearch(X,Y,.1*sqrt(2))
+                idX_near = rangesearch(X,Y,.1001*sqrt(2))
+                %%
 %             idX_near = rangesearch(points_mat',x_new',n); % QUESTO NON TORNA
 %             % - Choose Parent
 %             % the function can return either x_min or its ID

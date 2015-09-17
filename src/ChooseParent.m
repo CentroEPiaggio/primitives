@@ -30,7 +30,6 @@ for i=1:length(idX_near) % for every point btw the near by vertices
                 if (c_actual < c_min)% && (c_actual < c_x_new)
                     idx_min = idX_near{i};
                     c_min = c_actual;
-                    disp('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
                 end
 %             end
         end
