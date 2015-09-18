@@ -95,16 +95,22 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             if raggio>0
                 centro = x_new-raggio;
                 diameter = 2*raggio;
-                % Draw a circle around the 10 nearest neighbors.
+                % Draw a circle around the nearest neighbors inside the bubble.
                 %%
                 figure(fig_points)
                 cerchio = rectangle('position',[centro',diameter,diameter],...
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
 %                 figure(fig_trajectories)
 %                 cerchio = rectangle('position',[centro',diameter,diameter],...
-%                     'curvature',[1 1],'EdgeColor','b','LineStyle',':'); % 'LineStyle',':'
+%                     'curvature',[1 1],'EdgeColor','b','LineStyle',':'); %
+%                     'LineStyle',':'\
+
 %                 keyboard
 %                 set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+
+% Find the parent with the lower cost
+cost_from_x_nearest_to_new = cost;
+idx_min = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles)
             end
             disp('###')
 %             keyboard

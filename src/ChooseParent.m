@@ -1,40 +1,50 @@
-function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-
+%CHOOSEPARENT determines the best parent in the cost sense
+% function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
+function idx_min = ChooseParent(idX_near, idx_nearest, T, G, E, x_new, cost_from_x_nearest_to_new,Obstacles)
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);
 G(sizeG(shorterDim)+1:max(sizeG),:)=0;
+disp('Inside ChooseParent')
 
-idx_min = idx_nearest;
+idx_min = idx_nearest; % default initialization
+
 %CHOOSEPARENT determines the best parent in the cost sense
-idx_I = 1;
+idx_I = 1; % initial node is node 1
 % x_new = T.get(idx_new);
 x_nearest = T.get(idx_nearest);
 c_new = Inf;
 
 % costo = costo accumulato + costo nuovo campione
-c_x_nearest = graphshortestpath(G,idx_I,idx_nearest);
-c_min = c_x_nearest + cost_x_new;  
+c_x_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
+cost_x_new = cost_from_x_nearest_to_new;
+c_min = c_x_nearest + cost_x_new;
 
-for i=1:length(idX_near) % for every point btw the near by vertices
-    if ~isempty(idX_near{i})
-        X_near(i,:)=T.get(idX_near{i});
-        [feasible,cost_actual,q,traj_pos,traj_vel] = steering_muovi(X_near(i,1),x_new(1),X_near(i,2),x_new(2));
-        if feasible
-%             if any(Obstacles.Node{1}.P.contains([traj_pos(:)'; traj_vel(:)'])) % ObstacleFree
+keyboard
+
+for i=1:length(idX_near) % for every point btw the nearby vertices
+    if ~isempty(idX_near(i))
+        X_near(:,i)=T.get(idX_near(i));
+%         % remove NaNs where not needed, this part shall be extended for
+%         % managing multiple primitives
+%         dimensions = isnan(X_near(i,:));
+%         x_near
+% ... actually now with just steering_muovi we don't need any of it
+        % calculate feasibility and cost
+        [feasible,cost_actual,q,traj_pos,traj_vel] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
+        if feasible && ~isinf(cost_actual) && ~isnan(cost_actual) % last two conditions are useless, could be probably removed without problems
+            if ~any(Obstacles.Node{1}.P.contains([traj_pos(:)'; traj_vel(:)'])) % ObstacleFree
                 % costo fino al near
-                c_x_near = graphshortestpath(G,idx_I,idX_near{i});
+                c_x_near = graphshortestpath(G,idx_I,idX_near(i));
 %                 c_x_new = graphshortestpath(G,idx_I,idx_new);
                 % costo fino al near + pezzettino near-new
                 c_actual = c_x_near + cost_actual;
                 if (c_actual < c_min)% && (c_actual < c_x_new)
-                    idx_min = idX_near{i};
+                    idx_min = idX_near(i);
                     c_min = c_actual;
                 end
-%             end
+            end
         end
     end
 end
 end
-
-
