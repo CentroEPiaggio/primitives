@@ -110,8 +110,9 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 
 % Find the parent with the lower cost
 cost_from_x_nearest_to_new = cost;
-keyboard
+
 [idx_min,q,cost_new] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles);
+
 [T,Graph,Edges] = InsertNode(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
             end
             disp('###')
