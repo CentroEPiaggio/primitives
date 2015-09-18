@@ -114,6 +114,9 @@ cost_from_x_nearest_to_new = cost;
 [idx_min,q,cost_new] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles);
 
 [T,Graph,Edges] = InsertNode(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
+keyboard
+% [T,Graph,Edges] = ReWire(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
+[T,Graph,Edges] = ReWire(idx_near_bubble, idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
             end
             disp('###')
 %             keyboard
