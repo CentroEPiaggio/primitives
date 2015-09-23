@@ -82,7 +82,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 traj_vel = nested_traj_vel;
             end
         end
-        
+        z_min = x_nearest;
         if feasible
             %             %% TODO: add RRT* stuff
             %             % - Find nearby vertices (n meaning is not clear)
@@ -92,6 +92,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             [idx_near_bubble,raggio] = near(T,Graph,Edges,x_new,cardV);
             disp('###')
             idx_near_bubble % get all the nodes with T.get(idx_near_bubble{1})
+            disp(['raggio: ' num2str(raggio)]);
             if raggio>0
                 centro = x_new-raggio;
                 diameter = 2*raggio;
@@ -100,44 +101,34 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 figure(fig_points)
                 cerchio = rectangle('position',[centro',diameter,diameter],...
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
-%                 figure(fig_trajectories)
-%                 cerchio = rectangle('position',[centro',diameter,diameter],...
-%                     'curvature',[1 1],'EdgeColor','b','LineStyle',':'); %
-%                     'LineStyle',':'\
-
-                keyboard
-                set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
-
-% Find the parent with the lower cost
-cost_from_x_nearest_to_new = cost;
-
-[idx_min,q,cost_new] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles);
-
-[T,Graph,Edges] = InsertNode(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
-keyboard
-% [T,Graph,Edges] = ReWire(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
-[T,Graph,Edges] = ReWire(idx_near_bubble, idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
+                %                 keyboard
+                %                 set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+                
+                % Find the parent with the lower cost
+                cost_from_x_nearest_to_new = cost;
+                disp('Entra in ChooseParent')
+                [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles,q);
+                if ~isnan(traj_pos_chooseparent)
+                    traj_pos = traj_pos_chooseparent;
+                    traj_vel = traj_vel_chooseparent;
+                    z_min = T.get(idx_min);
+                end
+                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)']))
+                    disp('Entra in InsertNode')
+                    [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
+                end
+                % keyboard
+                % [T,Graph,Edges] = ReWire(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
+                idx_new = T.nnodes;
+                disp('Entra in ReWire')
+                [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
+                if ~isnan(traj_pos_rewire)
+                    traj_pos = traj_pos_rewire;
+                    traj_vel = traj_vel_rewire;
+                end
+%                 keyboard
             end
             disp('###')
-%             keyboard
-%             %% TEST Usage rangesearch
-%             X=[1 1; 2 2;3 3;4 4]
-%             Y=[2.1,2.1]
-%             idX_near = rangesearch(X,Y,.1*sqrt(2))
-%             idX_near = rangesearch(X,Y,.1001*sqrt(2))
-            %%
-            %             idX_near = rangesearch(points_mat',x_new',n); % QUESTO NON TORNA
-            %             % - Choose Parent
-            %             % the function can return either x_min or its ID
-            %             idx_min = ChooseParent(idX_near, idx_nearest, T, Graph, x_new, cost);
-            %             % x_min = T.get(idx_min); % get the value from index
-            %             % - Insert Node
-            %             x_min = T.get(idx_min);
-            %             x_new = fix_nans(x_new,prim.dimensions);
-            %             T = T.addnode(idx_min,x_new);
-            %             % - Rewire
-            % %             T = ReWire(T, idX_near, x_min, x_new);
-            
         end
         
         %%
@@ -148,7 +139,7 @@ keyboard
             plot(traj_pos,traj_vel,'r');
         end
         disp('In localRRTstar:')
-        %         keyboard
+%         keyboard
         
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
@@ -161,21 +152,24 @@ keyboard
             x_rand = fix_nans(x_rand,prim.dimensions);
             x_new = fix_nans(x_new,prim.dimensions);
             %             T = T.addnode(idx_nearest,x_rand);
-            T = T.addnode(idx_nearest,x_new);% REMOVE THIS WHEN USING RRT* STUFF
-            idx_last_added_node = length(T.Node);
-            Graph(idx_nearest,idx_last_added_node) = cost;
-            %             keyboard;
             
-            actions{jj} = struct('source_node', idx_nearest,...
-                'dest_node', idx_last_added_node,...
-                'primitive',prim.name,...
-                'primitive_q',q);
+%             % RRT AMAREZZA
+%             T = T.addnode(idx_nearest,x_new);% REMOVE THIS WHEN USING RRT* STUFF
+%             idx_last_added_node = length(T.Node);
+%             Graph(idx_nearest,idx_last_added_node) = cost;
+%             %             keyboard;
+%             
+%             actions{jj} = struct('source_node', idx_nearest,...
+%                 'dest_node', idx_last_added_node,...
+%                 'primitive',prim.name,...
+%                 'primitive_q',q);
             
             % visualize tree-connection
             %             keyboard
             if verbose
                 figure(fig_points)
-                line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+%                 line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+                line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
                 %             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
                 plot(x_new(1),x_new(2),'mx','linewidth',2)
                 % visualize path in image space
@@ -191,7 +185,7 @@ keyboard
             prim_feasible(jj) = 0;
             prim_cost(jj) = Inf;
             prim_params{jj} = 0;
-            actions{jj} = NaN;
+%             actions{jj} = NaN;
         end
     end
     
@@ -207,9 +201,9 @@ else
     prim_opt = Ptree.get(idx_p_opt);
     prim_params_opt = prim_params{idx_p_opt};
     %     keyboard
-    idx_parent = actions{idx_p_opt}.source_node;
-    idx_child  = actions{idx_p_opt}.dest_node;
-    Edges{idx_parent,idx_child} = actions{idx_p_opt};
+%     idx_parent = actions{idx_p_opt}.source_node;
+%     idx_child  = actions{idx_p_opt}.dest_node;
+%     Edges{idx_parent,idx_child} = actions{idx_p_opt};
     if verbose
         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
     end

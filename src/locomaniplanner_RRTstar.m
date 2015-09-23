@@ -59,7 +59,7 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 
 
 % algorithm parameters
-N_sample_max = 20000; % max number of samples
+N_sample_max = 100; % max number of samples
 
 % empty search graph
 G = sparse(1,1,0);
@@ -69,9 +69,14 @@ PUNTI_FINTI = [6 1;
                6 2;
                6 3;
                5 3;
-               5 2]';
+               5 2;
+               4 2]';
+           PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000;
+            2.6741    2.3733   -2.8106    2.8929    0.5705         0];
+load prova_punti_strani.mat;
+N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %            PUNTI_FINTI = [6 3]';
-N_sample_max = size(PUNTI_FINTI,2);
+% N_sample_max = size(PUNTI_FINTI,2);
 %%
 % main loop
 for ii=1:N_sample_max
@@ -80,9 +85,11 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
         x_rand = x_G(1:2); % every once in a while push in a known number
+    elseif ii <= N_PUNTI_FINTI
+        x_rand = PUNTI_FINTI(:,ii);
     else
         x_rand = Chi0.sample; % sample a point in Chi0.
-        x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
+%         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
     end
     
     if verbose

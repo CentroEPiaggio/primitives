@@ -20,8 +20,8 @@ cost_table = rand(10,3);
 
 xmin = -2; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
 xmax = 25;
-vmin = -10;
-vmax = +10;
+vmin = -5;
+vmax = +5;
 dimensioni = [1 1 0 0]; % only sample in x and v cart.
 Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
