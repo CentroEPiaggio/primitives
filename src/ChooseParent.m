@@ -18,9 +18,10 @@ c_new = Inf;
 cost_new_edge = Inf;
 
 % costo = costo accumulato + costo nuovo campione
-c_x_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
-cost_z_new = cost_from_x_nearest_to_new;
-c_min = c_x_nearest + cost_z_new;
+cost_z_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
+c_x_new = cost_from_x_nearest_to_new;
+cost_z_new = cost_z_nearest + c_x_new;
+c_min = cost_z_new; % initializazion of c_min
 
 % keyboard
 
@@ -44,7 +45,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 cost_znear_znew  = cost_new_edge;
 %                 c_x_new = graphshortestpath(G,idx_I,idx_new);
                 % costo fino al near + pezzettino near-new
-                c_prime = (cost_up_to_z_near + cost_znear_znew < cost_z_new);
+                c_prime = cost_up_to_z_near + cost_znear_znew;
                 if (c_prime < cost_z_new) && (c_prime < c_min) % cost_z_near) && % && (c_actual < c_x_new)
                     idx_min = idX_near(i);
                     c_min = c_prime;

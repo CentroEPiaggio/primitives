@@ -28,7 +28,7 @@ gam = 100; % TUNE
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);
-% crop the maximum radius at 4.43, see test_radius.m for the reason
+% BITTER crop the maximum radius at 4.43, see test_radius.m for the reason
 radius = min(radius,4.43)
 
 % builds a matrix of the nodes (this can be avoided in a future

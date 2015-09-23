@@ -105,8 +105,8 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 %                     'curvature',[1 1],'EdgeColor','b','LineStyle',':'); %
 %                     'LineStyle',':'\
 
-%                 keyboard
-%                 set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+                keyboard
+                set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
 
 % Find the parent with the lower cost
 cost_from_x_nearest_to_new = cost;
