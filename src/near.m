@@ -22,11 +22,11 @@ radius = 0;
 n = cardV;
 if n<2
     idX_near = 1; % return the index of the root of the tree
-    radius = 10000; % TUNE big value to search in all the searchable space
+    radius = 10; % TUNE big value to search in all the searchable space
     disp('Gimme something more mate!');
         return
 end
-gam = 1000000; % TUNE
+gam = 1000; % TUNE
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);
@@ -34,7 +34,7 @@ radius = radius_elevated_n^(1/n);
 disp('lo printa?')
 radius = min(radius,4.43)
 
-radius = 100;
+% radius = 100;
 
 % builds a matrix of the nodes (this can be avoided in a future
 % implementation with a better data structure)

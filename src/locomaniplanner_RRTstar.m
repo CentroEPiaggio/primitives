@@ -10,12 +10,14 @@ import primitive_library.*;
 load_primitive_tree; % builds a list with all available primitives
 % plotta gli spazi immagini delle primitive (tutti schiacciati nello stesso
 % piano)
-for jj=1:Ptree.nnodes
-    prim = Ptree.get(jj);
-    prim.chi.P.plot;
-    hold on
-end
+% for jj=1:Ptree.nnodes
+%     prim = Ptree.get(jj);
+%     prim.chi.P.plot;
+%     hold on
+% end
 
+% actually instead of NaN we could use a value. Why is it better to use
+% NaN? We'll see.
 x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 x_G = [17;   0;NaN;NaN]; % goal state for debug
@@ -45,11 +47,11 @@ plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
 
 % define obstacles
 Obstacles = tree;
-speed_limit = -1;
+speed_limit_bottom = -1;
 speed_limit_top = 1;
 speed_limit_entry = 10;
 speed_limit_exit = 15;
-obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit; speed_limit_exit speed_limit_top]'*1)');
+obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit_bottom;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit_bottom; speed_limit_exit speed_limit_top]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 % plot obstacles
 figure(fig_points)
@@ -62,8 +64,8 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 N_sample_max = 100; % max number of samples
 
 % empty search graph
-G = sparse(1,1,0);
-E = cell(1,1);
+G = sparse(1,1,0); % cost graph
+E = cell(1,1);     % primitive graph
 %% Fictitious points (to be removed). Used for debug purposes.
 PUNTI_FINTI = [6 1;
                6 2;
@@ -73,7 +75,7 @@ PUNTI_FINTI = [6 1;
                4 2]';
            PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000;
             2.6741    2.3733   -2.8106    2.8929    0.5705         0];
-load prova_punti_strani.mat;
+% load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %            PUNTI_FINTI = [6 3]';
 % N_sample_max = size(PUNTI_FINTI,2);
@@ -85,8 +87,8 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
         x_rand = x_G(1:2); % every once in a while push in a known number
-    elseif ii <= N_PUNTI_FINTI
-        x_rand = PUNTI_FINTI(:,ii);
+%     elseif ii <= N_PUNTI_FINTI
+%         x_rand = PUNTI_FINTI(:,ii);
     else
         x_rand = Chi0.sample; % sample a point in Chi0.
 %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
