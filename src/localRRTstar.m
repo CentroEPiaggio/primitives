@@ -82,8 +82,8 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 traj_vel = nested_traj_vel;
             end
         end
-        z_min = x_nearest;
-        if feasible
+        z_min = x_nearest; % initialization of z_min which is the point in space that gives the lower cost
+        if feasible % this means: IF feasible AND ObstacleFree
             %             %% TODO: add RRT* stuff
             %             % - Find nearby vertices (n meaning is not clear)
             %             n = 10;
