@@ -11,30 +11,13 @@ fig_trajectories=3;
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     %     jj
     prim = Ptree.get(jj);                   % prim is the current primitive
-    %% find the nearest point, in Chi0
-    % convert nodes in trees from cells to matrix
-    %         keyboard
-    points_mat = cell2mat(T.Node');
-    % now since we want to search in Chi0 we can remove all rows from
-    % points_mat that does contain a NaN
-    %     points_mat(~any(isnan(points_mat)),:)=[]
-    points_mat(isnan(points_mat)) = []; % remove NaN from points
-    points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
-    % find nearest pointisp
-    %     keyboard
-    idx_nearest = knnsearch(points_mat',x_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
-    x_nearest = T.get(idx_nearest);
-    x_nearest(isnan(x_nearest)) = []; % remove NaN
-    %     keyboard
-    % nearest point found
+    
+    % search for nearest point
+    [idx_nearest,x_nearest] = nearest(x_rand,T);
+    
     x_rand_temp=x_rand;
     x_nearest_temp=x_nearest;
-    %     keyboard
-    % TODO: how to represent the space? I suggest sth like sparse matrices
-    % with NaNs for non-intersecting (or not yet sampled) dimensions.
-    % UPDATE: this is how it's being implemented right now
-    %     keyboard
-    %waitforbuttonpress
+
     % TODO: valutare il miglior parametro per muoversi in Chi0
     dimChi0 = Chi.P.Dim;
     dimP = prim.chi.P.Dim;
@@ -43,6 +26,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         x_rand_temp(dimChi0+1:dimP) = 0.0;
         x_nearest_temp(dimChi0+1:dimP) = 0.0;
     end
+    
     if prim.chi.P.contains([x_rand_temp, x_nearest_temp])
         %             prim_cost(jj) = searchCost(prim.cost_table); % now we can use
         %             the steering function
