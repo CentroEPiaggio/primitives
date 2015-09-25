@@ -1,5 +1,5 @@
 function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges,Obstacles,verbose)
-
+cprintf('err','In localRRTstar:\n');
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -9,9 +9,11 @@ fig_trajectories=3;
 
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
+    cprintf('cyan','checking primitive %d:\n',jj);
     %     jj
     prim = Ptree.get(jj);                   % prim is the current primitive
     
+    cprintf('[1 0 1]','Nearest\n',jj);
     % search for nearest point
     [idx_nearest,x_nearest] = nearest(x_rand,T);
     
@@ -33,38 +35,15 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         q = [xi xf vi vf];
+        cprintf('[1 0.5 0]','steering function: %s\n',prim.name);
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         x_new=x_rand;
         %         x_new(1) = q(2);
         %         x_new(2) = q(4);
         
-        % collision checker loop
-        % checks for feasibility of the returned steering function and, if
-        % not feasible, looks for an intermediate point that might be able
-        % to satisfy feasibility in the sense of no collisions along the
-        % path
+        cprintf('-comment','Collision checking.\n');
         if feasible
-            kk=1;
-            nested_feasible = false; nested_cost = Inf; nested_q = q; nested_traj_pos = traj_pos; nested_traj_vel = traj_vel;
-            while any(Obstacles.Node{1}.P.contains([nested_traj_pos(:)'; nested_traj_vel(:)'])) && kk<=10 % tries only 10 times to shring the trajectory
-                % ~nested_feasible &&
-                kk = kk+1;
-                q = [xi xf vi vf];
-                start = [xi,vi];
-                fin = [xf,vf];
-                alpha = 1-0.1*kk; % decreases of 10 percent along the line connecting initial and final point
-                point = (1-alpha)*start+(alpha)*fin;
-                [nested_feasible,nested_cost,nested_q,nested_traj_pos,nested_traj_vel]=steering_muovi(xi,point(1),vi,point(2));
-                %                 x_new=x_rand;
-                x_new(1) = nested_traj_pos(end);%q(2);
-                x_new(2) = nested_traj_vel(end);%q(4);
-                %                 keyboard
-                feasible = nested_feasible;
-                cost = nested_cost;
-                q = nested_q;
-                traj_pos = nested_traj_pos;
-                traj_vel = nested_traj_vel;
-            end
+            [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
         end
         z_min = x_nearest; % initialization of z_min which is the point in space that gives the lower cost
         if feasible % this means: IF feasible AND ObstacleFree
@@ -122,7 +101,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         else
             plot(traj_pos,traj_vel,'r');
         end
-        disp('In localRRTstar:')
+        
 %         keyboard
         
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)

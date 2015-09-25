@@ -18,13 +18,12 @@ load_primitive_tree; % builds a list with all available primitives
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
-x_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
-x_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
-x_G = [17;   0;NaN;NaN]; % goal state for debug
-% initialize an empty tree
-T = tree;
-% add inial state to the tree
-T = T.addnode(0,x_I);
+z_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
+z_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
+z_G = [17;   0;NaN;NaN]; % goal state for debug
+
+[T,G,E] = InitializeTree();
+[T,G,E] = InsertNode(0,z_I,T,G,E,NaN,0,0);
 
 % set initial image space
 % angolo = pi/4;
@@ -37,13 +36,13 @@ fig_trajectories = 3; % figure handle to plot the sampled points and their traje
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
-plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
-plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
+plot(z_I(1),z_I(2),'go','linewidth',4) % plot initial point
+plot(z_G(1),z_G(2),'ro','linewidth',4) % plot initial point
 figure(fig_trajectories)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
-plot(x_I(1),x_I(2),'go','linewidth',4) % plot initial point
-plot(x_G(1),x_G(2),'ro','linewidth',4) % plot initial point
+plot(z_I(1),z_I(2),'go','linewidth',4) % plot initial point
+plot(z_G(1),z_G(2),'ro','linewidth',4) % plot initial point
 
 % define obstacles
 Obstacles = tree;
@@ -63,9 +62,6 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 % algorithm parameters
 N_sample_max = 100; % max number of samples
 
-% empty search graph
-G = sparse(1,1,0); % cost graph
-E = cell(1,1);     % primitive graph
 %% Fictitious points (to be removed). Used for debug purposes.
 PUNTI_FINTI = [6 1;
                6 2;
@@ -86,7 +82,7 @@ for ii=1:N_sample_max
     %waitforbuttonpress
     %% sampling
     if mod(ii,10)==0
-        x_rand = x_G(1:2); % every once in a while push in a known number
+        x_rand = z_G(1:2); % every once in a while push in a known number
 %     elseif ii <= N_PUNTI_FINTI
 %         x_rand = PUNTI_FINTI(:,ii);
     else
@@ -104,9 +100,9 @@ for ii=1:N_sample_max
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E,Obstacles,verbose);
     % check if has added the goal as last node
-    dim = ~isnan(x_G);
-    if reached(T.Node{end},x_G)
-        idx_goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+    dim = ~isnan(z_G);
+    if reached(T.Node{end},z_G)
+        idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Raggiunto!');
 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
@@ -142,7 +138,7 @@ disp('PLANNING COMPLETATO')
 
 %% simulate the optimal plan that has been found
 source_node = 1;
-goal_node = idx_goal; % just to try
+goal_node = idz_Goal; % just to try
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);
@@ -169,8 +165,8 @@ for ii=2:length(path)
     opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
 end
 
-x_values=x_I(1);
-y_values=x_I(2);
+x_values=z_I(1);
+y_values=z_I(2);
 for k=2:length(opt_plan.Node)
     x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
     y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
