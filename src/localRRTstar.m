@@ -1,4 +1,4 @@
-function [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,Graph,Edges,Obstacles,verbose)
+function [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,Graph,Edges,Obstacles,verbose)
 cprintf('err','In localRRTstar:\n');
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -15,11 +15,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     
     cprintf('[1 0 1]','Nearest\n',jj);
     % search for nearest point
-    [idx_nearest,x_nearest] = nearest(x_rand,T);
+    [idx_nearest,z_nearest] = nearest(z_rand,T);
+    z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
+    x_rand_temp=z_rand;
+    x_nearest_temp=z_nearest;
     
-    x_rand_temp=x_rand;
-    x_nearest_temp=x_nearest;
-
     % TODO: valutare il miglior parametro per muoversi in Chi0
     dimChi0 = Chi.P.Dim;
     dimP = prim.chi.P.Dim;
@@ -37,7 +37,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         q = [xi xf vi vf];
         cprintf('[1 0.5 0]','steering function: %s\n',prim.name);
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
-        x_new=x_rand;
+        x_new=z_rand;
         %         x_new(1) = q(2);
         %         x_new(2) = q(4);
         
@@ -45,7 +45,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         if feasible
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
         end
-        z_min = x_nearest; % initialization of z_min which is the point in space that gives the lower cost
+
         if feasible % this means: IF feasible AND ObstacleFree
             %             %% TODO: add RRT* stuff
             %             % - Find nearby vertices (n meaning is not clear)
@@ -112,7 +112,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             end
             %% add the new node to the tree
-            x_rand = fix_nans(x_rand,prim.dimensions);
+            z_rand = fix_nans(z_rand,prim.dimensions);
             x_new = fix_nans(x_new,prim.dimensions);
             %             T = T.addnode(idx_nearest,x_rand);
             

@@ -7,42 +7,30 @@ run utils/startup_lmp.m;
 
 import primitive_library.*;
 
-load_primitive_tree; % builds a list with all available primitives
-% plotta gli spazi immagini delle primitive (tutti schiacciati nello stesso
-% piano)
-% for jj=1:Ptree.nnodes
-%     prim = Ptree.get(jj);
-%     prim.chi.P.plot;
-%     hold on
-% end
+% [Ptree,Chi0]=InitializePrimitives(); % builds a list with all available primitives
+InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
-z_I = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
-z_G = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
-z_G = [17;   0;NaN;NaN]; % goal state for debug
+z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
+z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
+z_goal = [17;   0;NaN;NaN]; % goal state for debug
 
 [T,G,E] = InitializeTree();
-[T,G,E] = InsertNode(0,z_I,T,G,E,NaN,0,0);
-
-% set initial image space
-% angolo = pi/4;
-% Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
-Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space
-dimChi0 = Chi0.P.Dim;
+[T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
 fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
 fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
-plot(z_I(1),z_I(2),'go','linewidth',4) % plot initial point
-plot(z_G(1),z_G(2),'ro','linewidth',4) % plot initial point
+plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
+plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
 figure(fig_trajectories)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
-plot(z_I(1),z_I(2),'go','linewidth',4) % plot initial point
-plot(z_G(1),z_G(2),'ro','linewidth',4) % plot initial point
+plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
+plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
 
 % define obstacles
 Obstacles = tree;
@@ -64,13 +52,13 @@ N_sample_max = 100; % max number of samples
 
 %% Fictitious points (to be removed). Used for debug purposes.
 PUNTI_FINTI = [6 1;
-               6 2;
-               6 3;
-               5 3;
-               5 2;
-               4 2]';
-           PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000;
-            2.6741    2.3733   -2.8106    2.8929    0.5705         0];
+    6 2;
+    6 3;
+    5 3;
+    5 2;
+    4 2]';
+PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000;
+    2.6741    2.3733   -2.8106    2.8929    0.5705         0];
 % load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %            PUNTI_FINTI = [6 3]';
@@ -78,33 +66,33 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %%
 % main loop
 for ii=1:N_sample_max
-%     ii
+    %     ii
     %waitforbuttonpress
     %% sampling
     if mod(ii,10)==0
-        x_rand = z_G(1:2); % every once in a while push in a known number
-%     elseif ii <= N_PUNTI_FINTI
-%         x_rand = PUNTI_FINTI(:,ii);
+        z_rand = z_goal(1:2); % every once in a while push in a known number
+        %     elseif ii <= N_PUNTI_FINTI
+        %         x_rand = PUNTI_FINTI(:,ii);
     else
-        x_rand = Chi0.sample; % sample a point in Chi0.
-%         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
+        z_rand = Chi0.sample; % sample a point in Chi0.
+        %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
     end
     
     if verbose
-    figure(fig_points)
-%     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-    figure(fig_trajectories)
-    plot(x_rand(1),x_rand(2),'x','linewidth',2)
+        figure(fig_points)
+        %     plot(x_rand(1),x_rand(2),'x','linewidth',2)
+        figure(fig_trajectories)
+        plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
     %% forall primitives living in Chi0
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,x_rand,T,G,E,Obstacles,verbose);
+    [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
     % check if has added the goal as last node
-    dim = ~isnan(z_G);
-    if reached(T.Node{end},z_G)
+    dim = ~isnan(z_goal);
+    if reached(T.Node{end},z_goal)
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Raggiunto!');
-%         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+        %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
     %     keyboard
@@ -165,15 +153,15 @@ for ii=2:length(path)
     opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
 end
 
-x_values=z_I(1);
-y_values=z_I(2);
+x_values=z_init(1);
+y_values=z_init(2);
 for k=2:length(opt_plan.Node)
     x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
     y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
     figure(fig_points)
     line(x_values, y_values,'color','yellow','LineWidth',4);
-%     figure(fig_trajectories)
-%     line(x_values, y_values,'color','yellow','LineWidth',4);
+    %     figure(fig_trajectories)
+    %     line(x_values, y_values,'color','yellow','LineWidth',4);
 end
 
 %% go to test the plan
@@ -193,7 +181,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-%             keyboard
+            %             keyboard
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
