@@ -84,7 +84,7 @@ for ii=1:N_sample_max
         figure(fig_trajectories)
         plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
-    %% forall primitives living in Chi0
+    %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
     % check if has added the goal as last node
@@ -95,6 +95,7 @@ for ii=1:N_sample_max
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
+    %% Get last added node
     %     keyboard
     %     %% check if other dimensions can be activated from the newest point (x_rand)
     %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
