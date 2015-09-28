@@ -1,5 +1,5 @@
 % locomaniplanner
-clear all; clear import; close all; clc;
+% clear all; clear import; close all; clc;
 
 verbose = 1;
 
@@ -51,14 +51,15 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 N_sample_max = 100; % max number of samples
 
 %% Fictitious points (to be removed). Used for debug purposes.
-PUNTI_FINTI = [6 1;
-    6 2;
-    6 3;
-    5 3;
-    5 2;
-    4 2]';
-PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000;
-    2.6741    2.3733   -2.8106    2.8929    0.5705         0];
+% PUNTI_FINTI = [6 1;
+%     6 2;
+%     6 3;
+%     5 3;
+%     5 2;
+%     4 2;
+%     5 0]';
+% PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000 5 ; 
+%     2.6741    2.3733   -2.8106    2.8929    0.5705         0 0];
 % load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %            PUNTI_FINTI = [6 3]';
@@ -71,8 +72,8 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
-        %     elseif ii <= N_PUNTI_FINTI
-        %         x_rand = PUNTI_FINTI(:,ii);
+            elseif ii <= N_PUNTI_FINTI
+                z_rand = PUNTI_FINTI(:,ii);
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
