@@ -6,7 +6,7 @@ prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any f
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_points=2;
 fig_trajectories=3;
-
+a = [];
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     cprintf('cyan','checking primitive %d:\n',jj);
@@ -65,7 +65,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 cerchio = rectangle('position',[centro',diameter,diameter],...
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
                 %                 keyboard
-                %                 set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+%                                  set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
                 
                 % Find the parent with the lower cost
                 cost_from_x_nearest_to_new = cost;
@@ -80,8 +80,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     disp('Entra in InsertNode')
                     [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
                 end
-%                 keyboard
-                % [T,Graph,Edges] = ReWire(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
+                if verbose
+                    figure(fig_points)
+                    line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+                    plot(x_new(1),x_new(2),'mx','linewidth',2)
+                end
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
                 [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
@@ -89,21 +92,22 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;
                 end
-%                 keyboard
+                if verbose
+                    a = plot_graph(T,fig_points,prim,a);
+                end
             end
             disp('###')
         end
         
-        %%
-        figure(fig_trajectories)
-        if feasible
-            plot(traj_pos,traj_vel,'k');
-        else
-            plot(traj_pos,traj_vel,'r');
-        end
+        %% PLOTTING PART
         
-%         keyboard
-        
+%         figure(fig_trajectories)
+%         if feasible
+%             plot(traj_pos,traj_vel,'k');
+%         else
+%             plot(traj_pos,traj_vel,'r');
+%         end
+
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
@@ -111,36 +115,17 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             if verbose
                 disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             end
-            %% add the new node to the tree
-            z_rand = fix_nans(z_rand,prim.dimensions);
-            x_new = fix_nans(x_new,prim.dimensions);
-            %             T = T.addnode(idx_nearest,x_rand);
             
-%             % RRT AMAREZZA
-%             T = T.addnode(idx_nearest,x_new);% REMOVE THIS WHEN USING RRT* STUFF
-%             idx_last_added_node = length(T.Node);
-%             Graph(idx_nearest,idx_last_added_node) = cost;
-%             %             keyboard;
-%             
-%             actions{jj} = struct('source_node', idx_nearest,...
-%                 'dest_node', idx_last_added_node,...
-%                 'primitive',prim.name,...
-%                 'primitive_q',q);
+%             if verbose
+%                 figure(fig_points)
+%                 line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+%                 plot(x_new(1),x_new(2),'mx','linewidth',2)
+%                 % visualize path in image space
+% %                 figure(fig_trajectories)
+% %                 plot(x_new(1),x_new(2),'mx','linewidth',2)
+% %                 plot(traj_pos,traj_vel);
+%             end
             
-            % visualize tree-connection
-            %             keyboard
-            if verbose
-                figure(fig_points)
-%                 line([x_nearest(1) x_new(1)],[x_nearest(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-                line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-                %             line([x_nearest(1) x_rand(1)],[x_nearest(2) x_rand(2)],'color','black'); % just for visualization
-                plot(x_new(1),x_new(2),'mx','linewidth',2)
-                % visualize path in image space
-                figure(fig_trajectories)
-                plot(x_new(1),x_new(2),'mx','linewidth',2)
-                plot(traj_pos,traj_vel);
-            end
-            %             keyboard
         else
             if verbose
                 disp('No primitives found')
@@ -151,8 +136,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 %             actions{jj} = NaN;
         end
     end
-    
-% end
+
+G = Graph; % update graph
+E = Edges; % update edges
+
+%% Is this part a repetition of what is just over here? 
 
 [~,idx_p_opt] = min(prim_cost);
 if prim_cost(idx_p_opt) == Inf
@@ -172,6 +160,5 @@ else
     end
     % add the node and the edge to the graph
 end
-G = Graph; % update graph
-E = Edges; % update edges
+
 end
