@@ -80,7 +80,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     disp('Entra in InsertNode')
                     [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
                 end
-                % keyboard
+%                 keyboard
                 % [T,Graph,Edges] = ReWire(T.get(idx_min), x_new, idx_min, T, Graph, Edges, prim, q, cost_new);
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
@@ -152,7 +152,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         end
     end
     
-end
+% end
 
 [~,idx_p_opt] = min(prim_cost);
 if prim_cost(idx_p_opt) == Inf
