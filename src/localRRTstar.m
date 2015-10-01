@@ -6,7 +6,7 @@ prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any f
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_points=2;
 fig_trajectories=3;
-a = [];
+
 %% check if other dimensions can be activated from the newest point (x_rand)
 for jj=1:1%Ptree.nnodes                       % start looking between all available primitives
     cprintf('cyan','checking primitive %d:\n',jj);
@@ -30,16 +30,12 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     end
     
     if prim.chi.P.contains([x_rand_temp, x_nearest_temp])
-        %             prim_cost(jj) = searchCost(prim.cost_table); % now we can use
-        %             the steering function
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         q = [xi xf vi vf];
         cprintf('[1 0.5 0]','steering function: %s\n',prim.name);
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         x_new=z_rand;
-        %         x_new(1) = q(2);
-        %         x_new(2) = q(4);
         
         cprintf('-comment','Collision checking.\n');
         if feasible
@@ -60,7 +56,6 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 centro = x_new-raggio;
                 diameter = 2*raggio;
                 % Draw a circle around the nearest neighbors inside the bubble.
-                %%
                 figure(fig_points)
                 cerchio = rectangle('position',[centro',diameter,diameter],...
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
@@ -74,17 +69,16 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 if ~isnan(traj_pos_chooseparent)
                     traj_pos = traj_pos_chooseparent;
                     traj_vel = traj_vel_chooseparent;
-                    z_min = T.get(idx_min);
                 end
                 if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)']))
                     disp('Entra in InsertNode')
                     [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
                 end
-                if verbose
-                    figure(fig_points)
-                    line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-                    plot(x_new(1),x_new(2),'mx','linewidth',2)
-                end
+%                 if verbose
+%                     figure(fig_points)
+%                     b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+%                     b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
+%                 end
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
                 [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
@@ -92,9 +86,26 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;
                 end
-                if verbose
-                    a = plot_graph(T,fig_points,prim,a);
-                end
+%                 if verbose
+%                     points = [];
+%                     set(b1,'Visible','off')
+%                     % set(b2,'Visible','off')
+%                     for ii=1:length(T.Node)
+%                         points = [points,ii];
+%                         figure(fig_points)
+%                         current_parent=T.Parent(ii);
+%                         if current_parent~=0
+%                             source = T.get(current_parent);
+%                             source=fix_nans(source,prim.dimensions);
+%                             goal = T.get(points(ii));
+%                             goal=fix_nans(goal,prim.dimensions);
+%                             a1=line([source(1) goal(1)],[source(2) goal(2)],'color','blue','linewidth',2); % just for visualization
+%                             a2=plot(goal(1),goal(2),'bo','linewidth',2);
+%                         end
+%                     end
+%                     set(a1,'Visible','off')
+%                     set(a2,'Visible','off')
+%                 end
             end
             disp('###')
         end
@@ -140,25 +151,24 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
 G = Graph; % update graph
 E = Edges; % update edges
 
-%% Is this part a repetition of what is just over here? 
-
-[~,idx_p_opt] = min(prim_cost);
-if prim_cost(idx_p_opt) == Inf
-    if verbose
-        disp('nessuna primitiva con costo finito disponibile');
-    end
-    % elseif feasible
-else
-    prim_opt = Ptree.get(idx_p_opt);
-    prim_params_opt = prim_params{idx_p_opt};
-    %     keyboard
-%     idx_parent = actions{idx_p_opt}.source_node;
-%     idx_child  = actions{idx_p_opt}.dest_node;
-%     Edges{idx_parent,idx_child} = actions{idx_p_opt};
-    if verbose
-        disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
-    end
-    % add the node and the edge to the graph
-end
+%% b/w all the primitives choose the best one
+% [~,idx_p_opt] = min(prim_cost);
+% if prim_cost(idx_p_opt) == Inf
+%     if verbose
+%         disp('no primitives with a finite cost');
+%     end
+%     % elseif feasible
+% else
+%     prim_opt = Ptree.get(idx_p_opt);
+%     prim_params_opt = prim_params{idx_p_opt};
+%     %     keyboard
+% %     idx_parent = actions{idx_p_opt}.source_node;
+% %     idx_child  = actions{idx_p_opt}.dest_node;
+% %     Edges{idx_parent,idx_child} = actions{idx_p_opt};
+%     if verbose
+%         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
+%     end
+%     % add the node and the edge to the graph
+% end
 
 end

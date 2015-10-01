@@ -20,17 +20,17 @@ z_goal = [17;   0;NaN;NaN]; % goal state for debug
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
 fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
-fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
+% fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
-figure(fig_trajectories)
-Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
-axis equal;
-plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
-plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
+% figure(fig_trajectories)
+% Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
+% axis equal;
+% plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
+% plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
 
 % define obstacles
 Obstacles = tree;
@@ -38,17 +38,20 @@ speed_limit_bottom = -1;
 speed_limit_top = 1;
 speed_limit_entry = 10;
 speed_limit_exit = 15;
+% speed_limit_bottom = 0;
+% speed_limit_top = 0;
+% speed_limit_entry = 0;
+% speed_limit_exit = 0;
 obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit_bottom;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit_bottom; speed_limit_exit speed_limit_top]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 % plot obstacles
 figure(fig_points)
 obstacle_speed_limit.P.plot('color','black','alpha',1);
-figure(fig_trajectories)
-obstacle_speed_limit.P.plot('color','black','alpha',1);
-
+% figure(fig_trajectories)
+% obstacle_speed_limit.P.plot('color','black','alpha',1);
 
 % algorithm parameters
-N_sample_max = 100; % max number of samples
+N_sample_max = 1000; % max number of samples
 
 %% Fictitious points (to be removed). Used for debug purposes.
 % PUNTI_FINTI = [6 1;
@@ -66,8 +69,6 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 %%
 % main loop
 for ii=1:N_sample_max
-    %     ii
-    %waitforbuttonpress
     %% sampling
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
@@ -81,9 +82,10 @@ for ii=1:N_sample_max
     if verbose
         figure(fig_points)
         %     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-        figure(fig_trajectories)
-        plot(z_rand(1),z_rand(2),'x','linewidth',2)
+%         figure(fig_trajectories)
+%         plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
+    
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
@@ -141,6 +143,7 @@ set(h.Nodes(path),'Color',[1 0.4 0.4])
 edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
 set(edges,'LineColor',[1 0 0])
 set(edges,'LineWidth',1.5)
+
 %% obtain plan as the shortest path in the graph
 opt_plan = tree;
 prim_name = 'Standby';
@@ -203,10 +206,10 @@ for ii=1:length(opt_plan.Node)
                 traj_y_cart(:)'];
             q_reference = [q_reference, q_reference_add];
             % plot the trajectory on the phase plane
-            figure(fig_trajectories)
-            traj_pos = xi+cumtrapz(time,traj_x_cart);
-            traj_vel = traj_x_cart;
-            line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
+%             figure(fig_trajectories)
+%             traj_pos = xi+cumtrapz(time,traj_x_cart);
+%             traj_vel = traj_x_cart;
+%             line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
         otherwise
             disp('standby');
     end
