@@ -24,4 +24,4 @@ function res = dynamics_jerk_bc(ya,yb)
 % %     1+yb(4)*vf + -abs(yb(6))]'; % conditions on the costate is: H(tf)=0 for the free final time problem without final state weight in the figure of merit. Hence it is
 % % something like: 1+p1(tf)*vf+p2(tf)*af+p3(tf)*u(tf)=0
 res = [ya(1)-2;ya(2)-2;yb(1);yb(2);yb(3)^2+yb(4)^2-1];
-res = res(:)
+% res = res(:)

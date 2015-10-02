@@ -7,9 +7,6 @@ run utils/startup_lmp.m;
 
 import primitive_library.*;
 
-% [Ptree,Chi0]=InitializePrimitives(); % builds a list with all available primitives
-InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
-
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
 z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
@@ -18,9 +15,11 @@ z_goal = [17;   0;NaN;NaN]; % goal state for debug
 
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
+% [Ptree,Chi0]=InitializePrimitives(); % builds a list with all available primitives
+InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
 fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
-% fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
+fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
@@ -61,7 +60,7 @@ N_sample_max = 1000; % max number of samples
 %     5 2;
 %     4 2;
 %     5 0]';
-% PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000 5 ; 
+% PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000 5 ;
 %     2.6741    2.3733   -2.8106    2.8929    0.5705         0 0];
 load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
@@ -72,8 +71,8 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
-            elseif ii <= N_PUNTI_FINTI
-                z_rand = PUNTI_FINTI(:,ii);
+    elseif ii <= N_PUNTI_FINTI
+        z_rand = PUNTI_FINTI(:,ii);
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
@@ -81,11 +80,11 @@ for ii=1:N_sample_max
     
     if verbose
         figure(fig_points)
-        %     plot(x_rand(1),x_rand(2),'x','linewidth',2)
-%         figure(fig_trajectories)
-%         plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        figure(fig_trajectories)
+        plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
-    
+    keyboard
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
@@ -122,7 +121,7 @@ for ii=1:N_sample_max
     %         prim_opt = P.get(idx_p_opt);
     %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
     %     end
-    
+    %     keyboard
 end
 
 disp('PLANNING COMPLETATO')
@@ -206,10 +205,10 @@ for ii=1:length(opt_plan.Node)
                 traj_y_cart(:)'];
             q_reference = [q_reference, q_reference_add];
             % plot the trajectory on the phase plane
-%             figure(fig_trajectories)
-%             traj_pos = xi+cumtrapz(time,traj_x_cart);
-%             traj_vel = traj_x_cart;
-%             line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
+            %             figure(fig_trajectories)
+            %             traj_pos = xi+cumtrapz(time,traj_x_cart);
+            %             traj_vel = traj_x_cart;
+            %             line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
         otherwise
             disp('standby');
     end
