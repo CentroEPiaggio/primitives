@@ -19,7 +19,7 @@ z_goal = [17;   0;NaN;NaN]; % goal state for debug
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
 fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
-fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
+% fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_points)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
@@ -81,10 +81,10 @@ for ii=1:N_sample_max
     if verbose
         figure(fig_points)
         plot(z_rand(1),z_rand(2),'x','linewidth',2)
-        figure(fig_trajectories)
-        plot(z_rand(1),z_rand(2),'x','linewidth',2)
+%         figure(fig_trajectories)
+%         plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
-    keyboard
+%     keyboard
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
