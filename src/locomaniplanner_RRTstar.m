@@ -63,7 +63,8 @@ N_sample_max = 1000; % max number of samples
 %     5 0]';
 % PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000 5 ;
 %     2.6741    2.3733   -2.8106    2.8929    0.5705         0 0];
-load prova_punti_strani.mat;
+% load prova_punti_strani.mat;
+load prova_punti_debug.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 %%

@@ -114,6 +114,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     b2 = plot(x_new(1),x_new(2),'bo','linewidth',2);
 %                     b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','blue','linewidth',2); 
                     plot(traj_pos,traj_vel,'b','linewidth',2);
+                    set(cerchio,'visible','off')
                     if printfigu
                         printafigu('figures/','fig_06');
                         keyboard
@@ -123,30 +124,13 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 disp('Entra in ReWire')
                 disp('Prima di ReWire')
                 keyboard
-                [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
+                [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new,verbose,cerchio);
                 disp('Dopo  di ReWire')
+                keyboard
                 if ~isnan(traj_pos_rewire)
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;
-                end
-                if verbose
-%                     points = [];
-%                     for ii=1:length(T.Node)
-%                         points = [points,ii];
-%                         figure(fig_points)
-%                         current_parent=T.Parent(ii);
-%                         if current_parent~=0
-%                             source = T.get(current_parent);
-%                             source=fix_nans(source,prim.dimensions);
-%                             goal = T.get(points(ii));
-%                             goal=fix_nans(goal,prim.dimensions);
-%                             a1=line([source(1) goal(1)],[source(2) goal(2)],'color','blue','linewidth',2);
-%                             a2=plot(goal(1),goal(2),'bo','linewidth',2);
-%                         end
-%                     end
-%                     set(a1,'Visible','off')
-%                     set(a2,'Visible','off')
-                    set(cerchio,'Visible','off')
+                    plot(traj_pos,traj_vel,'b','linewidth',2);
                 end
             end
             disp('###')
