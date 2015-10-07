@@ -60,11 +60,13 @@ for ii=1:10:length(rt_t)
 end
 
 if(movie==1)
-   disp('saving video...');
+   disp('saving anima video...');
    
    for iter=1:10:frames-1
        vidObj.writeVideo(movie_anima(iter));
    end
    
    close(vidObj);
+   
+   disp('...done!');
 end
