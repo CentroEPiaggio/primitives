@@ -82,7 +82,7 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 if printfigu
     printafigu(pathfigu,'fig_01');
 end
-keyboard
+
 for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
@@ -100,14 +100,14 @@ for ii=1:N_sample_max
         %         figure(fig_trajectories)
         %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
         if printfigu
-	    printafigu(pathfigu,'fig_02');
+            printafigu(pathfigu,'fig_02');
         end                
         if(movie==1)
             movie_rrtstar(frames) = getframe(figure(fig_points));
             frames = frames +1;
         end
     end
-    keyboard
+    
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,printfigu);
@@ -120,7 +120,7 @@ for ii=1:N_sample_max
         break
     end
     %% Get last added node
-    %     keyboard
+    %     
     %     %% check if other dimensions can be activated from the newest point (x_rand)
     %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
     %     for jj=1:P.nnodes % start looking between all available primitives
@@ -144,7 +144,7 @@ for ii=1:N_sample_max
     %         prim_opt = P.get(idx_p_opt);
     %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
     %     end
-    %     keyboard
+    %     
 end
 
 disp('PLANNING COMPLETATO')
@@ -211,7 +211,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-            %             keyboard
+            %             
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
