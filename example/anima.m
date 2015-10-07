@@ -16,7 +16,14 @@ figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
 movie=0;
-frames=1;
+
+if movie==1
+    frames=1;
+    vidObj=VideoWriter('anima');
+    vidObj.Quality = 50;
+    vidObj.FrameRate = 100;
+    open(vidObj);
+end
 
 for ii=1:10:length(rt_t)
     figure(fnum)
@@ -50,4 +57,14 @@ for ii=1:10:length(rt_t)
         frames = frames +1;
     end
     
+end
+
+if(movie==1)
+   disp('saving video...');
+   
+   for iter=1:10:frames-1
+       vidObj.writeVideo(movie_anima(iter));
+   end
+   
+   close(vidObj);
 end
