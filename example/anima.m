@@ -14,6 +14,10 @@ py = d.*sin(theta);
   fnum = length(fh)+1;
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
+
+movie=0;
+frames=1;
+
 for ii=1:10:length(rt_t)
     figure(fnum)
     clf
@@ -40,4 +44,10 @@ for ii=1:10:length(rt_t)
     text(x_cart(ii)+cart_width/2,cart_height/2,[num2str(rt_t(ii)) '/' num2str(rt_t(end))]); % clock
     drawnow;
     pause(0.001);
+    
+    if(movie==1)
+        movie_anima(frames) = getframe(figure(fnum));
+        frames = frames +1;
+    end
+    
 end
