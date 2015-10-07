@@ -63,12 +63,13 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 %                                  set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
                 
                 % Find the parent with the lower cost
-                cost_from_x_nearest_to_new = cost;
+                cost_from_z_nearest_to_new = cost;
                 disp('Entra in ChooseParent')
                 if isempty(idx_near_bubble) % if there is no near vertex in the bubble keep the nearest node and proceed to insert it in the tree
                     idx_min = idx_nearest;
+                    cost_new = cost_from_z_nearest_to_new;
                 else % otherwise look for possibly more convenient paths
-                    [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles,q);
+                    [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_z_nearest_to_new,Obstacles,q);
                     if ~isnan(traj_pos_chooseparent)
                         traj_pos = traj_pos_chooseparent;
                         traj_vel = traj_vel_chooseparent;
