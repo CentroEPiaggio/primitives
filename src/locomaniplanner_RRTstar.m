@@ -2,7 +2,6 @@
 clear all; clear import; close all; clc;
 
 verbose = 1;
-printfigu = 1; pathfigu = 'figures/';
 
 run utils/startup_lmp.m;
 
@@ -64,7 +63,7 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 % obstacle_speed_limit.P.plot('color','black','alpha',1);
 
 % algorithm parameters
-N_sample_max = 100; % max number of samples
+N_sample_max = 300; % max number of samples
 
 %% Fictitious points (to be removed). Used for debug purposes.
 % PUNTI_FINTI = [6 1;
@@ -79,15 +78,10 @@ N_sample_max = 100; % max number of samples
 load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
-%%
-% main loop
-if printfigu
-    printafigu(pathfigu,'fig_01');
-end
 
+%% Main loop
 for ii=1:N_sample_max
     %% sampling
-    ii
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
     %elseif ii <= N_PUNTI_FINTI
@@ -110,14 +104,14 @@ for ii=1:N_sample_max
     
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,ii,plot_nodes,plot_edges);
+    [T,G,E,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     plot_nodes=pn;
     plot_edges=pe;
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-        disp('Raggiunto!');
+        disp('Goal reached!');
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
@@ -149,7 +143,7 @@ for ii=1:N_sample_max
     %     
 end
 
-disp('PLANNING COMPLETATO')
+disp('PLANNING COMPLETED')
 
 %% simulate the optimal plan that has been found
 source_node = 1;
@@ -206,7 +200,6 @@ prim_filepath = [run_filepath 'prim/'];
 q_reference = [0;0;0];
 % loop
 for ii=1:length(opt_plan.Node)
-    ii
     switch opt_plan.Node{ii}.primitive
         case 'Muovi'
             xi = opt_plan.Node{ii}.primitive_q(1);

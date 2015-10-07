@@ -2,6 +2,7 @@
 % z_current to z_new
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
 function [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q, cost)
+disp('Entered inside InsertNode')
 if isempty(prim)
     % add inial state to the tree
     T = T.addnode(0,z_new);

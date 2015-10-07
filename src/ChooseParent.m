@@ -1,6 +1,7 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
 function [idx_min,q,cost_new_edge,traj_pos,traj_vel] = ChooseParent(idX_near, idx_nearest, T, G, E, x_new, cost_from_x_nearest_to_new,Obstacles,q)
+disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
 sizeG = size(G);
@@ -29,11 +30,6 @@ traj_vel = NaN;
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         X_near(:,i)=T.get(idX_near(i));
-%         % remove NaNs where not needed, this part shall be extended for
-%         % managing multiple primitives
-%         dimensions = isnan(X_near(i,:));
-%         x_near
-% ... actually now with just steering_muovi we don't need any of it
         % calculate feasibility and cost
         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems

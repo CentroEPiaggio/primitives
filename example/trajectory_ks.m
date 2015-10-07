@@ -45,8 +45,8 @@ if nargin==7 % we got a constraint on maximum (modulus) acceleration
     amax_upper = (p1x+1 - (masses(1)*p1x + masses(2)*p2x + masses(3)*p3x)/sum(masses)) * (sum(masses)*9.8)/(3*dot(masses,pz));
     amax_lower = (p1x-1 - (masses(1)*p1x + masses(2)*p2x + masses(3)*p3x)/sum(masses)) * (sum(masses)*9.8)/(3*dot(masses,pz));
     amax_desired = min(max(abs(amax_upper)),max(abs(amax_lower)));
-    disp(['amax_desired: ' num2str(amax_desired)])
-    disp('trajectory_ks');
+%     disp(['amax_desired: ' num2str(amax_desired)])
+%     disp('trajectory_ks');
 %     keyboard
     while(abs(amax)>abs(amax_desired) && abs(amin)>abs(amax_desired)) && jj<100
         disp(['Estendo il tempo per la ' num2str(jj) '-ma volta'])
