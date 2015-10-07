@@ -41,7 +41,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         if feasible
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
         end
-
+        
         if feasible % this means: IF feasible AND ObstacleFree
             %             %% TODO: add RRT* stuff
             %             % - Find nearby vertices (n meaning is not clear)
@@ -60,25 +60,29 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 cerchio = rectangle('position',[centro',diameter,diameter],...
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
                 %                 keyboard
-%                                  set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
+                %                                  set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
                 
                 % Find the parent with the lower cost
                 cost_from_x_nearest_to_new = cost;
                 disp('Entra in ChooseParent')
-                [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles,q);
-                if ~isnan(traj_pos_chooseparent)
-                    traj_pos = traj_pos_chooseparent;
-                    traj_vel = traj_vel_chooseparent;
+                if isempty(idx_near_bubble) % if there is no near vertex in the bubble keep the nearest node and proceed to insert it in the tree
+                    idx_min = idx_nearest;
+                else % otherwise look for possibly more convenient paths
+                    [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_x_nearest_to_new,Obstacles,q);
+                    if ~isnan(traj_pos_chooseparent)
+                        traj_pos = traj_pos_chooseparent;
+                        traj_vel = traj_vel_chooseparent;
+                    end
                 end
                 if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)']))
                     disp('Entra in InsertNode')
                     [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
                 end
-%                 if verbose
-%                     figure(fig_points)
-%                     b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-%                     b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
-%                 end
+                %                 if verbose
+                %                     figure(fig_points)
+                %                     b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+                %                     b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
+                %                 end
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
                 [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
@@ -88,7 +92,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 end
                 if verbose
                     points = [];
-%                     set(b1,'Visible','off')
+                    %                     set(b1,'Visible','off')
                     % set(b2,'Visible','off')
                     for ii=1:length(T.Node)
                         points = [points,ii];
@@ -112,13 +116,13 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         
         %% PLOTTING PART
         
-%         figure(fig_trajectories)
-%         if feasible
-%             plot(traj_pos,traj_vel,'k');
-%         else
-%             plot(traj_pos,traj_vel,'r');
-%         end
-
+        %         figure(fig_trajectories)
+        %         if feasible
+        %             plot(traj_pos,traj_vel,'k');
+        %         else
+        %             plot(traj_pos,traj_vel,'r');
+        %         end
+        
         if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
@@ -127,15 +131,15 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
             end
             
-%             if verbose
-%                 figure(fig_points)
-%                 line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-%                 plot(x_new(1),x_new(2),'mx','linewidth',2)
-%                 % visualize path in image space
-% %                 figure(fig_trajectories)
-% %                 plot(x_new(1),x_new(2),'mx','linewidth',2)
-% %                 plot(traj_pos,traj_vel);
-%             end
+            %             if verbose
+            %                 figure(fig_points)
+            %                 line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
+            %                 plot(x_new(1),x_new(2),'mx','linewidth',2)
+            %                 % visualize path in image space
+            % %                 figure(fig_trajectories)
+            % %                 plot(x_new(1),x_new(2),'mx','linewidth',2)
+            % %                 plot(traj_pos,traj_vel);
+            %             end
             
         else
             if verbose
@@ -144,31 +148,31 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             prim_feasible(jj) = 0;
             prim_cost(jj) = Inf;
             prim_params{jj} = 0;
-%             actions{jj} = NaN;
+            %             actions{jj} = NaN;
         end
     end
-
-G = Graph; % update graph
-E = Edges; % update edges
-
-%% b/w all the primitives choose the best one
-% [~,idx_p_opt] = min(prim_cost);
-% if prim_cost(idx_p_opt) == Inf
-%     if verbose
-%         disp('no primitives with a finite cost');
-%     end
-%     % elseif feasible
-% else
-%     prim_opt = Ptree.get(idx_p_opt);
-%     prim_params_opt = prim_params{idx_p_opt};
-%     %     keyboard
-% %     idx_parent = actions{idx_p_opt}.source_node;
-% %     idx_child  = actions{idx_p_opt}.dest_node;
-% %     Edges{idx_parent,idx_child} = actions{idx_p_opt};
-%     if verbose
-%         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
-%     end
-%     % add the node and the edge to the graph
-% end
-
+    
+    G = Graph; % update graph
+    E = Edges; % update edges
+    
+    %% b/w all the primitives choose the best one
+    % [~,idx_p_opt] = min(prim_cost);
+    % if prim_cost(idx_p_opt) == Inf
+    %     if verbose
+    %         disp('no primitives with a finite cost');
+    %     end
+    %     % elseif feasible
+    % else
+    %     prim_opt = Ptree.get(idx_p_opt);
+    %     prim_params_opt = prim_params{idx_p_opt};
+    %     %     keyboard
+    % %     idx_parent = actions{idx_p_opt}.source_node;
+    % %     idx_child  = actions{idx_p_opt}.dest_node;
+    % %     Edges{idx_parent,idx_child} = actions{idx_p_opt};
+    %     if verbose
+    %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
+    %     end
+    %     % add the node and the edge to the graph
+    % end
+    
 end
