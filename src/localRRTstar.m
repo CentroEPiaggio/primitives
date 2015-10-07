@@ -74,8 +74,8 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                 end
                 if verbose
                     figure(fig_points)
-                    b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); 
-                    b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
+                    b2 = plot(x_new(1),x_new(2),'bo','linewidth',2);
+                    b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','blue','linewidth',2); 
                 end
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
