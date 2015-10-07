@@ -19,16 +19,6 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
     x_rand_temp=z_rand;
     x_nearest_temp=z_nearest;
-    if verbose && printfigu
-        figure(fig_points);
-        h_z_nearest=plot(z_nearest(1),z_nearest(2),'rx','linewidth',2);
-        
-        printafigu('figures/','fig_03');
-        
-        delete(h_z_nearest);
-    end
-    
-    
     
     % TODO: valutare il miglior parametro per muoversi in Chi0
     dimChi0 = Chi.P.Dim;
@@ -46,20 +36,10 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         cprintf('[1 0.5 0]','steering function: %s\n',prim.name);
         [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
         z_new=z_rand;
-        if verbose && printfigu
-            h_traj=plot(traj_pos,traj_vel);
-            printafigu('figures/','fig_04');
-            
-        end
+        
         cprintf('-comment','Collision checking.\n');
         if feasible
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
-            if verbose && printfigu
-                h_traj_collisionfree=plot(traj_pos,traj_vel,'c','Linewidth',2);
-                printafigu('figures/','fig_05');
-                
-                delete(h_traj_collisionfree);
-            end
         end
         
         if feasible
