@@ -85,7 +85,7 @@ for ii=1:N_sample_max
     
     if verbose
         figure(fig_points)
-        plot(z_rand(1),z_rand(2),'rx','linewidth',2)
+        plot(z_rand(1),z_rand(2),'bx','linewidth',2)
         %         figure(fig_trajectories)
         %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
         if printfigu
@@ -95,7 +95,7 @@ for ii=1:N_sample_max
     keyboard
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
+    [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,printfigu);
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
