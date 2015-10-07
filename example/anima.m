@@ -14,6 +14,17 @@ py = d.*sin(theta);
   fnum = length(fh)+1;
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
+
+movie=0;
+
+if movie==1
+    frames=1;
+    vidObj=VideoWriter('anima');
+    vidObj.Quality = 50;
+    vidObj.FrameRate = 100;
+    open(vidObj);
+end
+
 for ii=1:10:length(rt_t)
     figure(fnum)
     clf
@@ -40,4 +51,22 @@ for ii=1:10:length(rt_t)
     text(x_cart(ii)+cart_width/2,cart_height/2,[num2str(rt_t(ii)) '/' num2str(rt_t(end))]); % clock
     drawnow;
     pause(0.001);
+    
+    if(movie==1)
+        movie_anima(frames) = getframe(figure(fnum));
+        frames = frames +1;
+    end
+    
+end
+
+if(movie==1)
+   disp('saving anima video...');
+   
+   for iter=1:10:frames-1
+       vidObj.writeVideo(movie_anima(iter));
+   end
+   
+   close(vidObj);
+   
+   disp('...done!');
 end

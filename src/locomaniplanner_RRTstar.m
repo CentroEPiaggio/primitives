@@ -2,10 +2,21 @@
 clear all; clear import; close all; clc;
 
 verbose = 1;
+printfigu = 1; pathfigu = 'figures/';
 
 run utils/startup_lmp.m;
 
 import primitive_library.*;
+
+movie=0;
+
+if movie==1
+    frames=1;
+    vidObj=VideoWriter('rrtstar');
+    vidObj.Quality = 100;
+    vidObj.FrameRate = 1;
+    open(vidObj);
+end
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
@@ -25,6 +36,7 @@ Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region 
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
+
 % figure(fig_trajectories)
 % Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 % axis equal;
@@ -52,7 +64,7 @@ obstacle_speed_limit.P.plot('color','black','alpha',1);
 % obstacle_speed_limit.P.plot('color','black','alpha',1);
 
 % algorithm parameters
-N_sample_max = 1000; % max number of samples
+N_sample_max = 100; % max number of samples
 
 %% Fictitious points (to be removed). Used for debug purposes.
 % PUNTI_FINTI = [6 1;
@@ -69,13 +81,17 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 %%
 % main loop
+if printfigu
+    printafigu(pathfigu,'fig_01');
+end
+
 for ii=1:N_sample_max
     %% sampling
     ii
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
-    elseif ii <= N_PUNTI_FINTI
-        z_rand = PUNTI_FINTI(:,ii);
+    %elseif ii <= N_PUNTI_FINTI
+    %    z_rand = PUNTI_FINTI(:,ii);
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
@@ -83,11 +99,18 @@ for ii=1:N_sample_max
     
     if verbose
         figure(fig_points)
-        plot(z_rand(1),z_rand(2),'rx','linewidth',2)
-%         figure(fig_trajectories)
-%         plot(z_rand(1),z_rand(2),'x','linewidth',2)
-    end
+        plot(z_rand(1),z_rand(2),'bx','linewidth',2)
+        %         figure(fig_trajectories)
+        %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        if printfigu
+            printafigu(pathfigu,'fig_02');
+        end                
 %     
+            movie_rrtstar(frames) = getframe(figure(fig_points));
+            frames = frames +1;
+        end
+    end
+    
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,ii,plot_nodes,plot_edges);
@@ -170,6 +193,10 @@ for k=2:length(opt_plan.Node)
     line(x_values, y_values,'color','yellow','LineWidth',4);
     %     figure(fig_trajectories)
     %     line(x_values, y_values,'color','yellow','LineWidth',4);
+    if(movie==1)
+        movie_rrtstar(frames) = getframe(figure(fig_points));
+        frames = frames +1;
+    end
 end
 
 %% go to test the plan
@@ -218,6 +245,19 @@ for ii=1:length(opt_plan.Node)
             disp('standby');
     end
 end
+
+if(movie==1)
+   disp('saving rrtstar video...');
+   
+   for iter=1:frames-1
+       vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
+   end
+   
+   close(vidObj);
+   
+   disp('...done!');
+end
+
 save([run_filepath 'runna.mat'],'q_reference');
 save([run_filepath 'rsim_tfdata.mat'],'q_reference');
 Tend = q_reference(1,end)*1.1; % 10 percent more time, for the show
