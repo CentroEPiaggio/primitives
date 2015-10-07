@@ -42,33 +42,26 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
         end
         
-        if feasible % this means: IF feasible AND ObstacleFree
-            %             %% TODO: add RRT* stuff
-            %             % - Find nearby vertices (n meaning is not clear)
-            %             n = 10;
-            % Check for nearest point inside a certain bubble
+        if feasible
             cardV = T.nnodes; % number of vertices in the graph
-            [idx_near_bubble,raggio] = near(T,Graph,Edges,x_new,cardV);
+            [idx_near_bubble,raggio] = near(T,Graph,Edges,x_new,cardV);     % Check for nearest point inside a certain bubble
             disp('###')
-            idx_near_bubble % get all the nodes with T.get(idx_near_bubble{1})
+            idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
             disp(['raggio: ' num2str(raggio)]);
             if raggio>0
                 centro = x_new-raggio;
                 diameter = 2*raggio;
-                % Draw a circle around the nearest neighbors inside the bubble.
                 figure(fig_points)
-                cerchio = rectangle('position',[centro',diameter,diameter],...
+                cerchio = rectangle('position',[centro',diameter,diameter],... % Draw a circle around the nearest neighbors inside the bubble.
                     'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
-                %                 keyboard
-                %                                  set(cerchio,'visible','off'); % comment this if you want to keep all the circles on
-                
+                set(cerchio,'visible','on')
                 % Find the parent with the lower cost
                 cost_from_z_nearest_to_new = cost;
                 disp('Entra in ChooseParent')
-                if isempty(idx_near_bubble) % if there is no near vertex in the bubble keep the nearest node and proceed to insert it in the tree
+                if isempty(idx_near_bubble)                                 % if there is no near vertex in the bubble keep the nearest node and proceed to insert it in the tree
                     idx_min = idx_nearest;
                     cost_new = cost_from_z_nearest_to_new;
-                else % otherwise look for possibly more convenient paths
+                else                                                        % otherwise look for possibly more convenient paths
                     [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, x_new,cost_from_z_nearest_to_new,Obstacles,q);
                     if ~isnan(traj_pos_chooseparent)
                         traj_pos = traj_pos_chooseparent;
@@ -79,11 +72,11 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     disp('Entra in InsertNode')
                     [T,Graph,Edges] = InsertNode(idx_min, x_new, T, Graph, Edges, prim, q, cost_new);
                 end
-                %                 if verbose
-                %                     figure(fig_points)
-                %                     b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); % just for visualization
-                %                     b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
-                %                 end
+                if verbose
+                    figure(fig_points)
+                    b1 = line([z_min(1) x_new(1)],[z_min(2) x_new(2)],'color','red','linewidth',2); 
+                    b2 = plot(x_new(1),x_new(2),'mx','linewidth',2);
+                end
                 idx_new = T.nnodes;
                 disp('Entra in ReWire')
                 [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new);
@@ -92,24 +85,23 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                     traj_vel = traj_vel_rewire;
                 end
                 if verbose
-                    points = [];
-                    %                     set(b1,'Visible','off')
-                    % set(b2,'Visible','off')
-                    for ii=1:length(T.Node)
-                        points = [points,ii];
-                        figure(fig_points)
-                        current_parent=T.Parent(ii);
-                        if current_parent~=0
-                            source = T.get(current_parent);
-                            source=fix_nans(source,prim.dimensions);
-                            goal = T.get(points(ii));
-                            goal=fix_nans(goal,prim.dimensions);
-                            a1=line([source(1) goal(1)],[source(2) goal(2)],'color','blue','linewidth',2); % just for visualization
-                            a2=plot(goal(1),goal(2),'bo','linewidth',2);
-                        end
-                    end
-                    set(a1,'Visible','off')
-                    set(a2,'Visible','off')
+%                     points = [];
+%                     for ii=1:length(T.Node)
+%                         points = [points,ii];
+%                         figure(fig_points)
+%                         current_parent=T.Parent(ii);
+%                         if current_parent~=0
+%                             source = T.get(current_parent);
+%                             source=fix_nans(source,prim.dimensions);
+%                             goal = T.get(points(ii));
+%                             goal=fix_nans(goal,prim.dimensions);
+%                             a1=line([source(1) goal(1)],[source(2) goal(2)],'color','blue','linewidth',2);
+%                             a2=plot(goal(1),goal(2),'bo','linewidth',2);
+%                         end
+%                     end
+%                     set(a1,'Visible','off')
+%                     set(a2,'Visible','off')
+                    set(cerchio,'Visible','off')
                 end
             end
             disp('###')
