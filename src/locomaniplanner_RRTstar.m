@@ -85,7 +85,7 @@ for ii=1:N_sample_max
     
     if verbose
         figure(fig_points)
-        plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        plot(z_rand(1),z_rand(2),'rx','linewidth',2)
         %         figure(fig_trajectories)
         %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
         if printfigu
