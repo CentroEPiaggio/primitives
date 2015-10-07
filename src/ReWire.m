@@ -1,4 +1,4 @@
-function [ T, G, E , traj_pos,traj_vel] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, prim, q, cost_new)
+function [T, G, E , traj_pos,traj_vel,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, prim, q, cost_new,pn,pe,fig_points)
 %REWIRE Summary of this function goes here
 traj_pos = NaN;
 traj_vel = NaN;
@@ -17,7 +17,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
     [~,shorterDim]=min(sizeG);
     G(sizeG(shorterDim)+1:max(sizeG),:)=0;
 
-    if idX_near(i)==idx_min % avoid idx_min
+    if (idX_near(i)==idx_min || idX_near(i)==idx_I) % avoid idx_min and tree root
         continue;
     end
     if ~isempty(idX_near(i))
@@ -48,8 +48,8 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     disp('OK, once here thou shalt rewire')
                     disp('ReConnect');
 %                     avviso
-%                     keyboard
-                    [T,G,E] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire);
+                    keyboard
+                    [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire,pn,pe,fig_points);
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;
                 end

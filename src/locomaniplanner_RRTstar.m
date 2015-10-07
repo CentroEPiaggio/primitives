@@ -30,6 +30,8 @@ plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
 % axis equal;
 % plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 % plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
+plot_nodes=0;
+plot_edges=0;
 
 % define obstacles
 Obstacles = tree;
@@ -69,6 +71,7 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % main loop
 for ii=1:N_sample_max
     %% sampling
+    ii
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
     elseif ii <= N_PUNTI_FINTI
@@ -84,10 +87,12 @@ for ii=1:N_sample_max
 %         figure(fig_trajectories)
 %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
-%     keyboard
+%     
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
+    [T,G,E,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,ii,plot_nodes,plot_edges);
+    plot_nodes=pn;
+    plot_edges=pe;
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
@@ -97,7 +102,7 @@ for ii=1:N_sample_max
         break
     end
     %% Get last added node
-    %     keyboard
+    %     
     %     %% check if other dimensions can be activated from the newest point (x_rand)
     %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
     %     for jj=1:P.nnodes % start looking between all available primitives
@@ -121,7 +126,7 @@ for ii=1:N_sample_max
     %         prim_opt = P.get(idx_p_opt);
     %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
     %     end
-    %     keyboard
+    %     
 end
 
 disp('PLANNING COMPLETATO')
@@ -184,7 +189,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-            %             keyboard
+            %             
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...

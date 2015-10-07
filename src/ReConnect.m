@@ -1,6 +1,6 @@
 %RECONNECT
 % [T,G,E] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost)
-function [T,G,E] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost)
+function [T,G,E,pn,pe] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost,pn,pe,fig_points)
 z_near = T.get(idx_near);
 z_near = fix_nans(z_near,prim.dimensions);
 % re-insert the z_near node attaching it to the z_new node
@@ -11,12 +11,20 @@ T.Parent(idx_near) = idx_new;
 % remove old edge
 E{idx_old,idx_near} = [];
 G(idx_old,idx_near) = 0;
+% set(pe(idx_near),'visible','off');
+delete(pe(idx_near));
 
 G(idx_new,idx_near) = cost;
 actions = struct('source_node', idx_new,...
         'dest_node', idx_near,...
         'primitive',prim.name,...
         'primitive_q',q);
-    E{idx_new,idx_near} = actions;
+E{idx_new,idx_near} = actions;
 
+z_new = T.get(idx_new);
+figure(fig_points)
+%node = plot(z_new(1),z_new(2),'bo','linewidth',2);
+%plot_nodes = horzcat(plot_nodes,node);
+edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','magenta','linewidth',2); 
+pe(idx_near)=edge; % THIS SEEMS TO BE RIGHT
 
