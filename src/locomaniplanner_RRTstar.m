@@ -2,6 +2,7 @@
 clear all; clear import; close all; clc;
 
 verbose = 1;
+printfigu = 1; pathfigu = 'figures/';
 
 run utils/startup_lmp.m;
 
@@ -67,6 +68,10 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 %%
 % main loop
+if printfigu
+    printafigu(pathfigu,'fig_01');
+end
+keyboard
 for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
@@ -81,10 +86,13 @@ for ii=1:N_sample_max
     if verbose
         figure(fig_points)
         plot(z_rand(1),z_rand(2),'x','linewidth',2)
-%         figure(fig_trajectories)
-%         plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        %         figure(fig_trajectories)
+        %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
+        if printfigu
+            printafigu(pathfigu,'fig_02');
+        end
     end
-%     keyboard
+    keyboard
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
     [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose);
