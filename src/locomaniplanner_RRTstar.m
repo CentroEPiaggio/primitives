@@ -116,8 +116,18 @@ for ii=1:N_sample_max
         break
     end
     %% Check for available primitives to extend the last sampled point in a new dimension
-    keyboard
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
+    
+    %% Iterate over available primitives
+    for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
+        if ~idx_avail_prim(jj)
+            % this primitive jj is not available for this point
+            continue;
+        end
+        prim = Ptree.Node{jj};
+        z_aug = prim.chi.sample;
+        z_aug(Ptree.Node{1}.dimensions>0) = z_new;
+    end
 end
 
 disp('PLANNING COMPLETED')
