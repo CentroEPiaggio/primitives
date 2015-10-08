@@ -20,7 +20,7 @@ classdef tree
 
 % Jean-Yves Tinevez <tinevez@pasteur.fr> March 2012
     
-    properties (SetAccess = public)
+    properties (SetAccess = public) % set access public so that we can access to Parent in writing mode
         % Hold the data at each node
         Node = { [] };
         

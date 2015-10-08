@@ -34,7 +34,7 @@ radius = radius_elevated_n^(1/n);
 disp('lo printa?')
 radius = min(radius,4.43)
 
-radius = 10; % HARDCODE
+% radius = 10; % HARDCODE
 
 % builds a matrix of the nodes (this can be avoided in a future
 % implementation with a better data structure)

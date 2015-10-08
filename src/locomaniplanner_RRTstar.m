@@ -3,6 +3,8 @@ clear all; clear import; close all; clc;
 
 verbose = 1;
 printfigu = 1; pathfigu = 'figures/';
+debug = 0;
+h_traj_vector = [];
 
 run utils/startup_lmp.m;
 
@@ -63,8 +65,10 @@ N_sample_max = 1000; % max number of samples
 %     5 0]';
 % PUNTI_FINTI = [   13.1138    2.5570   -1.8239    7.3473   23.3957   17.0000 5 ;
 %     2.6741    2.3733   -2.8106    2.8929    0.5705         0 0];
-% load prova_punti_strani.mat;
-load prova_punti_debug.mat;
+
+load prova_punti_strani.mat;
+% load prova_punti_debug.mat;
+
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 %%
@@ -72,7 +76,7 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 if printfigu
     printafigu(pathfigu,'fig_01');
 end
-keyboard
+if debug, keyboard, end
 for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
@@ -93,10 +97,10 @@ for ii=1:N_sample_max
             printafigu(pathfigu,'fig_02');
         end
     end
-    keyboard
+    if debug, keyboard, end
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,printfigu);
+    [T,G,E,h_traj_vector] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,printfigu,debug,h_traj_vector);
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
@@ -106,7 +110,7 @@ for ii=1:N_sample_max
         break
     end
     %% Get last added node
-    %     keyboard
+    %     if debug, keyboard, end
     %     %% check if other dimensions can be activated from the newest point (x_rand)
     %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
     %     for jj=1:P.nnodes % start looking between all available primitives
@@ -130,7 +134,7 @@ for ii=1:N_sample_max
     %         prim_opt = P.get(idx_p_opt);
     %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
     %     end
-    %     keyboard
+    %     if debug, keyboard, end
 end
 
 disp('PLANNING COMPLETATO')
@@ -193,7 +197,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-            %             keyboard
+            %             if debug, keyboard, end
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...

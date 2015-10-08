@@ -20,7 +20,7 @@ cost_table = rand(10,3);
 
 % Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
 
-xmin = -2; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
+xmin = -10;%-2; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
 xmax = 25;
 vmin = -5;
 vmax = +5;
