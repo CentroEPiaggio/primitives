@@ -25,35 +25,45 @@ xmax = 25;
 vmin = -5;
 vmax = +5;
 dimensioni = [1 1 0 0]; % only sample in x and v cart.
-Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni);
+default_extend = [0 0 NaN NaN];
+Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
 
-xmin = -1;
-xmax = +1;
+% xmin = -1;
+% xmax = +1;
+% vmin = -5;
+% vmax = +5;
 ymin = 1;
 ymax = 10;
-dimensioni = [1 0 1 0]; % only sample in x cart and y pendulum.
-Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni);
+dimensioni = [1 1 1 0]; % only sample in x cart and y pendulum and v cart.
+default_extend = [NaN NaN ymin NaN];
+% Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
+Abbassa = PrimitiveFun([xmin,vmin,ymin;
+    xmin vmin ymax;
+    xmin vmax ymin;
+    xmin vmax ymax;
+    xmax vmin ymin;
+    xmax vmin ymax;
+    xmax vmax ymin;
+    xmax vmax ymax],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
 Ptree = Ptree.addnode(idx_primitive_next,Abbassa);
 
 idx_primitive_next = idx_primitive_next+1;
 
-xmin = 18;
-xmax = 19;
-ymin = 8;
-ymax = 10;
-thetamin = 0;
-thetamax = 1;
-dimensioni = [1 0 1 1]; % sample in x_cart, y_pendulum and pulsante
-Premi = PrimitiveFun([xmin,ymin; xmax,ymin; xmax,ymax; xmin,ymax],[1 0],cost_table,'Premi',dimensioni);
-Ptree = Ptree.addnode(idx_primitive_next,Premi);
-
-idx_primitive_next = idx_primitive_next+1;
+% xmin = 18;
+% xmax = 19;
+% ymin = 8;
+% ymax = 10;
+% thetamin = 0;
+% thetamax = 1;
+% dimensioni = [1 0 1 1]; % sample in x_cart, y_pendulum and pulsante
+% Premi = PrimitiveFun([xmin,ymin; xmax,ymin; xmax,ymax; xmin,ymax],[1 0],cost_table,'Premi',dimensioni);
+% Ptree = Ptree.addnode(idx_primitive_next,Premi);
+% 
+% idx_primitive_next = idx_primitive_next+1;
 
 %% Calculate Chi0
-% set initial image space
-% angolo = pi/4;
-% Chi0 = Imagespace(([cos(angolo) sin(angolo);-sin(angolo) cos(angolo)]*[-1 -1;-1 1;1 -1; 1 1]'*1)');
+% setup initial image space
 Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space. More generally, here we should check for an intersection of all the image spaces, easy to do with the library we have.

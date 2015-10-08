@@ -24,7 +24,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         X_near(:,i)=T.get(idX_near(i));
         [feasible,cost_rewire,q,traj_pos_rewire,traj_vel_rewire] = steering_muovi(x_new(1),X_near(1,i),x_new(2),X_near(2,i));
         if feasible && ~isinf(cost_rewire) && ~isnan(cost_rewire) % last two conditions are useless, could be probably removed without problems
-            if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'])) % ObstacleFree
+            if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'],1)) % ObstacleFree
                 cost_up_to_z_new = graphshortestpath(G,idx_I,idx_new); % cost to reach z_new from the first root of the tree
                 c_prime = cost_rewire;
                 cost_tentative = cost_up_to_z_new + c_prime;

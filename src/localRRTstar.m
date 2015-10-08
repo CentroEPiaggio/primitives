@@ -1,4 +1,4 @@
-function [T,G,E,plot_nodes,plot_edges] = localRRTstar(Chi,Ptree,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+function [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi,Ptree,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -24,7 +24,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
         x_nearest_temp(dimChi0+1:dimP) = 0.0;
     end
     
-    if prim.chi.P.contains([x_rand_temp, x_nearest_temp]) % check if both points are in the image space of the primitive
+    if prim.chi.P.contains([x_rand_temp, x_nearest_temp],1) % check if both points are in the image space of the primitive
         xi = x_nearest_temp(1); vi = x_nearest_temp(2);
         xf = x_rand_temp(1); vf = x_rand_temp(2);
         q = [xi xf vi vf];
@@ -61,7 +61,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
                         traj_vel = traj_vel_chooseparent;
                     end
                 end
-                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)']))
+                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
                     if verbose
                         figure(fig_points)
@@ -89,7 +89,7 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
             disp('###')
         end
         
-        if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'])) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+        if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
             prim_feasible(jj) = feasible;
             prim_cost(jj) = cost;
             prim_params{jj} = q;
@@ -108,25 +108,4 @@ for jj=1:1%Ptree.nnodes                       % start looking between all availa
     
     G = Graph; % update graph
     E = Edges; % update edges
-    
-    %% b/w all the primitives choose the best one
-    % [~,idx_p_opt] = min(prim_cost);
-    % if prim_cost(idx_p_opt) == Inf
-    %     if verbose
-    %         disp('no primitives with a finite cost');
-    %     end
-    %     % elseif feasible
-    % else
-    %     prim_opt = Ptree.get(idx_p_opt);
-    %     prim_params_opt = prim_params{idx_p_opt};
-    %     %     
-    % %     idx_parent = actions{idx_p_opt}.source_node;
-    % %     idx_child  = actions{idx_p_opt}.dest_node;
-    % %     Edges{idx_parent,idx_child} = actions{idx_p_opt};
-    %     if verbose
-    %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt)) ' e con parametro q=[' num2str(prim_params_opt) ']'])
-    %     end
-    %     % add the node and the edge to the graph
-    % end
-    
 end

@@ -7,7 +7,7 @@ nest_q = q;
 nest_traj_pos = traj_pos; 
 nest_traj_vel = traj_vel;
 
-while any(Obstacles.Node{1}.P.contains([nest_traj_pos(:)'; nest_traj_vel(:)'])) && kk<=10 % tries only 10 times to shring the trajectory
+while any(Obstacles.Node{1}.P.contains([nest_traj_pos(:)'; nest_traj_vel(:)'],1)) && kk<=10 % tries only 10 times to shring the trajectory
     kk = kk+1;
     q = [xi xf vi vf];
     start = [xi,vi];

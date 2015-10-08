@@ -104,7 +104,7 @@ for ii=1:N_sample_max
     
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+    [T,G,E,z_new,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     plot_nodes=pn;
     plot_edges=pe;
     % check if has added the goal as last node
@@ -115,32 +115,9 @@ for ii=1:N_sample_max
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
-    %% Get last added node
-    %     
-    %     %% check if other dimensions can be activated from the newest point (x_rand)
-    %     prim_cost = zeros(P.nnodes,1); % cost vector, to choose between different primitives the cheaper one
-    %     for jj=1:P.nnodes % start looking between all available primitives
-    %         prim = P.get(jj); % prim is the current primitive
-    %         if prim.chi.P.contains(x_rand) % is the new point contained here? % TODO: manage search over Chi0
-    %             %              disp('beccato!')
-    %             % TODO: sample in
-    %             %             x_rand_new = sample(prim.chi.P\Chi0.P)
-    %             % evaluate best parameter for the primitive
-    %             %              prim_cost(jj) = prim.findbest(x_nearest,x_rand);
-    %             disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(jj))]);
-    %         else
-    %             disp('No primitives found')
-    %             prim_cost(jj) = Inf;
-    %         end
-    %     end
-    %     [~,idx_p_opt] = min(prim_cost);
-    %     if prim_cost(idx_p_opt) == Inf
-    %         disp(['nessuna primitiva con costo finito disponibile']);
-    %     else
-    %         prim_opt = P.get(idx_p_opt);
-    %         disp(['scelgo la primitiva ' prim_opt.getName ' con un costo ' num2str(prim_cost(idx_p_opt))])
-    %     end
-    %     
+    %% Check for available primitives to extend the last sampled point in a new dimension
+    keyboard
+    idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
 end
 
 disp('PLANNING COMPLETED')
