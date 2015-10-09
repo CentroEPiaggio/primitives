@@ -35,10 +35,10 @@ idx_primitive_next = idx_primitive_next+1;
 % xmax = +1;
 % vmin = -5;
 % vmax = +5;
-ymin = 1;
-ymax = 10;
+ymin = 1; % here ymin is the minimum height for the end effector
+ymax = 10;% here ymax is the maximum height for the end effector
 dimensioni = [1 1 1 0]; % only sample in x cart and y pendulum and v cart.
-default_extend = [NaN NaN ymin NaN];
+default_extend = [NaN NaN ymin NaN]; % here ymin is the minimum height for the end effector
 % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
 Abbassa = PrimitiveFun([xmin,vmin,ymin;
     xmin vmin ymax;

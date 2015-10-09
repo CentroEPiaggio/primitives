@@ -28,9 +28,11 @@ z_goal = [17;   0;NaN;NaN]; % goal state for debug
 % [Ptree,Chi0]=InitializePrimitives(); % builds a list with all available primitives
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
-fig_points = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
+fig_chi0 = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
+fig_xy = 3;
+fig_yv = 4;
 % fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
-figure(fig_points)
+figure(fig_chi0)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
@@ -57,7 +59,7 @@ speed_limit_exit = 15;
 obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit_bottom;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit_bottom; speed_limit_exit speed_limit_top]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 % plot obstacles
-figure(fig_points)
+figure(fig_chi0)
 obstacle_speed_limit.P.plot('color','black','alpha',1);
 % figure(fig_trajectories)
 % obstacle_speed_limit.P.plot('color','black','alpha',1);
@@ -92,21 +94,19 @@ for ii=1:N_sample_max
     end
     
     if verbose
-        figure(fig_points)
+        figure(fig_chi0)
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
         %         figure(fig_trajectories)
         %         plot(z_rand(1),z_rand(2),'x','linewidth',2)              
         if movie==1
-            movie_rrtstar(frames) = getframe(figure(fig_points));
+            movie_rrtstar(frames) = getframe(figure(fig_chi0));
             frames = frames +1;
         end
     end
     
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E,z_new,pn,pe] = localRRTstar(Chi,Ptree,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
-    plot_nodes=pn;
-    plot_edges=pe;
+    [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
@@ -126,7 +126,10 @@ for ii=1:N_sample_max
         end
         prim = Ptree.Node{jj};
         z_aug = prim.chi.sample;
-        z_aug(Ptree.Node{1}.dimensions>0) = z_new;
+%         z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the
+%         extension is a delicate thing
+        Chi_aug = prim.chi;
+        [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     end
 end
 
@@ -167,12 +170,12 @@ y_values=z_init(2);
 for k=2:length(opt_plan.Node)
     x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
     y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
-    figure(fig_points)
+    figure(fig_chi0)
     line(x_values, y_values,'color','yellow','LineWidth',4);
     %     figure(fig_trajectories)
     %     line(x_values, y_values,'color','yellow','LineWidth',4);
     if(movie==1)
-        movie_rrtstar(frames) = getframe(figure(fig_points));
+        movie_rrtstar(frames) = getframe(figure(fig_chi0));
         frames = frames +1;
     end
 end
