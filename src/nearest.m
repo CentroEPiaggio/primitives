@@ -8,6 +8,8 @@
 % - z_nearest:      the nearest point
 % - dim_nearest:    the dimension vector of the nearest point
 function [idx_nearest,z_nearest,dim_nearest] = nearest(x_rand,T)
+% TODO: implement multiple-dimension distance calculator as in slides of
+% planning_meeting_04
 %% find the nearest point, in Chi0
 % convert nodes in trees from cells to matrix
 %         keyboard
