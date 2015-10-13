@@ -15,12 +15,16 @@ z_min = z_nearest; % initialization of z_min which is the point in space that gi
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
 z_nearest_temp=z_nearest;
 
-% In the current implementation I can't remember what was the utility of
-% this part
-% % TODO: valutare il miglior parametro per muoversi in Chi0
-% dimChi0 = Chi.P.Dim;
-% dimP = prim.chi.P.Dim;
-% 
+% TODO: valutare il miglior parametro per muoversi in Chi0.
+% DONE: lo fa la steering function
+
+% The next 6 lines of code allow a point to be extended with a coordinate
+% in the new primitive (e.g. a dimension from NaN becomes a real number)
+dimChi0 = Ptree.Node{1}.dimensions;%Chi.P.Dim;
+dimP = prim.dimensions; %.chi.P.Dim;
+dim_z_rand = ~isnan(z_rand);
+dim_z_nearest = ~isnan(z_nearest);
+
 % if dimP > dimChi0 % add trailing zeros for dimensions outside Chi0
 %     z_rand_temp(dimChi0+1:dimP) = 0.0;
 %     z_nearest_temp(dimChi0+1:dimP) = 0.0;
@@ -29,7 +33,8 @@ prim
 if idx_prim > 1
     keyboard
 end
-if prim.chi.P.contains([z_rand_temp, fix_nans(z_nearest_temp)],1) % check if both points are in the image space of the primitive
+% STUCK HERE
+if prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1) % check if both points are in the image space of the primitive
     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
     xf = z_rand_temp(1); vf = z_rand_temp(2);
     q = [xi xf vi vf];
