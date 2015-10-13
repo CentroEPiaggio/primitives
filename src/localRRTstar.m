@@ -5,28 +5,33 @@ prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any f
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_xv=2; fig_xy = 3; fig_yv = 4;
 %% check if other dimensions can be activated from the newest point (x_rand)
+
+prim = Ptree.get(idx_prim);                   % prim is the current primitive
+% search for nearest point
+z_rand_dimensions = prim.dimensions;
+[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{1}.dimensions);
+z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
+
+z_rand_temp=z_rand; % why the heck did we define this temp vars?
+z_nearest_temp=z_nearest;
+
+% In the current implementation I can't remember what was the utility of
+% this part
+% % TODO: valutare il miglior parametro per muoversi in Chi0
+% dimChi0 = Chi.P.Dim;
+% dimP = prim.chi.P.Dim;
+% 
+% if dimP > dimChi0 % add trailing zeros for dimensions outside Chi0
+%     z_rand_temp(dimChi0+1:dimP) = 0.0;
+%     z_nearest_temp(dimChi0+1:dimP) = 0.0;
+% end
+prim
 if idx_prim > 1
     keyboard
 end
-prim = Ptree.get(idx_prim);                   % prim is the current primitive
-% search for nearest point
-[idx_nearest,z_nearest] = nearest(z_rand,T);
-z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
-x_rand_temp=z_rand;
-x_nearest_temp=z_nearest;
-
-% TODO: valutare il miglior parametro per muoversi in Chi0
-dimChi0 = Chi.P.Dim;
-dimP = prim.chi.P.Dim;
-
-if dimP > dimChi0 % add trailing zeros for dimensions outside Chi0
-    x_rand_temp(dimChi0+1:dimP) = 0.0;
-    x_nearest_temp(dimChi0+1:dimP) = 0.0;
-end
-
-if prim.chi.P.contains([x_rand_temp, x_nearest_temp],1) % check if both points are in the image space of the primitive
-    xi = x_nearest_temp(1); vi = x_nearest_temp(2);
-    xf = x_rand_temp(1); vf = x_rand_temp(2);
+if prim.chi.P.contains([z_rand_temp, fix_nans(z_nearest_temp)],1) % check if both points are in the image space of the primitive
+    xi = z_nearest_temp(1); vi = z_nearest_temp(2);
+    xf = z_rand_temp(1); vf = z_rand_temp(2);
     q = [xi xf vi vf];
     [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
     z_new=z_rand;

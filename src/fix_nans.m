@@ -12,12 +12,19 @@
 % e.g. x_sampled = [4 NaN 7]
 % we return x=[4 7];
 function x = fix_nans(x_sampled,dimensions)
+if nargin==1 % obtain non-NaN dimensions
+        x = x_sampled(~isnan(x_sampled)>0);
+        return
+end
+        
 if length(x_sampled)<length(dimensions) % we have been asked to add nans in proper place
     idx=~dimensions;
     x = nan(size(dimensions));
     x(~idx) = x_sampled;
     x = x(:); % column vector
 else % we have been asked to remove nans from a vector
-    x = x_sampled(dimensions>0);
+    if nargin==2 % non-NaN dimensions passed as argument
+        x = x_sampled(dimensions>0);
+    end
 end
 end
