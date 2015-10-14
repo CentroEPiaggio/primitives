@@ -60,5 +60,19 @@ import primitive_library.*;
             z_check = z_check(obj.dimensions>0);
             extendable = obj.chi.P.contains(z_check);
         end
+        % extend a point in the current primitive image space by replacing
+        % (if there are) NaN values with default_extend values
+        function extended_state = extend(obj,z_test) % z_test must be already with its own NaNs
+%             keyboard
+            nans = isnan(z_test);
+            if isequal(~nans(:),obj.dimensions(:))
+                extended_state = z_test; % do nothing
+                return
+            end
+            % here we need to initialize some nan values to the
+            % default_extend value
+            extended_state = z_test;
+            extended_state((~isnan(obj.default_extend))>0) = obj.default_extend((~isnan(obj.default_extend))>0);
+        end
     end
 end

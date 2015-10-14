@@ -33,8 +33,13 @@ prim
 if idx_prim > 1
     keyboard
 end
-% STUCK HERE
-if prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1) % check if both points are in the image space of the primitive
+% to connect the two points with the primitive prim, it is necessary that
+% both of them are initialized in the same image space (e.g. same non-NaN
+% dimensions).
+% The method PrimitiveFun.extend does this.
+z_nearest_temp=prim.extend(z_nearest_temp);
+if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
+    % TODO: generalize i/o for different primitive types.
     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
     xf = z_rand_temp(1); vf = z_rand_temp(2);
     q = [xi xf vi vf];
@@ -114,6 +119,10 @@ if prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dime
         prim_cost(idx_prim) = Inf;
         prim_params{idx_prim} = 0;
     end
+    
+else
+    cprintf('error','Random and Nearest are not connectable with the primitive %s\n',prim.getName);
+    % do nothing
 end
 
 G = Graph; % update graph
