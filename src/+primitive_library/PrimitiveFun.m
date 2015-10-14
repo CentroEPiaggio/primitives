@@ -80,7 +80,7 @@ classdef PrimitiveFun
     methods (Abstract)
         % this function is the steering function for the primitive:
         % it has to be implemented in every
-        steering(obj)
+        steering(obj,z_start,z_end)
     end
     
 end
