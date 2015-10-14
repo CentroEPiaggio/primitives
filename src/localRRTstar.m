@@ -29,10 +29,6 @@ dim_z_nearest = ~isnan(z_nearest);
 %     z_rand_temp(dimChi0+1:dimP) = 0.0;
 %     z_nearest_temp(dimChi0+1:dimP) = 0.0;
 % end
-prim
-if idx_prim > 1
-    keyboard
-end
 % to connect the two points with the primitive prim, it is necessary that
 % both of them are initialized in the same image space (e.g. same non-NaN
 % dimensions).
@@ -40,6 +36,9 @@ end
 z_nearest_temp=prim.extend(z_nearest_temp);
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     % TODO: generalize i/o for different primitive types.
+if idx_prim > 1
+    keyboard
+end    
     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
     xf = z_rand_temp(1); vf = z_rand_temp(2);
     q = [xi xf vi vf];

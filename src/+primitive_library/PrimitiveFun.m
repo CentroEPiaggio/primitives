@@ -3,18 +3,20 @@ classdef PrimitiveFun
         name; % string
         chi; % Imagespace
 %         Params q;
+        q; % primitive parameters
 %         Mapping f;
-cost_coeff;  % replace with an abstract function or sth else
-cost_table;
-dimensions; % tracks what dimensions are used by a primitive
-default_extend; % default value used when expanding the primitive (i.e. the hyperplane where the projection happens)
+        cost_coeff;  % replace with an abstract function or sth else
+        cost_table;
+        dimensions; % tracks what dimensions are used by a primitive
+        default_extend; % default value used when expanding the primitive (i.e. the hyperplane where the projection happens)
     end
     methods
         % constructor
-        function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,default_extend) % TODO: PrimitiveFun(chi,q,f)
-import primitive_library.*;
-            if nargin == 6
-                obj.chi = Imagespace(V);
+%         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,default_extend) % TODO: PrimitiveFun(chi,q,f)
+            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,default_extend) % TODO: PrimitiveFun(chi,q,f)
+            disp('Dentro costruttore di PrimitiveFun');
+            if nargin == 7 % obj takes one argument, the others are our parameters
+                obj.chi = primitive_library.Imagespace(V);
                 obj.cost_coeff = cost_coeff;
                 obj.cost_table = cost_table;
                 obj.name = name;
@@ -75,4 +77,10 @@ import primitive_library.*;
             extended_state((~isnan(obj.default_extend))>0) = obj.default_extend((~isnan(obj.default_extend))>0);
         end
     end
+    methods (Abstract)
+        % this function is the steering function for the primitive:
+        % it has to be implemented in every
+        steering(obj)
+    end
+    
 end
