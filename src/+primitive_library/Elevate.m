@@ -1,4 +1,4 @@
-classdef Move < primitive_library.PrimitiveFun
+classdef Elevate < primitive_library.PrimitiveFun
     properties
         %         Control u; % generic control law
         %         Trig xi; % trigger conditions
@@ -10,8 +10,8 @@ classdef Move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = Move(V,cost_coeff,cost_table,name,dimensions,default_extend)
-            disp('dentro costruttore di Move')
+        function obj = Elevate(V,cost_coeff,cost_table,name,dimensions,default_extend)
+            disp('dentro costruttore di Elevate')
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the Move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
@@ -20,7 +20,7 @@ classdef Move < primitive_library.PrimitiveFun
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend);
         end
         function [feasible,cost,q,x] = steering(obj,z_start,z_end)
-            disp('Move like Jagger!')
+            disp('E-le-va-tion!')
             z_start
             z_end
             % STEERING_MUOVI
@@ -41,65 +41,28 @@ classdef Move < primitive_library.PrimitiveFun
             % initialization
             feasible=false;
             cost=Inf;
-            % q=[xi,xf,vi,vf];
-            xi = z_start(1);
-            vi = z_start(2);
-            xf = z_end(1);
-            vf = z_end(2);
             traj_pos_cart=NaN;
             traj_vel_cart=NaN;
-            
+
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
             
             Tend = 10; % TODO porcata. Il tempo va parametrizzato.
             Ts = 0.01;
             
-            enable_muovi = true;
-            enable_alza  = false;
-            if enable_muovi==false && enable_alza==false % what's your game?'
-                feasible = false;
-                cost = Inf;
-                return;
-            end
-            
-            % xi = 0;
-            % xf = 10;
-            yi = rand;
-            yf = yi*2;
-            % prepare data for muovi
-            if enable_muovi
-                % define parameters for primitive muovi
-                primitive_muovi_params = struct('name','muovi',    ...
-                    'xi',xi,            ...
-                    'xf',xf,            ...
-                    'vi',vi, ...
-                    'vf',vf, ...
-                    'Tend',Tend,        ...
-                    'Ts',Ts,            ...
-                    'xf_vec_len',1, ...
-                    'vx0_vec_len',1,  ...
-                    'vxf_vec_len',1, ...
-                    'filepath',prim_filepath ...
-                    );
-                %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
-                [time,traj_vel_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
-                traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
-                if any(isnan(time)) || any(isnan(traj_vel_cart))
-                    feasible=0;
-                    cost=Inf;
-                    return
-                end
-                if nargout > 2 % if requested...
-                    traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
-                    traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
-                    q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
-                end
-                %     keyboard
-            end
+%             enable_muovi = true;
+%             enable_alza  = false;
+%             if enable_muovi==false && enable_alza==false % what's your game?'
+%                 feasible = false;
+%                 cost = Inf;
+%                 return;
+%             end
+%             
+            yi = z_start(1);
+            yf = z_end(1);
             
             % prepare data for alza
-            if enable_alza
+%             if enable_alza
                 primitive_abbassa_params = struct('name','abbassa',    ...
                     'yi',yi,            ...
                     'yf',yf, ...
@@ -110,11 +73,15 @@ classdef Move < primitive_library.PrimitiveFun
                     'yf_vec_len',1,    ...
                     'filepath',prim_filepath ...
                     );
-                [time,traj_y_cart]=gen_primitives_abbassa(primitive_abbassa_params);
-            else
-                traj_y_cart = zeros(size(traj_vel_cart));
-            end
+                [time,traj_yp_cart]=gen_primitives_abbassa(primitive_abbassa_params);
+                traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
+%             else
+%                 traj_y_cart = zeros(size(traj_vel_cart));
+%             end
             % generate initial condition file for simulation
+            xi = [0;0;0]; % HARDFIX
+            vi = [0;0;0]; % HARDFIX
+            traj_vel_cart = ones(size(time))*vi(1); % HARDFIX
             q0 = [xi(:);deg2rad(90);2];
             qp0 = [vi(:);0;0];
             qref0 = q0;
@@ -123,7 +90,7 @@ classdef Move < primitive_library.PrimitiveFun
             % simulate
             q_reference = [time(:)';
                 traj_vel_cart(:)';
-                traj_y_cart(:)'];
+                traj_yp_cart(:)'];
             save('../example/runna.mat','q_reference');
             runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
             [status, result] = system(runstr);
@@ -141,7 +108,8 @@ classdef Move < primitive_library.PrimitiveFun
                 cost = Inf;
             end
             % pack return data
-            x = [traj_pos_cart;traj_vel_cart];
+            q = [traj_y_cart(1) traj_y_cart(end)];
+            x = [traj_yp_cart];
         end
         %         function fwd = Forward(u,xi,t,q,chi,f)
         %             if nargin>0
