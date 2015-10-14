@@ -12,7 +12,7 @@
 %                   that node).
 % PARAMETERS (to be tuned inside the function):
 % gam: a proportionality term on the volume to be considered
-function [idX_near,radius] = near(T,Graph,Edges,x_new,cardV)
+function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV)
 idX_near=NaN;
 radius = 0;
 % define the volume of the bubble, according to
@@ -35,15 +35,34 @@ radius = radius_elevated_n^(1/n);
 % radius = min(radius,4.43)
 
 % radius = 100;
-
+keyboard
 % builds a matrix of the nodes (this can be avoided in a future
 % implementation with a better data structure)
 points_mat = cell2mat(T.Node');
-points_mat(isnan(points_mat)) = []; % remove NaN from points
-points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
 
+idx_same_dimension = find(any(isnan(points_mat(z_new_dimensions>0,:))));
+idx_has_nan = any(isnan(points_mat(z_new_dimensions>0,:)));
+points_mat(:,idx_has_nan>0) = [];
 % finds the closest points inside the n-ball of volume volume and radius
 % radius
-% keyboard
-idX_near = rangesearch(points_mat',x_new', radius);
-idX_near = cell2mat(idX_near);
+if ~isempty(points_mat)
+    idX_near_temp = rangesearch(points_mat(z_new_dimensions>0,:)',z_new', radius);
+    idX_near_temp = cell2mat(idX_near_temp);
+    idx_compatible = find(~idx_has_nan>0)
+    idX_near = idx_compatible(idX_near_temp)
+else
+    idX_near = [];
+end
+% rangesearch(points_mat(z_new_dimensions>0)',z_new',radius)
+% points_mat(isnan(points_mat)) = []; % remove NaN from points
+% points_mat = reshape(points_mat,2,size(T.Node,1)); % HARDFIX here 2 should be parametrized
+% 
+% % finds the closest points inside the n-ball of volume volume and radius
+% % radius
+% % keyboard
+% if ~isempty(points_mat)
+%     idX_near = rangesearch(points_mat',z_new', radius);
+%     idX_near = cell2mat(idX_near);
+% else
+%     idX_near = [];
+% end

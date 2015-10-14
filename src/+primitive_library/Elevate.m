@@ -79,9 +79,11 @@ classdef Elevate < primitive_library.PrimitiveFun
 %                 traj_y_cart = zeros(size(traj_vel_cart));
 %             end
             % generate initial condition file for simulation
-            xi = [0;0;0]; % HARDFIX
-            vi = [0;0;0]; % HARDFIX
-            traj_vel_cart = ones(size(time))*vi(1); % HARDFIX
+%             xi = [0;0;0]; % HARDFIX
+            xi = z_start(1);
+%             vi = [0;0;0]; % HARDFIX
+            vi = z_start(2);
+            traj_vel_cart = ones(size(time))*vi; % HARDFIX
             q0 = [xi(:);deg2rad(90);2];
             qp0 = [vi(:);0;0];
             qref0 = q0;

@@ -33,30 +33,37 @@ dim_z_nearest = ~isnan(z_nearest);
 % both of them are initialized in the same image space (e.g. same non-NaN
 % dimensions).
 % The method PrimitiveFun.extend does this.
-z_nearest_temp=prim.extend(z_nearest_temp);
+z_nearest_temp=prim.extend(z_nearest_temp); % WRONG: it should be the rand sample that is extended, not the nearest!
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     % TODO: generalize i/o for different primitive types.
-if idx_prim > 1
-    keyboard
-end    
-    xi = z_nearest_temp(1); vi = z_nearest_temp(2);
-    xf = z_rand_temp(1); vf = z_rand_temp(2);
-    q = [xi xf vi vf];
-    [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
-    z_new=z_rand;
     
-    if feasible
+    %     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
+    %     xf = z_rand_temp(1); vf = z_rand_temp(2);
+    %     q = [xi xf vi vf];
+    %     [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
+    [feasible,cost,q,x] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
+    z_new=z_rand;
+    dim_z_new = prim.dimensions;
+    
+    if feasible && idx_prim == 1 % collision checking only if we are on the Move primitive
+        traj_pos = x(1,:);
+        traj_vel = x(2,:);
         [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
+        x = [traj_pos; traj_vel];
     end
     
     if feasible
         cardV = T.nnodes; % number of vertices in the graph
-        [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,cardV);     % Check for nearest point inside a certain bubble
+        if idx_prim > 1
+            keyboard
+        end
+        
+        [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         disp('###')
         %             idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
         if raggio>0
             %                 disp(['raggio: ' num2str(raggio)]);
-            centro = z_new-raggio;
+            centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
             cerchio = rectangle('position',[centro',diameter,diameter],... % Draw a circle around the nearest neighbors inside the bubble.

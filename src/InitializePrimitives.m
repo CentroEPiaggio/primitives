@@ -60,7 +60,7 @@ Eleva = Elevate([xmin,vmin,ymin;
 Ptree = Ptree.addnode(idx_primitive_next,Eleva);
 
 idx_primitive_next = idx_primitive_next+1;
-keyboard
+
 % xmin = 18;
 % xmax = 19;
 % ymin = 8;
