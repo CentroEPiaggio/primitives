@@ -2,7 +2,7 @@
 % generate initial condition file for simulating inside a steering function
 function gen_ic(params)
 % rtp = rsimgetrtp(mdlName,'AddTunableParamInfo','on');
-ic=load('params1.mat');
+ic=load('params1.mat'); % FIX: in example/ run cp params1.matt params1.mat
 n_indep_coords = length(params.q0);
 ic.rtp.parameters.values(1:n_indep_coords) = params.q0(:)';
 ic.rtp.parameters.values(n_indep_coords+1:2*n_indep_coords) = params.qp0(:)';
