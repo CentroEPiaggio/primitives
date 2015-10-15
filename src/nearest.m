@@ -15,7 +15,7 @@ function [idx_nearest,z_nearest] = nearest(z_rand,T,dimensions_z_rand,dimensions
 % planning_meeting_04
 %% find the nearest point, in Chi0
 % convert nodes in trees from cells to matrix
-% keyboard
+%keyboard
 points_mat = cell2mat(T.Node');
 
 % by definition, the closer nearest point has to be inside the same image
@@ -39,7 +39,7 @@ else
     %     points_mat(~any(isnan(points_mat)),:)=[]
     points_mat(isnan(points_mat)) = []; % remove NaN from points
 %     points_mat = reshape(points_mat,sum(dimensions_chi0),size(T.Node,1));
-points_mat = reshape(points_mat,sum(dimensions_chi0),size(points_mat,2));
+points_mat = reshape(points_mat,sum(dimensions_chi0),length(points_mat)/sum(dimensions_chi0));
     % find nearest pointisp
     %     keyboard
     idx_nearest = knnsearch(points_mat',z_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table

@@ -76,3 +76,4 @@ idx_primitive_next = idx_primitive_next+1;
 %% Calculate Chi0
 % setup initial image space
 Chi0 = Ptree.Node{1}.chi; % conventionally in node{1} we have the chi0 space. More generally, here we should check for an intersection of all the image spaces, easy to do with the library we have.
+Chi1 = Ptree.Node{2}.chi;

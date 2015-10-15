@@ -26,6 +26,7 @@ z_goal = [17;   0;NaN;NaN]; % goal state for debug
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 % [Ptree,Chi0]=InitializePrimitives(); % builds a list with all available primitives
+
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
 fig_chi0 = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
@@ -34,6 +35,7 @@ fig_yv = 4;
 % fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_chi0)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
+Chi1.P.plot('color','lightblue','alpha',0.5)
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point

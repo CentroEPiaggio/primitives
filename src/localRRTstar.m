@@ -9,7 +9,7 @@ fig_xv=2; fig_xy = 3; fig_yv = 4;
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 % search for nearest point
 z_rand_dimensions = prim.dimensions;
-[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{1}.dimensions);
+[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{idx_prim}.dimensions);
 z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
 
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
@@ -36,7 +36,7 @@ dim_z_nearest = ~isnan(z_nearest);
 z_nearest_temp=prim.extend(z_nearest_temp); % WRONG: it should be the rand sample that is extended, not the nearest!
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     % TODO: generalize i/o for different primitive types.
-    
+    %%keyboard
     %     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
     %     xf = z_rand_temp(1); vf = z_rand_temp(2);
     %     q = [xi xf vi vf];
@@ -45,21 +45,28 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
     z_new=z_rand;
     dim_z_new = prim.dimensions;
     
-    if feasible && idx_prim == 1 % collision checking only if we are on the Move primitive
-        traj_pos = x(1,:);
-        traj_vel = x(2,:);
-        [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
-        x = [traj_pos; traj_vel];
+    if feasible 
+        if idx_prim == 1 % collision checking only if we are on the Move primitive
+            traj_pos = x(1,:);
+            traj_vel = x(2,:);
+            [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
+            x = [traj_pos traj_vel];
+        else % idx_prim > 1
+            traj_pos = z_new(1)*ones(length(x),1);
+            traj_vel = z_new(2)*ones(length(x),1);
+            x = horzcat(traj_pos,traj_vel,x);
+        end
     end
     
     if feasible
         cardV = T.nnodes; % number of vertices in the graph
         if idx_prim > 1
-            keyboard
+            %keyboard
         end
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         disp('###')
+        %keyboard
         %             idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
         if raggio>0
             %                 disp(['raggio: ' num2str(raggio)]);
@@ -82,16 +89,29 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_vel = traj_vel_chooseparent;
                 end
             end
-            if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
-                if verbose
-                    figure(fig_xv)
-                    node = plot(z_new(1),z_new(2),'bo','linewidth',2);
-                    plot_nodes = horzcat(plot_nodes,node);
-                    edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','blue','linewidth',2);
-                    plot_edges = horzcat(plot_edges,edge);
+            if idx_prim==1
+                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
+                    if verbose
+                        figure(fig_xv)
+                        node = plot(z_new(1),z_new(2),'bo','linewidth',2);
+                        plot_nodes = horzcat(plot_nodes,node);
+                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','blue','linewidth',2);
+                        plot_edges = horzcat(plot_edges,edge);
+                    end
                 end
-            end
+            else % idx_prim > 1
+                if all(prim.chi.P.contains(x',1))
+                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
+                    if verbose
+                        figure(fig_xv)
+                        node = plot(z_new(1),z_new(2),'bo','linewidth',2);
+                        plot_nodes = horzcat(plot_nodes,node);
+                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','blue','linewidth',2);
+                        plot_edges = horzcat(plot_edges,edge);
+                    end
+                end 
+            end 
             z_min = T.get(idx_min);
             
             idx_new = T.nnodes;
@@ -110,12 +130,25 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         disp('###')
     end
     
-    if feasible && all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
-        prim_feasible(idx_prim) = feasible;
-        prim_cost(idx_prim) = cost;
-        prim_params{idx_prim} = q;
-        if verbose
-            disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(idx_prim))]);
+    if feasible 
+        if idx_prim ==1 
+            if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+                prim_feasible(idx_prim) = feasible;
+                prim_cost(idx_prim) = cost;
+                prim_params{idx_prim} = q;
+                if verbose
+                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(idx_prim))]);
+                end
+            end
+        else
+            if all(prim.chi.P.contains(x',1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+                prim_feasible(idx_prim) = feasible;
+                prim_cost(idx_prim) = cost;
+                prim_params{idx_prim} = q;
+                if verbose
+                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(idx_prim))]);
+                end
+            end
         end
     else
         if verbose
