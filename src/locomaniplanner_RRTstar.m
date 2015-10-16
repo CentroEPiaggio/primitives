@@ -35,7 +35,7 @@ fig_yv = 4;
 % fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
 figure(fig_chi0)
 Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
-Chi1.P.plot('color','lightblue','alpha',0.5)
+% Chi1.P.plot('color','lightblue','alpha',0.5)
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
@@ -63,6 +63,8 @@ Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 % plot obstacles
 figure(fig_chi0)
 obstacle_speed_limit.P.plot('color','black','alpha',1);
+figure(fig_xy)
+Chi1.P.plot('color','lightblue','alpha',0.5); hold on;
 % figure(fig_trajectories)
 % obstacle_speed_limit.P.plot('color','black','alpha',1);
 
@@ -108,7 +110,7 @@ for ii=1:N_sample_max
     
     %% Run RRT* on the Chi0 space
     Chi = Chi0;
-    [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+    [T,G,E,z_new,plot_nodes,plot_edges,feasible] = localRRTstar(Chi,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     % check if has added the goal as last node
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
@@ -121,17 +123,21 @@ for ii=1:N_sample_max
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
     
     %% Iterate over available primitives
-    for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
-        if ~idx_avail_prim(jj)
-            % this primitive jj is not available for this point
-            continue;
+    if feasible
+        for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
+            if ~idx_avail_prim(jj)
+                % this primitive jj is not available for this point
+                continue;
+            end
+            prim = Ptree.Node{jj};
+            z_aug = prim.chi.sample;
+            z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the extension is a delicate thing
+            figure(fig_xy);
+            plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
+            Chi_aug = prim.chi;
+            cprintf('red','Sto per provare con la eleva')
+            [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
         end
-        prim = Ptree.Node{jj};
-        z_aug = prim.chi.sample;
-%         z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the
-%         extension is a delicate thing
-        Chi_aug = prim.chi;
-        [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
     end
 end
 

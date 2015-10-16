@@ -1,15 +1,18 @@
-function [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+function [T,G,E,z_new,plot_nodes,plot_edges,feasible] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_xv=2; fig_xy = 3; fig_yv = 4;
+feasible = 0;
 %% check if other dimensions can be activated from the newest point (x_rand)
-
+keyboard
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 % search for nearest point
 z_rand_dimensions = prim.dimensions;
-[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{1}.dimensions);
+%% TODO FIX THIS Ptree.Node{idx_prim} instead of Ptree.Node{1} 
+[idx_nearest,z_nearest] = nearest(z_rand,T,Ptree.Node{1});
+
 z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
 
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
@@ -33,10 +36,11 @@ dim_z_nearest = ~isnan(z_nearest);
 % both of them are initialized in the same image space (e.g. same non-NaN
 % dimensions).
 % The method PrimitiveFun.extend does this.
-z_nearest_temp=prim.extend(z_nearest_temp); % WRONG: it should be the rand sample that is extended, not the nearest!
+z_nearest_temp=prim.extend(z_nearest_temp); 
+% WRONG: it should be the rand sample that is extended, not the nearest!
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     % TODO: generalize i/o for different primitive types.
-    %%keyboard
+    %%%keyboard
     %     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
     %     xf = z_rand_temp(1); vf = z_rand_temp(2);
     %     q = [xi xf vi vf];
@@ -44,29 +48,31 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
     [feasible,cost,q,x] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
     z_new=z_rand;
     dim_z_new = prim.dimensions;
-    
+    disp(['size durante la muovi',num2str(size(x))]);
     if feasible 
         if idx_prim == 1 % collision checking only if we are on the Move primitive
             traj_pos = x(1,:);
             traj_vel = x(2,:);
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
             x = [traj_pos traj_vel];
-        else % idx_prim > 1
-            traj_pos = z_new(1)*ones(length(x),1);
-            traj_vel = z_new(2)*ones(length(x),1);
-            x = horzcat(traj_pos,traj_vel,x);
+            
+        else
+            traj_pos = x(1,:);
+            traj_vel = x(2,:);
+            traj_y = x(3,:);
+            disp(['size durante la alza',num2str(size(x))]);
         end
     end
     
     if feasible
         cardV = T.nnodes; % number of vertices in the graph
         if idx_prim > 1
-            %keyboard
+            %%keyboard
         end
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         disp('###')
-        %keyboard
+        %%keyboard
         %             idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
         if raggio>0
             %                 disp(['raggio: ' num2str(raggio)]);
@@ -101,13 +107,15 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     end
                 end
             else % idx_prim > 1
-                if all(prim.chi.P.contains(x',1))
+                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
                     if verbose
                         figure(fig_xv)
-                        node = plot3(z_new(1),z_new(2),z_new(3),'bo','linewidth',2);
+%                         node = plot3(z_new(1),z_new(2),z_new(3),'bo','linewidth',2);
+                        node = plot(z_new(1),z_new(2),'go','linewidth',2);
                         plot_nodes = horzcat(plot_nodes,node);
-                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],[z_min(3) z_new(3)],'color','blue','linewidth',2);
+%                         edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],[z_min(3) z_new(3)],'color','blue','linewidth',2);
+                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','green','linewidth',2);
                         plot_edges = horzcat(plot_edges,edge);
                     end
                 end 
@@ -141,7 +149,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 end
             end
         else
-            if all(prim.chi.P.contains(x',1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+            if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
                 prim_feasible(idx_prim) = feasible;
                 prim_cost(idx_prim) = cost;
                 prim_params{idx_prim} = q;
