@@ -20,7 +20,8 @@ points_mat = cell2mat(T.Node');
 
 % by definition, the closer nearest point has to be inside the same image
 % space. I.e. no distance defined outside the primitive space.
-if ~isequal(dimensions_chi0,dimensions_z_rand) % z_rand is an extended space
+% if ~isequal(dimensions_chi0,dimensions_z_rand) % z_rand is an extended space
+if sum(dimensions_chi0)<sum(dimensions_z_rand) % z_rand is an extended space
     % search for near inside the same image space
     points_mat_z_rand_dimension = points_mat(dimensions_z_rand>0,:);
     points_mat_z_rand_dimension = [points_mat_z_rand_dimension, [1;2;3]];
@@ -31,6 +32,7 @@ if ~isequal(dimensions_chi0,dimensions_z_rand) % z_rand is an extended space
     idx_nearest = knnsearch(points_mat_z_rand_dimension',z_rand');
     z_nearest = T.get(idx_nearest);
 else
+    if isequal(dimensions_chi0,dimensions_z_rand)
     % if no nearest point has been found inside the image space of the point,
     % look for a close point in the Chi0 imagespace
     %
@@ -44,6 +46,10 @@ points_mat = reshape(points_mat,sum(dimensions_chi0),length(points_mat)/sum(dime
     %     keyboard
     idx_nearest = knnsearch(points_mat',z_rand'); % TODO: this can be replaced by a search in the least-cost sense, employing the primitive's cost_table
     z_nearest = T.get(idx_nearest);
+    else
+        idx_nearest=[];
+        z_nearest=[];
+    end
 end
 
 % no need of

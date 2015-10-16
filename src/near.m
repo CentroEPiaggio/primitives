@@ -35,7 +35,7 @@ radius = radius_elevated_n^(1/n);
 % radius = min(radius,4.43)
 
 % radius = 100;
-keyboard
+%keyboard
 % builds a matrix of the nodes (this can be avoided in a future
 % implementation with a better data structure)
 points_mat = cell2mat(T.Node');
@@ -47,7 +47,7 @@ z_new
 % finds the closest points inside the n-ball of volume volume and radius
 % radius
 if ~isempty(points_mat)
-    idX_near_temp = rangesearch(points_mat(z_new_dimensions>0,:)',z_new, radius);
+    idX_near_temp = rangesearch(points_mat(z_new_dimensions>0,:)',z_new', radius);
     idX_near_temp = cell2mat(idX_near_temp);
     idx_compatible = find(~idx_has_nan>0)
     idX_near = idx_compatible(idX_near_temp)

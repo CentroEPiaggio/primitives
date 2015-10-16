@@ -9,7 +9,7 @@ fig_xv=2; fig_xy = 3; fig_yv = 4;
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 % search for nearest point
 z_rand_dimensions = prim.dimensions;
-[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{idx_prim}.dimensions);
+[idx_nearest,z_nearest] = nearest(z_rand,T,z_rand_dimensions,Ptree.Node{1}.dimensions);
 z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
 
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
@@ -105,9 +105,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
                     if verbose
                         figure(fig_xv)
-                        node = plot(z_new(1),z_new(2),'bo','linewidth',2);
+                        node = plot3(z_new(1),z_new(2),z_new(3),'bo','linewidth',2);
                         plot_nodes = horzcat(plot_nodes,node);
-                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','blue','linewidth',2);
+                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],[z_min(3) z_new(3)],'color','blue','linewidth',2);
                         plot_edges = horzcat(plot_edges,edge);
                     end
                 end 
