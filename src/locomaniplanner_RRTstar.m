@@ -18,10 +18,10 @@ if movie==1
 end
 
 % actually instead of NaN we could use a value. Why is it better to use
-% NaN? We'll see.
-z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
-z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
-z_goal = [17;   0;NaN;NaN]; % goal state for debug
+% NaN? No.
+z_init = [0  ;0  ;0 ; 0]; % initial state. Position and speed of cart are both zeros
+z_goal = [0  ;0  ;0 ; 1]; % goal state. Button shall be pressed
+z_goal = [17 ;0  ;1 ; 0]; % goal state for debug
 
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node

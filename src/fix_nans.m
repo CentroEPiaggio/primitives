@@ -19,7 +19,7 @@ end
         
 if length(x_sampled)<length(dimensions) % we have been asked to add nans in proper place
     idx=~dimensions;
-    x = nan(size(dimensions));
+    x = zeros(size(dimensions));
     x(~idx) = x_sampled;
     x = x(:); % column vector
 else % we have been asked to remove nans from a vector
