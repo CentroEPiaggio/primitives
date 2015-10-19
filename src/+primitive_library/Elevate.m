@@ -41,6 +41,10 @@ classdef Elevate < primitive_library.PrimitiveFun
             % initialization
             feasible=false;
             cost=Inf;
+            xi = z_start(1);
+            vi = z_start(2);
+            xf = z_end(1);
+            vf = z_end(2);
             traj_pos_cart=NaN;
             traj_vel_cart=NaN;
 
@@ -50,31 +54,63 @@ classdef Elevate < primitive_library.PrimitiveFun
             Tend = 10; % TODO porcata. Il tempo va parametrizzato.
             Ts = 0.01;
             
-%             enable_muovi = true;
-%             enable_alza  = false;
-%             if enable_muovi==false && enable_alza==false % what's your game?'
-%                 feasible = false;
-%                 cost = Inf;
-%                 return;
-%             end
-%             
-            yi = z_start(1);
-            yf = z_end(1);
+            enable_muovi = false;
+            enable_alza  = true;
+            
+            if enable_muovi==false && enable_alza==false % what's your game?'
+                feasible = false;
+                cost = Inf;
+                return;
+            end
+            
+            yi = z_start(3);
+            yf = z_end(3);
             
             % prepare data for alza
 %             if enable_alza
                 primitive_abbassa_params = struct('name','abbassa',    ...
                     'yi',yi,            ...
-                    'yf',yf, ...
+                    'yf',yf,            ...
                     'ypi',0,            ...
-                    'ypf',0,          ...
+                    'ypf',0,            ...
                     'Tend',Tend,        ...
                     'Ts',Ts,            ...
-                    'yf_vec_len',1,    ...
+                    'yf_vec_len',1,     ...
                     'filepath',prim_filepath ...
                     );
                 [time,traj_yp_cart]=gen_primitives_abbassa(primitive_abbassa_params);
                 traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
+                
+                if enable_muovi
+                % define parameters for primitive muovi
+                primitive_muovi_params = struct('name','muovi',    ...
+                    'xi',xi,            ...
+                    'xf',xf,            ...
+                    'vi',vi, ...
+                    'vf',vf, ...
+                    'Tend',Tend,        ...
+                    'Ts',Ts,            ...
+                    'xf_vec_len',1, ...
+                    'vx0_vec_len',1,  ...
+                    'vxf_vec_len',1, ...
+                    'filepath',prim_filepath ...
+                    );
+                %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
+                [time,traj_vel_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
+                traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
+                if any(isnan(time)) || any(isnan(traj_vel_cart))
+                    feasible=0;
+                    cost=Inf;
+                    return
+                end
+                if nargout > 2 % if requested...
+                    traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
+                    traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
+                    q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
+                end
+                %     keyboard
+                end
+            
 %             else
 %                 traj_y_cart = zeros(size(traj_vel_cart));
 %             end
@@ -111,7 +147,16 @@ classdef Elevate < primitive_library.PrimitiveFun
             end
             % pack return data
             q = [traj_y_cart(1) traj_y_cart(end)];
-            x = [traj_yp_cart];
+            
+            if enable_muovi == false
+                traj_pos = z_start(1)*ones(length(time),1);
+                traj_vel = z_start(2)*ones(length(time),1);
+            end
+            
+            x = [traj_pos traj_vel traj_yp_cart]';
+            feasible
+%             anima
+            return
         end
         %         function fwd = Forward(u,xi,t,q,chi,f)
         %             if nargin>0
