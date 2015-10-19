@@ -25,9 +25,9 @@ xmax = 25;
 vmin = -5;
 vmax = +5;
 dimensioni = [1 1 0 0]; % only sample in x and v cart.
-default_extend = [0 0 NaN NaN];
+initial_extend = [0 0 NaN NaN];
 % Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend);
-Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend); % instantiate the primitive Move in Muovi
+Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend); % instantiate the primitive Move in Muovi
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
@@ -39,7 +39,7 @@ idx_primitive_next = idx_primitive_next+1;
 ymin = 1; % here ymin is the minimum height for the end effector
 ymax = 10;% here ymax is the maximum height for the end effector
 dimensioni = [1 1 1 0]; % only sample in x cart and y pendulum and v cart.
-default_extend = [NaN NaN ymin NaN]; % here ymin is the minimum height for the end effector
+initial_extend = [NaN NaN ymin NaN]; % here ymin is the minimum height for the end effector
 % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
 % Abbassa = PrimitiveFun([xmin,vmin,ymin;
 %     xmin vmin ymax;
@@ -56,7 +56,7 @@ Eleva = Elevate([xmin,vmin,ymin;
     xmax vmin ymin;
     xmax vmin ymax;
     xmax vmax ymin;
-    xmax vmax ymax],[1 0],cost_table,'Eleva',dimensioni,default_extend);
+    xmax vmax ymax],[1 0],cost_table,'Eleva',dimensioni,initial_extend);
 Ptree = Ptree.addnode(idx_primitive_next,Eleva);
 
 idx_primitive_next = idx_primitive_next+1;

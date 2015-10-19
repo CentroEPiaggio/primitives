@@ -28,3 +28,85 @@ else % we have been asked to remove nans from a vector
     end
 end
 end
+
+%% FIX THIS STUFF
+% fix_nans([4 7]',[1 1 0 1])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 7],[1 1 0 1])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 NaN 7])
+% 
+% ans =
+% 
+%      4     7
+% 
+% fix_nans([4 7],[0 0 1])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 7],[1 1 1])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 7],[1 1 0])
+% 
+% ans =
+% 
+%      4
+%      7
+%    NaN
+% 
+% fix_nans([4 7],[1 1 0 0])
+% 
+% ans =
+% 
+%      4
+%      7
+%    NaN
+%    NaN
+% 
+% fix_nans([4 7],[1 1 0 0 1])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 7],[1 1 0 0 0])
+% 
+% ans =
+% 
+%      4
+%      7
+%    NaN
+%    NaN
+%    NaN
+% 
+% fix_nans([4 NaN 7],[1 0 1 0 0 0])
+% In an assignment  A(I) = B, the number of elements in B and I must be the same.
+% 
+% Error in fix_nans (line 23)
+%     x(~idx) = x_sampled;
+%  
+% fix_nans([4 NaN 7],[1 1 1 0 0 0])
+% 
+% ans =
+% 
+%      4
+%    NaN
+%      7
+%    NaN
+%    NaN
+%    NaN
+% 

@@ -7,7 +7,7 @@ run utils/startup_lmp.m;
 
 import primitive_library.*;
 
-movie=0;
+movie=1;
 
 if movie==1
     frames=1;
@@ -22,6 +22,7 @@ end
 z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
 z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 z_goal = [17;   0;NaN;NaN]; % goal state for debug
+z_goal = [17;   0;1;NaN]; % goal state for debug
 
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -39,7 +40,10 @@ Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region 
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
 plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
-
+figure(fig_xy)
+plot3(z_init(1),z_init(2),1,'go','linewidth',4) % plot initial point % HARDFIX 1 in z_init(3)
+hold on
+plot3(z_goal(1),z_goal(2),z_goal(3),'ro','linewidth',4) % plot initial point
 % figure(fig_trajectories)
 % Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 % axis equal;
@@ -121,7 +125,7 @@ for ii=1:N_sample_max
     end
     %% Check for available primitives to extend the last sampled point in a new dimension
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
-    
+
     %% Iterate over available primitives
     if feasible
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
@@ -130,8 +134,16 @@ for ii=1:N_sample_max
                 continue;
             end
             prim = Ptree.Node{jj};
+            % Extend the z_new point (already in the tree) with its initial_extend
+            % values (see PrimitiveFun.extend)
+            z_new_temp=prim.extend(z_new);
+            z_new = fix_nans(z_new_temp,prim.dimensions);
+            
+            T.Node{T.nnodes} = z_new;
+            
             z_aug = prim.chi.sample;
-            z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the extension is a delicate thing
+%             z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the extension is a delicate thing
+%             z_aug(2) = z_new(2); % force v constant 
             figure(fig_xy);
             plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
             Chi_aug = prim.chi;

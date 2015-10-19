@@ -19,7 +19,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             % as a constructor.
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend);
         end
-        function [feasible,cost,q,x] = steering(obj,z_start,z_end)
+        function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('E-le-va-tion!')
             z_start
             z_end
@@ -120,7 +120,7 @@ classdef Elevate < primitive_library.PrimitiveFun
 %             vi = [0;0;0]; % HARDFIX
             vi = z_start(2);
             traj_vel_cart = ones(size(time))*vi; % HARDFIX
-            q0 = [xi(:);deg2rad(90);2];
+            q0 = [xi(:);deg2rad(90);z_start(3)];
             qp0 = [vi(:);0;0];
             qref0 = q0;
             ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
@@ -148,12 +148,13 @@ classdef Elevate < primitive_library.PrimitiveFun
             % pack return data
             q = [traj_y_cart(1) traj_y_cart(end)];
             
-            if enable_muovi == false
-                traj_pos = z_start(1)*ones(length(time),1);
-                traj_vel = z_start(2)*ones(length(time),1);
-            end
+%             if enable_muovi == false
+%                 traj_pos = z_start(1)*ones(length(time),1);
+%                 traj_vel = z_start(2)*ones(length(time),1);
+%             end
             
-            x = [traj_pos traj_vel traj_yp_cart]';
+%             x = [traj_pos traj_vel traj_yp_cart]';
+            x = [traj_yp_cart]';
             feasible
 %             anima
             return

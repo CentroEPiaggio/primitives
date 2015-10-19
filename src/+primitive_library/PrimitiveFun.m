@@ -8,12 +8,12 @@ classdef PrimitiveFun
         cost_coeff;  % replace with an abstract function or sth else
         cost_table;
         dimensions; % tracks what dimensions are used by a primitive
-        default_extend; % default value used when expanding the primitive (i.e. the hyperplane where the projection happens)
+        initial_extend; % initial value used when expanding the primitive (i.e. the hyperplane where the projection happens)
     end
     methods
         % constructor
-%         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,default_extend) % TODO: PrimitiveFun(chi,q,f)
-            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,default_extend) % TODO: PrimitiveFun(chi,q,f)
+%         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
+            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
             disp('Dentro costruttore di PrimitiveFun');
             if nargin == 7 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
@@ -21,7 +21,7 @@ classdef PrimitiveFun
                 obj.cost_table = cost_table;
                 obj.name = name;
                 obj.dimensions = dimensions;
-                obj.default_extend = default_extend;
+                obj.initial_extend = initial_extend;
             elseif nargin < 1
                 obj.chi = Imagespace([-1 -1; -1 1; 1 -1; 1 1]*0.3);
             else
@@ -58,12 +58,12 @@ classdef PrimitiveFun
         % check if a point can be extended
         function extendable = check_extendable(obj,z_test) % z_test must be already with its own NaNs
             z_check = z_test;
-            z_check(~isnan(obj.default_extend)) = obj.default_extend(~isnan(obj.default_extend));
+            z_check(~isnan(obj.initial_extend)) = obj.initial_extend(~isnan(obj.initial_extend));
             z_check = z_check(obj.dimensions>0);
             extendable = obj.chi.P.contains(z_check);
         end
         % extend a point in the current primitive image space by replacing
-        % (if there are) NaN values with default_extend values
+        % (if there are) NaN values with initial_extend values
         function extended_state = extend(obj,z_test) % z_test must be already with its own NaNs
 %             keyboard
             nans = isnan(z_test);
@@ -72,9 +72,9 @@ classdef PrimitiveFun
                 return
             end
             % here we need to initialize some nan values to the
-            % default_extend value
+            % initial_extend value
             extended_state = z_test;
-            extended_state((~isnan(obj.default_extend))>0) = obj.default_extend((~isnan(obj.default_extend))>0);
+            extended_state((~isnan(obj.initial_extend))>0) = obj.initial_extend((~isnan(obj.initial_extend))>0);
         end
     end
     methods (Abstract)

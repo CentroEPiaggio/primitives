@@ -6,12 +6,12 @@ actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasi
 fig_xv=2; fig_xy = 3; fig_yv = 4;
 feasible = 0;
 %% check if other dimensions can be activated from the newest point (x_rand)
-keyboard
+% keyboard
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 % search for nearest point
 z_rand_dimensions = prim.dimensions;
 %% TODO FIX THIS Ptree.Node{idx_prim} instead of Ptree.Node{1} 
-[idx_nearest,z_nearest] = nearest(z_rand,T,Ptree.Node{1});
+[idx_nearest,z_nearest] = nearest(z_rand,T,Ptree.Node{idx_prim});
 
 z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
 
@@ -36,7 +36,7 @@ dim_z_nearest = ~isnan(z_nearest);
 % both of them are initialized in the same image space (e.g. same non-NaN
 % dimensions).
 % The method PrimitiveFun.extend does this.
-z_nearest_temp=prim.extend(z_nearest_temp); 
+% z_nearest_temp=prim.extend(z_nearest_temp); 
 % WRONG: it should be the rand sample that is extended, not the nearest!
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     % TODO: generalize i/o for different primitive types.
@@ -45,7 +45,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
     %     xf = z_rand_temp(1); vf = z_rand_temp(2);
     %     q = [xi xf vi vf];
     %     [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
-    [feasible,cost,q,x] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
+    [feasible,cost,q,x,time] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
     z_new=z_rand;
     dim_z_new = prim.dimensions;
     disp(['size durante la muovi',num2str(size(x))]);
@@ -55,11 +55,12 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             traj_vel = x(2,:);
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
             x = [traj_pos traj_vel];
-            
-        else
-            traj_pos = x(1,:);
-            traj_vel = x(2,:);
-            traj_y = x(3,:);
+
+        else % Eleva primitive
+%             traj_pos = %x(1,:);
+            traj_vel = z_nearest_temp(2)*ones(size(x));%x(2,:);
+            traj_pos = z_nearest_temp(1)+cumtrapz(time,traj_vel);
+            traj_y = x;
             disp(['size durante la alza',num2str(size(x))]);
         end
     end
@@ -96,7 +97,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 end
             end
             if idx_prim==1
-                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
                     if verbose
                         figure(fig_xv)
@@ -107,15 +108,16 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     end
                 end
             else % idx_prim > 1
-                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+%                 keyboard
+                if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
                     if verbose
-                        figure(fig_xv)
-%                         node = plot3(z_new(1),z_new(2),z_new(3),'bo','linewidth',2);
-                        node = plot(z_new(1),z_new(2),'go','linewidth',2);
+                        figure(fig_xy)
+                        node = plot3(z_new(1),z_new(2),z_new(3),'go','linewidth',2);
+%                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
                         plot_nodes = horzcat(plot_nodes,node);
-%                         edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],[z_min(3) z_new(3)],'color','blue','linewidth',2);
-                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],'color','green','linewidth',2);
+                        edge = line([z_min(1) z_new(1)],[z_min(2) z_new(2)],[z_min(3) z_new(3)],'color','green','linewidth',2);
+%                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
                         plot_edges = horzcat(plot_edges,edge);
                     end
                 end 

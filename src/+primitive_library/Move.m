@@ -19,7 +19,7 @@ classdef Move < primitive_library.PrimitiveFun
             % as a constructor.
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend);
         end
-        function [feasible,cost,q,x] = steering(obj,z_start,z_end)
+        function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('Move like Jagger!')
             z_start
             z_end
