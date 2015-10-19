@@ -39,11 +39,11 @@ Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region 
 % Chi1.P.plot('color','lightblue','alpha',0.5)
 axis equal;
 plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
-plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
+plot(z_goal(1),z_goal(2),'ko','linewidth',4) % plot initial point
 figure(fig_xy)
 plot3(z_init(1),z_init(2),1,'go','linewidth',4) % plot initial point % HARDFIX 1 in z_init(3)
 hold on
-plot3(z_goal(1),z_goal(2),z_goal(3),'ro','linewidth',4) % plot initial point
+plot3(z_goal(1),z_goal(2),z_goal(3),'ko','linewidth',4) % plot initial point
 % figure(fig_trajectories)
 % Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
 % axis equal;
@@ -94,8 +94,8 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
         z_rand = z_goal(1:2); % every once in a while push in a known number
-    %elseif ii <= N_PUNTI_FINTI
-    %    z_rand = PUNTI_FINTI(:,ii);
+        %elseif ii <= N_PUNTI_FINTI
+        %    z_rand = PUNTI_FINTI(:,ii);
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         %         x_rand = PUNTI_FINTI(:,ii); % comment this out to test the algo with random points
@@ -105,7 +105,7 @@ for ii=1:N_sample_max
         figure(fig_chi0)
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
         %         figure(fig_trajectories)
-        %         plot(z_rand(1),z_rand(2),'x','linewidth',2)              
+        %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
         if movie==1
             movie_rrtstar(frames) = getframe(figure(fig_chi0));
             frames = frames +1;
@@ -119,13 +119,13 @@ for ii=1:N_sample_max
     dim = ~isnan(z_goal);
     if reached(T.Node{end},z_goal)
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-        disp('Goal reached!');
+        disp('Goal reached (via Muovi)!');
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
     %% Check for available primitives to extend the last sampled point in a new dimension
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
-
+    
     %% Iterate over available primitives
     if feasible
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
@@ -140,15 +140,24 @@ for ii=1:N_sample_max
             z_new = fix_nans(z_new_temp,prim.dimensions);
             
             T.Node{T.nnodes} = z_new;
-            
-            z_aug = prim.chi.sample;
-%             z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the extension is a delicate thing
-%             z_aug(2) = z_new(2); % force v constant 
+            if mod(ii,10)==0
+                z_aug = z_goal(1:3); % every once in a while push in a known number
+            else
+                z_aug = prim.chi.sample;
+            end
+            %             z_aug(Ptree.Node{1}.dimensions>0) = z_new; % how to choose the extension is a delicate thing
+            %             z_aug(2) = z_new(2); % force v constant
             figure(fig_xy);
             plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
             Chi_aug = prim.chi;
             cprintf('red','Sto per provare con la eleva')
             [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+            if reached(T.Node{end},z_goal)
+                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+                disp('Goal reached (via Eleva)!');
+                %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+                break
+            end
         end
     end
 end
@@ -168,9 +177,10 @@ h = view(biograph(G,[],'ShowWeights','on'));
 [dist,path,pred] = graphshortestpath(G,source_node,goal_node);
 % draw shortest path
 set(h.Nodes(path),'Color',[1 0.4 0.4])
+%% NON VA ROBA DI COLORI
 edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
-set(edges,'LineColor',[1 0 0])
-set(edges,'LineWidth',1.5)
+% set(edges,'LineColor',[1 0 0])
+% set(edges,'LineWidth',1.5)
 
 %% obtain plan as the shortest path in the graph
 opt_plan = tree;
@@ -187,9 +197,16 @@ end
 
 x_values=z_init(1);
 y_values=z_init(2);
-for k=2:length(opt_plan.Node)
-    x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
-    y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(4));
+for k=2:length(opt_plan.Node) % HARDFIX: formally correct but it has to be generalized
+    if isequal(opt_plan.Node{k}.primitive,'Muovi')
+        x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
+        y_values = horzcat(y_values,y_values(end));
+    elseif isequal(opt_plan.Node{k}.primitive,'Eleva')
+        x_values = horzcat(x_values,x_values(end));
+        y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(2));
+    end
+    
+    
     figure(fig_chi0)
     line(x_values, y_values,'color','yellow','LineWidth',4);
     %     figure(fig_trajectories)
@@ -216,7 +233,7 @@ for ii=1:length(opt_plan.Node)
             xf = opt_plan.Node{ii}.primitive_q(2);
             vi = opt_plan.Node{ii}.primitive_q(3);
             vf = opt_plan.Node{ii}.primitive_q(4);
-            %             
+            %
             
             primitive_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
@@ -247,15 +264,15 @@ for ii=1:length(opt_plan.Node)
 end
 
 if(movie==1)
-   disp('saving rrtstar video...');
-   
-   for iter=1:frames-1
-       vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
-   end
-   
-   close(vidObj);
-   
-   disp('...done!');
+    disp('saving rrtstar video...');
+    
+    for iter=1:frames-1
+        vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
+    end
+    
+    close(vidObj);
+    
+    disp('...done!');
 end
 
 save([run_filepath 'runna.mat'],'q_reference');

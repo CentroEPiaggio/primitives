@@ -1,7 +1,7 @@
 %INSERTNODE adds the new vertex z_new to the graph and creates an edge from
 % z_current to z_new
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
-function [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q, cost)
+function [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q, cost, x,time)
 disp('Entered inside InsertNode')
 if isempty(prim)
     % add inial state to the tree
@@ -15,6 +15,8 @@ else
     actions = struct('source_node', idx_current,...
         'dest_node', idx_last_added_node,...
         'primitive',prim.name,...
-        'primitive_q',q);
+        'primitive_q',q,...
+        'x',x,...
+        'time',time);
     E{idx_current,idx_last_added_node} = actions; % For now this is done at the
 end
