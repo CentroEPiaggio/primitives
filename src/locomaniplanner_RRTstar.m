@@ -90,6 +90,7 @@ N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 
 %% Main loop
+stop=false;
 for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0
@@ -153,11 +154,22 @@ for ii=1:N_sample_max
             cprintf('red','Sto per provare con la eleva')
             [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
             if reached(T.Node{end},z_goal)
-                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+                idz_Goal = T.nnodes-1; % last one is the goal state, for the moment (in anytime version this will change).
+                                       % the -1 is a dirty fix for the fact
+                                       % that this node is inserted two
+                                       % times, once via prim.extend and
+                                       % one from localRRT*(Chi_aug). Does
+                                       % not happen always but still it
+                                       % needs this workaround for those
+                                       % times.
                 disp('Goal reached (via Eleva)!');
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+                stop = true;
                 break
             end
+        end
+        if stop
+            break;
         end
     end
 end

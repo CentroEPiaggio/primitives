@@ -100,13 +100,13 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             added_new = false;
             if idx_prim==1
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
+                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     added_new = true;
                 end
             else % idx_prim > 1
                 %                 keyboard
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new);
+                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     added_new = true;
                 end
             end
