@@ -253,10 +253,13 @@ prim_filepath = [run_filepath 'prim/'];
 % init
 q_reference = [0;0;0];
 % loop
-for ii=2:length(opt_plan.Node)
+for ii=2:opt_plan.nnodes
     time = opt_plan.Node{ii}.time;
     traj_x_speed_cart = opt_plan.Node{ii}.x(2,:);
     traj_y_speed_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
+    if strcmp(opt_plan.Node{ii-1}.primitive,'Eleva') && strcmp(opt_plan.Node{ii}.primitive,'Muovi')
+        keyboard
+    end
     q_reference_add = [q_reference(1,end)+time(:)'; % conventionally SIMULINK requires that the first row of the vector q_reference (used in a from_file block) is the time
         traj_x_speed_cart(:)';
         traj_y_speed_cart(:)'];

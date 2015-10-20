@@ -154,7 +154,9 @@ classdef Elevate < primitive_library.PrimitiveFun
 %             end
             
 %             x = [traj_pos traj_vel traj_yp_cart]';
-            x = [traj_yp_cart]';
+            
+%             x = [traj_yp_cart]';
+            x = [traj_y_cart]';
             feasible
 %             anima
             return
