@@ -15,11 +15,11 @@ py = d.*sin(theta);
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
-movie=0;
+movie=1;
 
 if movie==1
     frames=1;
-    vidObj=VideoWriter('anima');
+    vidObj=VideoWriter('anima.avi');
     vidObj.Quality = 50;
     vidObj.FrameRate = 100;
     open(vidObj);
