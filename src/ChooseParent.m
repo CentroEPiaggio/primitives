@@ -1,6 +1,6 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-function [idx_min,q,cost_new_edge,traj_pos,traj_vel] = ChooseParent(idX_near, idx_nearest, T, G, E, x_new, cost_from_x_nearest_to_new,Obstacles,q)
+function [idx_min,q,cost_new_edge,x,time] = ChooseParent(idX_near, idx_nearest, T, G, E, x_new, cost_from_x_nearest_to_new,Obstacles,q,Ptree,idx_prim)
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
@@ -23,31 +23,62 @@ c_min = cost_z_new; % initializazion of c_min
 
 idx_min = idx_nearest; % default initialization row 2 algorithm 2
 cost_new_edge = c_min; % default initialization row 2 algorithm 2
-traj_pos = NaN;
-traj_vel = NaN;
+% traj_pos = NaN;
+% traj_vel = NaN;
+x = NaN;
+time = NaN;
 % keyboard
 
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         X_near(:,i)=T.get(idX_near(i));
+        % select primitive HARDFIX
+        if length(x_new)>=3 && X_near(3,1) ~= x_new(3) && ~isnan(x_new(3)) && ~isnan(X_near(3,1))
+            prim = Ptree.Node{2}; % Elevate
+            idx_prim = 2;
+        else
+            prim = Ptree.Node{1}; % Move
+            idx_prim = 1;
+        end
+        %         keyboard
         % calculate feasibility and cost
-        [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
+        %         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
+        z_near = X_near;
+        z_new = x_new;
+        %         keyboard
+        [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new); % uniform interface! Yeay!
+        if feasible
+            if idx_prim == 1 % collision checking only if we are on the Move primitive
+                %             keyboard
+                traj_pos_chooseparent = x_chooseparent(1,:);
+                traj_vel_chooseparent = x_chooseparent(2,:);
+                traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
+                x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+            else % Eleva primitive
+                %             traj_pos = %x(1,:);
+                traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
+                traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
+                traj_y_chooseparent = x_chooseparent;
+                disp(['size durante la alza',num2str(size(x))]);
+            end
+            x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent traj_y_chooseparent]; % assign arc-path
+        end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree
                 % cost up to near vertex
-%                 cost_up_to_z_near = G(idx_I,idX_near(i));%graphshortestpath(G,idx_I,idX_near(i));
+                %                 cost_up_to_z_near = G(idx_I,idX_near(i));%graphshortestpath(G,idx_I,idX_near(i));
                 cost_up_to_z_near = graphshortestpath(G,idx_I,idX_near(i)); % TODO this line or the one above?
-%                 cost_up_to_z_near = graphshortestpath(G,idx_I,idx_);
+                %                 cost_up_to_z_near = graphshortestpath(G,idx_I,idx_);
                 % costo from near to new vertex
                 cost_znear_znew  = cost_new_edge;
-%                 c_x_new = graphshortestpath(G,idx_I,idx_new);
+                %                 c_x_new = graphshortestpath(G,idx_I,idx_new);
                 % costo fino al near + pezzettino near-new
                 c_prime = cost_up_to_z_near + cost_znear_znew;
                 if (c_prime < cost_z_new) && (c_prime < c_min) % cost_z_near) && % && (c_actual < c_x_new)
                     idx_min = idX_near(i);
                     c_min = c_prime;
-                    traj_pos = traj_pos_chooseparent;
-                    traj_vel = traj_vel_chooseparent;
+                    x=x_chooseparent;
+                    time = time_chooseparent;
                 end
             end
         end

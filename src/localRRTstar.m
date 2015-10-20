@@ -51,11 +51,16 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
     disp(['size durante la muovi',num2str(size(x))]);
     if feasible
         if idx_prim == 1 % collision checking only if we are on the Move primitive
+            %             keyboard
             traj_pos = x(1,:);
             traj_vel = x(2,:);
-            traj_y   = z_nearest_temp(3,:)*ones(size(traj_vel));
+            if ~isnan(z_nearest_temp(3)) % HARDFIX
+                traj_y   = z_nearest_temp(3,:)*ones(size(traj_vel));
+            else
+                traj_y   = ones(size(traj_vel)); % HARDFIX: default y is 1
+            end
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
-            x = [traj_pos traj_vel];
+            x = [traj_pos; traj_vel;];
         else % Eleva primitive
             %             traj_pos = %x(1,:);
             traj_vel = z_nearest_temp(2)*ones(size(x));%x(2,:);
@@ -63,7 +68,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             traj_y = x;
             disp(['size durante la alza',num2str(size(x))]);
         end
-        x = [traj_pos traj_vel traj_y]; % assign arc-path
+                keyboard
+        x = [traj_pos; traj_vel; traj_y]; % assign arc-path
     end
     
     if feasible
@@ -91,21 +97,29 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
-                [idx_min,q,cost_new,traj_pos_chooseparent,traj_vel_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q);
-                if ~isnan(traj_pos_chooseparent)
+                [idx_min,q,cost_new,x_chooseparent,time_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
+%                 keyboard
+                if ~isnan(x_chooseparent)
+                    traj_pos_chooseparent=x_chooseparent(1,:);
+                    traj_vel_chooseparent=x_chooseparent(2,:);
+                    traj_yp_chooseparent =x_chooseparent(3,:);
                     traj_pos = traj_pos_chooseparent;
                     traj_vel = traj_vel_chooseparent;
+                    traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
+                    x = [traj_pos traj_vel traj_y]; % assign arc-path
                 end
             end
             added_new = false;
             if idx_prim==1
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+%                     keyboard
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     added_new = true;
                 end
             else % idx_prim > 1
                 %                 keyboard
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+%                     keyboard
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     added_new = true;
                 end
@@ -125,7 +139,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
                 plot_edges = horzcat(plot_edges,edge);
                 figure(fig_xy)
-%                 keyboard
+                %                 keyboard
                 node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
                 %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
                 plot_nodes = horzcat(plot_nodes,node);

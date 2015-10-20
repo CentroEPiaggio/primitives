@@ -191,8 +191,8 @@ h = view(biograph(G,[],'ShowWeights','on'));
 set(h.Nodes(path),'Color',[1 0.4 0.4])
 %% NON VA ROBA DI COLORI
 edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
-% set(edges,'LineColor',[1 0 0])
-% set(edges,'LineWidth',1.5)
+set(edges,'LineColor',[1 0 0])
+set(edges,'LineWidth',1.5)
 
 %% obtain plan as the shortest path in the graph
 opt_plan = tree;
@@ -239,28 +239,8 @@ prim_filepath = [run_filepath 'prim/'];
 q_reference = [0;0;0];
 % loop
 for ii=1:length(opt_plan.Node)
-    switch opt_plan.Node{ii}.primitive
-        case 'Muovi'
-            xi = opt_plan.Node{ii}.primitive_q(1);
-            xf = opt_plan.Node{ii}.primitive_q(2);
-            vi = opt_plan.Node{ii}.primitive_q(3);
-            vf = opt_plan.Node{ii}.primitive_q(4);
-            %
-            
-            primitive_muovi_params = struct('name','muovi',    ...
-                'xi',xi,            ...
-                'xf',xf,            ...
-                'vi',vi, ...
-                'vf',vf, ...
-                'Tend',Tend,        ...
-                'Ts',Ts,            ...
-                'xf_vec_len',1, ...
-                'vx0_vec_len',1,  ...
-                'vxf_vec_len',1, ...
-                'filepath',prim_filepath ...
-                );
-            [time,traj_x_cart]=gen_primitives_muovi_local(primitive_muovi_params);
-            traj_y_cart = zeros(size(traj_x_cart));
+            traj_x_cart = opt_plan.Node{ii}.x(2,:);
+            traj_y_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
             q_reference_add = [q_reference(1,end)+time(:)';
                 traj_x_cart(:)';
                 traj_y_cart(:)'];
@@ -270,9 +250,7 @@ for ii=1:length(opt_plan.Node)
             %             traj_pos = xi+cumtrapz(time,traj_x_cart);
             %             traj_vel = traj_x_cart;
             %             line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
-        otherwise
-            disp('standby');
-    end
+     
 end
 
 if(movie==1)
