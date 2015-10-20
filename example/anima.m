@@ -19,7 +19,7 @@ movie=1;
 
 if movie==1
     frames=1;
-    vidObj=VideoWriter('anima.avi');
+    vidObj=VideoWriter('anima_2.avi');
     vidObj.Quality = 50;
     vidObj.FrameRate = 100;
     open(vidObj);
