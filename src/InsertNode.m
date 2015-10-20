@@ -11,7 +11,6 @@ else
     T = T.addnode(idx_current,z_new);
     idx_last_added_node = T.nnodes;
     G(idx_current,idx_last_added_node) = cost;
-    % for now actions is not needed
 %     keyboard
     actions = struct('source_node', idx_current,...
         'dest_node', idx_last_added_node,...
@@ -19,5 +18,5 @@ else
         'primitive_q',q,...
         'x',x,...
         'time',time);
-    E{idx_current,idx_last_added_node} = actions; % For now this is done at the
+    E{idx_current,idx_last_added_node} = actions;
 end

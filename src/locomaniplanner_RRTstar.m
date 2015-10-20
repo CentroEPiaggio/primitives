@@ -257,7 +257,7 @@ for ii=2:length(opt_plan.Node)
     time = opt_plan.Node{ii}.time;
     traj_x_speed_cart = opt_plan.Node{ii}.x(2,:);
     traj_y_speed_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
-    q_reference_add = [q_reference(1,end)+time(:)';
+    q_reference_add = [q_reference(1,end)+time(:)'; % conventionally SIMULINK requires that the first row of the vector q_reference (used in a from_file block) is the time
         traj_x_speed_cart(:)';
         traj_y_speed_cart(:)'];
     q_reference = [q_reference, q_reference_add];
@@ -294,6 +294,7 @@ runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p
 if status ~= 0, error(result); end
 % and the show must go on!
 load ../example/optimal.mat;
+%%
 figure
 plot(rt_t,rt_qp_ref,'--','Linewidth',2)
 hold on
@@ -306,4 +307,5 @@ hold on
 plot(rt_t,rt_q,'Linewidth',2)
 grid on
 title('Position profile')
+%%
 anima
