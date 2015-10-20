@@ -32,6 +32,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 disp(['ReConnect costo: ' num2str(cost_tentative) ' < ' num2str(cost_up_to_z_near_without_rewiring) ' ???']);
                 if cost_tentative < cost_up_to_z_near_without_rewiring && ~isinf(cost_up_to_z_near_without_rewiring) % test for correlation between sleep hours and variable length, possibly inverse proportionality
                     cprintf('[1 0.5 0]','Rewiring\n');
+                    keyboard
                     [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire,pn,pe,fig_points);
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;

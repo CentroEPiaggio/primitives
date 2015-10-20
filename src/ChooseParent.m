@@ -1,6 +1,6 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-function [idx_min,q,cost_new_edge,x,time] = ChooseParent(idX_near, idx_nearest, T, G, E, x_new, cost_from_x_nearest_to_new,Obstacles,q,Ptree,idx_prim)
+function [idx_min,q,cost_new_edge,x,time] = ChooseParent(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim)
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
@@ -17,8 +17,8 @@ c_new = Inf;
 
 % costo = costo accumulato + costo nuovo campione
 cost_z_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
-c_x_new = cost_from_x_nearest_to_new;
-cost_z_new = cost_z_nearest + c_x_new;
+c_z_new = cost_from_z_nearest_to_new;
+cost_z_new = cost_z_nearest + c_z_new;
 c_min = cost_z_new; % initializazion of c_min
 
 idx_min = idx_nearest; % default initialization row 2 algorithm 2
@@ -33,7 +33,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         X_near(:,i)=T.get(idX_near(i));
         % select primitive HARDFIX
-        if length(x_new)>=3 && X_near(3,1) ~= x_new(3) && ~isnan(x_new(3)) && ~isnan(X_near(3,1))
+        if length(z_new)>=3 && X_near(3,1) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(X_near(3,1))
             prim = Ptree.Node{2}; % Elevate
             idx_prim = 2;
         else
@@ -43,8 +43,8 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         %         keyboard
         % calculate feasibility and cost
         %         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
-        z_near = X_near;
-        z_new = x_new;
+        z_near = X_near(:,i);
+        z_new = z_new;
         %         keyboard
         [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new); % uniform interface! Yeay!
         if feasible
@@ -52,8 +52,9 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 %             keyboard
                 traj_pos_chooseparent = x_chooseparent(1,:);
                 traj_vel_chooseparent = x_chooseparent(2,:);
+%                 keyboard
                 traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
-                x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+%                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
             else % Eleva primitive
                 %             traj_pos = %x(1,:);
                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
@@ -61,7 +62,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_y_chooseparent = x_chooseparent;
                 disp(['size durante la alza',num2str(size(x))]);
             end
-            x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent traj_y_chooseparent]; % assign arc-path
+            x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree

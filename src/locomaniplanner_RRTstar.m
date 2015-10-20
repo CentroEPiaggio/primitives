@@ -229,6 +229,22 @@ for k=2:length(opt_plan.Node) % HARDFIX: formally correct but it has to be gener
     end
 end
 
+%% save test data
+if ~exist('test/','dir')
+        mkdir('test/');
+end
+custom_test_name = []; % use custom_test_name = 'mytest' to firce filename and avoid timestamp;
+if isempty(custom_test_name)
+    formatOut = 'yyyy_mm_dd_hh_MM_SS';
+    str_date=datestr(now,formatOut);
+    test_savestr = ['test/test_' str_date '.mat'];
+else
+    test_savestr = ['test/test_' num2str(custom_test_name) '.mat'];
+end
+save(test_savestr); % run load(test_savestr) to reload this data
+
+%% showtime!
+movie = 1;
 %% go to test the plan
 % assemble the optimal plan
 Tend = 10; % TODO porcata. Il tempo va parametrizzato.
@@ -238,19 +254,14 @@ prim_filepath = [run_filepath 'prim/'];
 % init
 q_reference = [0;0;0];
 % loop
-for ii=1:length(opt_plan.Node)
-            traj_x_cart = opt_plan.Node{ii}.x(2,:);
-            traj_y_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
-            q_reference_add = [q_reference(1,end)+time(:)';
-                traj_x_cart(:)';
-                traj_y_cart(:)'];
-            q_reference = [q_reference, q_reference_add];
-            % plot the trajectory on the phase plane
-            %             figure(fig_trajectories)
-            %             traj_pos = xi+cumtrapz(time,traj_x_cart);
-            %             traj_vel = traj_x_cart;
-            %             line(traj_pos, traj_vel,'color','yellow','LineWidth',4);
-     
+for ii=2:length(opt_plan.Node)
+    time = opt_plan.Node{ii}.time;
+    traj_x_speed_cart = opt_plan.Node{ii}.x(2,:);
+    traj_y_speed_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
+    q_reference_add = [q_reference(1,end)+time(:)';
+        traj_x_speed_cart(:)';
+        traj_y_speed_cart(:)'];
+    q_reference = [q_reference, q_reference_add];
 end
 
 if(movie==1)

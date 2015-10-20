@@ -54,12 +54,12 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             %             keyboard
             traj_pos = x(1,:);
             traj_vel = x(2,:);
+            [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
             if ~isnan(z_nearest_temp(3)) % HARDFIX
                 traj_y   = z_nearest_temp(3,:)*ones(size(traj_vel));
             else
                 traj_y   = ones(size(traj_vel)); % HARDFIX: default y is 1
             end
-            [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
             x = [traj_pos; traj_vel;];
         else % Eleva primitive
             %             traj_pos = %x(1,:);
@@ -68,7 +68,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             traj_y = x;
             disp(['size durante la alza',num2str(size(x))]);
         end
-                keyboard
+%                 keyboard
         x = [traj_pos; traj_vel; traj_y]; % assign arc-path
     end
     
@@ -100,6 +100,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
 %                 keyboard
                 if ~isnan(x_chooseparent)
+                    keyboard
                     traj_pos_chooseparent=x_chooseparent(1,:);
                     traj_vel_chooseparent=x_chooseparent(2,:);
                     traj_yp_chooseparent =x_chooseparent(3,:);
