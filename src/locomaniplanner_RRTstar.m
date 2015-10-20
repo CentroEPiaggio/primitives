@@ -299,4 +299,11 @@ plot(rt_t,rt_qp_ref,'--','Linewidth',2)
 hold on
 plot(rt_t,rt_qp,'Linewidth',2)
 grid on
+title('Speed profile')
+figure
+plot(rt_t,rt_q_ref,'--','Linewidth',2)
+hold on
+plot(rt_t,rt_q,'Linewidth',2)
+grid on
+title('Position profile')
 anima

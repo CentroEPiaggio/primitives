@@ -1,5 +1,6 @@
-function [T, G, E , x_rewire ,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points)
+function [rewired, T, G, E , x_rewire ,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points)
 %REWIRE Summary of this function goes here
+rewired = false;
 traj_pos = NaN;
 traj_vel = NaN;
 x_rewire = NaN;
@@ -22,7 +23,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         continue;
     end
     if ~isempty(idX_near(i))
-        keyboard
+%         keyboard
         z_near=T.get(idX_near(i));
         % begin copy from ChooseParent
         % select primitive HARDFIX
@@ -53,7 +54,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_vel_rewire = z_near(2)*ones(size(x_rewire));%x(2,:);
                 traj_pos_rewire = z_near(1)+cumtrapz(time_rewire,traj_vel_rewire);
                 traj_y_rewire = x_rewire;
-                disp(['size durante la alza',num2str(size(x))]);
+                disp(['size durante la alza',num2str(size(x_rewire))]); % WHAT IS THIS?
             end
             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
         end
@@ -66,10 +67,11 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 disp(['ReConnect costo: ' num2str(cost_tentative) ' < ' num2str(cost_up_to_z_near_without_rewiring) ' ???']);
                 if cost_tentative < cost_up_to_z_near_without_rewiring && ~isinf(cost_up_to_z_near_without_rewiring) % test for correlation between sleep hours and variable length, possibly inverse proportionality
                     cprintf('[1 0.5 0]','Rewiring\n');
-                    keyboard
-                    [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire,pn,pe,fig_points);
+%                     keyboard
+                    [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire, x_rewire, time_rewire,pn,pe,fig_points);
                     traj_pos = traj_pos_rewire;
                     traj_vel = traj_vel_rewire;
+                    rewired = true;
                 end
             end
         end
