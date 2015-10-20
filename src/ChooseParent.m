@@ -31,9 +31,9 @@ time = NaN;
 
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
-        X_near(:,i)=T.get(idX_near(i));
+        z_near=T.get(idX_near(i));
         % select primitive HARDFIX
-        if length(z_new)>=3 && X_near(3,1) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(X_near(3,1))
+        if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
             prim = Ptree.Node{2}; % Elevate
             idx_prim = 2;
         else
@@ -43,8 +43,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         %         keyboard
         % calculate feasibility and cost
         %         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
-        z_near = X_near(:,i);
-        z_new = z_new;
+%         z_near = z_near(:,i);
         %         keyboard
         [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new); % uniform interface! Yeay!
         if feasible

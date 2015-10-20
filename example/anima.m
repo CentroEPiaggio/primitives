@@ -15,11 +15,16 @@ py = d.*sin(theta);
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
-movie=1;
+movie=1; % force
 
 if movie==1
+    if ~exist('movies/','dir')
+        mkdir('movies/');
+    end
     frames=1;
-    vidObj=VideoWriter('anima_2.avi');
+    formatOut = 'yyyy_mm_dd_hh_MM_SS';
+    str_date=datestr(now,formatOut);
+    vidObj=VideoWriter(['movies/anima_' str_date '.avi']);
     vidObj.Quality = 50;
     vidObj.FrameRate = 100;
     open(vidObj);

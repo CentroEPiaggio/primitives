@@ -100,7 +100,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
 %                 keyboard
                 if ~isnan(x_chooseparent)
-                    keyboard
+%                     keyboard
                     traj_pos_chooseparent=x_chooseparent(1,:);
                     traj_vel_chooseparent=x_chooseparent(2,:);
                     traj_yp_chooseparent =x_chooseparent(3,:);
@@ -152,11 +152,17 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             z_min = T.get(idx_min);
             
             idx_new = T.nnodes;
-            [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-            
-            if ~isnan(traj_pos_rewire)
-                traj_pos = traj_pos_rewire;
-                traj_vel = traj_vel_rewire;
+%             [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+            [T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+            if ~isnan(x_rewire)
+%                     keyboard
+                    traj_pos_rewire=x_rewire(1,:);
+                    traj_vel_rewire=x_rewire(2,:);
+                    traj_yp_rewire =x_rewire(3,:);
+                    traj_pos = traj_pos_rewire;
+                    traj_vel = traj_vel_rewire;
+                    traj_y = traj_yp_rewire; % TODO: FIX NAMES
+                    x = [traj_pos traj_vel traj_y]; % assign arc-path
             end
             plot_edges=pe;
             plot_nodes=pn;

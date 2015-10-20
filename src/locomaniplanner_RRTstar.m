@@ -155,13 +155,13 @@ for ii=1:N_sample_max
             [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
             if reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes-1; % last one is the goal state, for the moment (in anytime version this will change).
-                                       % the -1 is a dirty fix for the fact
-                                       % that this node is inserted two
-                                       % times, once via prim.extend and
-                                       % one from localRRT*(Chi_aug). Does
-                                       % not happen always but still it
-                                       % needs this workaround for those
-                                       % times.
+                % the -1 is a dirty fix for the fact
+                % that this node is inserted two
+                % times, once via prim.extend and
+                % one from localRRT*(Chi_aug). Does
+                % not happen always but still it
+                % needs this workaround for those
+                % times.
                 disp('Goal reached (via Eleva)!');
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
                 stop = true;
@@ -231,7 +231,7 @@ end
 
 %% save test data
 if ~exist('test/','dir')
-        mkdir('test/');
+    mkdir('test/');
 end
 custom_test_name = []; % use custom_test_name = 'mytest' to firce filename and avoid timestamp;
 if isempty(custom_test_name)
@@ -247,7 +247,6 @@ save(test_savestr); % run load(test_savestr) to reload this data
 movie = 1;
 %% go to test the plan
 % assemble the optimal plan
-Tend = 10; % TODO porcata. Il tempo va parametrizzato.
 Ts = 0.01;
 run_filepath = '../example/';
 prim_filepath = [run_filepath 'prim/'];
@@ -263,7 +262,8 @@ for ii=2:length(opt_plan.Node)
         traj_y_speed_cart(:)'];
     q_reference = [q_reference, q_reference_add];
 end
-
+Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
+movie=0;
 if(movie==1)
     disp('saving rrtstar video...');
     
@@ -295,6 +295,8 @@ if status ~= 0, error(result); end
 % and the show must go on!
 load ../example/optimal.mat;
 figure
-plot(rt_t,rt_qp_ref,rt_t,rt_qp,q_reference(1,:),q_reference(2,:))
+plot(rt_t,rt_qp_ref,'--','Linewidth',2)
+hold on
+plot(rt_t,rt_qp,'Linewidth',2)
 grid on
 anima

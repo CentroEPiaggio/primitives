@@ -1,7 +1,8 @@
-function [T, G, E , traj_pos,traj_vel,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, prim, q, cost_new,pn,pe,fig_points)
+function [T, G, E , x_rewire ,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points)
 %REWIRE Summary of this function goes here
 traj_pos = NaN;
 traj_vel = NaN;
+x_rewire = NaN;
 %   Detailed explanation goes here
 idx_I = 1;
 % make the sparse matrix square
@@ -9,7 +10,7 @@ sizeG = size(G);
 [~,shorterDim]=min(sizeG);
 G(sizeG(shorterDim)+1:max(sizeG),:)=0;
 % get x_new
-x_new = T.get(idx_new);
+z_new = T.get(idx_new);
 % keyboard
 for i=1:length(idX_near) % for every point btw the nearby vertices
     % CHECK EVERYTIME THE DIMENSIONS OF THE GRAPH TO BE CONSISTENT BTW THEM
@@ -21,8 +22,41 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         continue;
     end
     if ~isempty(idX_near(i))
-        X_near(:,i)=T.get(idX_near(i));
-        [feasible,cost_rewire,q,traj_pos_rewire,traj_vel_rewire] = steering_muovi(x_new(1),X_near(1,i),x_new(2),X_near(2,i));
+        keyboard
+        z_near=T.get(idX_near(i));
+        % begin copy from ChooseParent
+        % select primitive HARDFIX
+        if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
+            prim = Ptree.Node{2}; % Elevate
+            idx_prim = 2;
+        else
+            prim = Ptree.Node{1}; % Move
+            idx_prim = 1;
+        end
+        %         keyboard
+        % calculate feasibility and cost
+        %         [feasible,cost_new_edge,q,traj_pos_rewire,traj_vel_rewire] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
+%         z_near = z_near(:,i);
+        % end copy from ChooseParent
+%         [feasible,cost_rewire,q,traj_pos_rewire,traj_vel_rewire] = steering_muovi(z_new(1),z_near(1,i),z_new(2),z_near(2,i));
+        [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_near,z_new); % uniform interface! Yeay!
+        if feasible
+            if idx_prim == 1 % collision checking only if we are on the Move primitive
+                %             keyboard
+                traj_pos_rewire = x_rewire(1,:);
+                traj_vel_rewire = x_rewire(2,:);
+%                 keyboard
+                traj_y_rewire   = z_near(3,:)*ones(size(traj_vel_rewire));
+%                 x_rewire = [traj_pos_rewire traj_vel_rewire];
+            else % Eleva primitive
+                %             traj_pos = %x(1,:);
+                traj_vel_rewire = z_near(2)*ones(size(x_rewire));%x(2,:);
+                traj_pos_rewire = z_near(1)+cumtrapz(time_rewire,traj_vel_rewire);
+                traj_y_rewire = x_rewire;
+                disp(['size durante la alza',num2str(size(x))]);
+            end
+            x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
+        end
         if feasible && ~isinf(cost_rewire) && ~isnan(cost_rewire) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'],1)) % ObstacleFree
                 cost_up_to_z_new = graphshortestpath(G,idx_I,idx_new); % cost to reach z_new from the first root of the tree
