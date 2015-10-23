@@ -185,120 +185,20 @@ disp('PLANNING COMPLETED')
 %% simulate the optimal plan that has been found
 
 %% obtain plan as the shortest path in the graph
-opt_plan = tree;
-prim_name = 'Standby';
-prim_params = 0;
-pi_I = struct('primitive',prim_name, ...
-    'primitive_q',prim_params);
-opt_plan = opt_plan.addnode(0,pi_I);
-for ii=2:length(path)
-    idx_child = path(ii);
-    idx_parent = T.Parent(idx_child); % because tree class uses 0 as starting index
-    opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
-end
+opt_plan=extract_plan(T,E,path);
 
-x_values=z_init(1);
-y_values=z_init(2);
-for k=2:length(opt_plan.Node) % HARDFIX: formally correct but it has to be generalized
-    if isequal(opt_plan.Node{k}.primitive,'Muovi')
-        x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
-        y_values = horzcat(y_values,y_values(end));
-    elseif isequal(opt_plan.Node{k}.primitive,'Eleva')
-        x_values = horzcat(x_values,x_values(end));
-        y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(2));
-    end
-    
-    
-    figure(fig_chi0)
-    line(x_values, y_values,'color','yellow','LineWidth',4);
-    %     figure(fig_trajectories)
-    %     line(x_values, y_values,'color','yellow','LineWidth',4);
-    if(movie==1)
-        movie_rrtstar(frames) = getframe(figure(fig_chi0));
-        frames = frames +1;
-    end
-end
+%% TODO: FIX MOVIE STUFF
+% figure(fig_chi0)
+% line(x_values, y_values,'color','yellow','LineWidth',4);
+% %     figure(fig_trajectories)
+% %     line(x_values, y_values,'color','yellow','LineWidth',4);
+% if(movie==1)
+%     movie_rrtstar(frames) = getframe(figure(fig_chi0));
+%     frames = frames +1;
+% end
 
-%% save test data
-if ~exist('test/','dir')
-    mkdir('test/');
-end
-custom_test_name = []; % use custom_test_name = 'mytest' to firce filename and avoid timestamp;
-if isempty(custom_test_name)
-    formatOut = 'yyyy_mm_dd_hh_MM_SS';
-    str_date=datestr(now,formatOut);
-    test_savestr = ['test/test_' str_date '.mat'];
-else
-    test_savestr = ['test/test_' num2str(custom_test_name) '.mat'];
-end
-save(test_savestr); % run load(test_savestr) to reload this data
-
+save_test_data
 %% showtime!
 movie = 1;
 %% go to test the plan
-% assemble the optimal plan
-Ts = 0.01;
-run_filepath = '../example/';
-prim_filepath = [run_filepath 'prim/'];
-% init
-q_reference = [0;0;0];
-% loop
-for ii=2:opt_plan.nnodes
-    time = opt_plan.Node{ii}.time;
-    traj_x_speed_cart = opt_plan.Node{ii}.x(2,:);
-    traj_y_speed_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
-    if strcmp(opt_plan.Node{ii-1}.primitive,'Eleva') && strcmp(opt_plan.Node{ii}.primitive,'Muovi')
-        keyboard
-    end
-    q_reference_add = [q_reference(1,end)+time(:)'; % conventionally SIMULINK requires that the first row of the vector q_reference (used in a from_file block) is the time
-        traj_x_speed_cart(:)';
-        traj_y_speed_cart(:)'];
-    q_reference = [q_reference, q_reference_add];
-end
-Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
-movie=0;
-if(movie==1)
-    disp('saving rrtstar video...');
-    
-    for iter=1:frames-1
-        vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
-    end
-    
-    close(vidObj);
-    
-    disp('...done!');
-end
-
-save([run_filepath 'runna.mat'],'q_reference');
-save([run_filepath 'rsim_tfdata.mat'],'q_reference');
-Tend = q_reference(1,end)*1.1; % 10 percent more time, for the show
-q0 = [0;deg2rad(90);2];
-qp0 = [0;0;0];
-qref0 = q0;
-ic = struct('q0',q0,'qp0',qp0,'qref0',qref0);
-gen_ic(ic);
-m1 = 100;
-m2 = 1;
-m3 = 100;
-masses=[m1;m2;m3];
-nq=length(q0);
-runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
-[status, result] = system(runstr);
-if status ~= 0, error(result); end
-% and the show must go on!
-load ../example/optimal.mat;
-%%
-figure
-plot(rt_t,rt_qp_ref,'--','Linewidth',2)
-hold on
-plot(rt_t,rt_qp,'Linewidth',2)
-grid on
-title('Speed profile')
-figure
-plot(rt_t,rt_q_ref,'--','Linewidth',2)
-hold on
-plot(rt_t,rt_q,'Linewidth',2)
-grid on
-title('Position profile')
-%%
-anima
+run_plan

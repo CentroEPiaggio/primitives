@@ -1,4 +1,4 @@
-function extract_plan(T,E,path)
+function opt_plan = extract_plan(T,E,path)
 opt_plan = tree;
 prim_name = 'Standby';
 prim_params = 0;
