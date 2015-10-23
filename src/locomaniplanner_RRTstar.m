@@ -154,7 +154,7 @@ for ii=1:N_sample_max
             cprintf('red','Sto per provare con la eleva')
             [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
             if reached(T.Node{end},z_goal)
-                idz_Goal = T.nnodes-1; % last one is the goal state, for the moment (in anytime version this will change).
+                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 % the -1 is a dirty fix for the fact
                 % that this node is inserted two
                 % times, once via prim.extend and
@@ -169,7 +169,13 @@ for ii=1:N_sample_max
             end
         end
         if stop
-            break;
+            disp('Found a feasible path!');
+            source_node = 1;
+            goal_node = idz_Goal; % current goal node
+            % visualize tree structure with optimal path in red
+            path=plot_biograph(source_node,goal_node,G);
+            keyboard
+%             break;
         end
     end
 end
@@ -177,22 +183,6 @@ end
 disp('PLANNING COMPLETED')
 
 %% simulate the optimal plan that has been found
-source_node = 1;
-goal_node = idz_Goal; % just to try
-% make the sparse matrix square
-sizeG = size(G);
-[~,shorterDim]=min(sizeG);
-G(sizeG(shorterDim)+1:max(sizeG),:)=0;
-% show the graph
-h = view(biograph(G,[],'ShowWeights','on'));
-% find the shortest path
-[dist,path,pred] = graphshortestpath(G,source_node,goal_node);
-% draw shortest path
-set(h.Nodes(path),'Color',[1 0.4 0.4])
-%% NON VA ROBA DI COLORI
-edges = getedgesbynodeid(h,get(h.Nodes(path),'ID'));
-set(edges,'LineColor',[1 0 0])
-set(edges,'LineWidth',1.5)
 
 %% obtain plan as the shortest path in the graph
 opt_plan = tree;
