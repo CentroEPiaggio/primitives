@@ -1,4 +1,4 @@
-function [path]=plot_biograph(source_node,goal_node,G)
+function [path,dist]=plot_biograph(source_node,goal_node,G)
 % make the sparse matrix square
 sizeG = size(G);
 [~,shorterDim]=min(sizeG);

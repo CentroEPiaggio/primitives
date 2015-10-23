@@ -89,6 +89,8 @@ load prova_punti_strani.mat;
 N_PUNTI_FINTI = size(PUNTI_FINTI,2);
 % N_sample_max = size(PUNTI_FINTI,2);
 
+cost_vector = [];
+N_cost_vector = [];
 %% Main loop
 stop=false;
 for ii=1:N_sample_max
@@ -121,6 +123,7 @@ for ii=1:N_sample_max
     if reached(T.Node{end},z_goal)
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Goal reached (via Muovi)!');
+        keyboard
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
     end
@@ -141,6 +144,7 @@ for ii=1:N_sample_max
             z_new = fix_nans(z_new_temp,prim.dimensions);
             
             T.Node{T.nnodes} = z_new;
+            
             if mod(ii,10)==0
                 z_aug = z_goal(1:3); % every once in a while push in a known number
             else
@@ -164,6 +168,7 @@ for ii=1:N_sample_max
                 % times.
                 disp('Goal reached (via Eleva)!');
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+                keyboard
                 stop = true;
                 break
             end
@@ -173,7 +178,12 @@ for ii=1:N_sample_max
             source_node = 1;
             goal_node = idz_Goal; % current goal node
             % visualize tree structure with optimal path in red
-            path=plot_biograph(source_node,goal_node,G);
+            [path,cost]=plot_biograph(source_node,goal_node,G);
+            % save cost and iteration for plotting (anytime) stuff
+            cost_vector = [cost_vector, cost];
+            N_cost_vector = [N_cost_vector, ii];
+            figure(10)
+            bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             keyboard
 %             break;
         end

@@ -161,7 +161,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             idx_new = T.nnodes;
 %             [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
             [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-            if rewired,keyboard,end
+%             if rewired,keyboard,end
             if rewired && any(~any(isnan(x_rewire)))
 %                     keyboard
                     traj_pos_rewire=x_rewire(1,:);
@@ -200,6 +200,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     disp(['Found primitive ' prim.getName ' with cost: ' num2str(prim_cost(idx_prim))]);
                 end
             end
+        end
+        if prim_cost(idx_prim) == 0
+            keyboard
         end
     else
         if verbose

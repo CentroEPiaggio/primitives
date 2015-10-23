@@ -43,7 +43,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
 %         [feasible,cost_rewire,q,x_rewire,time_rewire] =
 %         prim.steering(z_near,z_new); % uniform interface! Yeay! % WRONG!
 %         The steering has to be done between z_new and z_near!
-[feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
+        [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
         if feasible
             if idx_prim == 1 % collision checking only if we are on the Move primitive
                 %             keyboard
