@@ -11,6 +11,8 @@ idx_old = T.getparent(idx_near);
 T.Parent(idx_near) = idx_new;
 % remove old edge
 E{idx_old,idx_near} = [];
+% keyboard % use plot_biograph(1,T.nnodes,G) to visualize rewiring. Call it
+% here and after G(idx_new,idx_near) = cost;
 G(idx_old,idx_near) = 0;
 % set(pe(idx_near),'visible','off');
 delete(pe(idx_near));
