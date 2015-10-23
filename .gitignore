@@ -31,6 +31,8 @@ example/*.slx.autosave    # da fixare
 example/*.*.autosave    # da fixare
 example/modello 	# da fixare
 *.autosave
+# avi
+src/movies/*.avi
 
 ##---------------------------------------------------
 ## Remove .fig and .png figures
