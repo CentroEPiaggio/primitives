@@ -93,9 +93,10 @@ cost_vector = [];
 N_cost_vector = [];
 %% Main loop
 stop=false;
+path_found = false;
 for ii=1:N_sample_max
     %% sampling
-    if mod(ii,10)==0
+    if mod(ii,10)==0 && ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
         %elseif ii <= N_PUNTI_FINTI
         %    z_rand = PUNTI_FINTI(:,ii);
@@ -123,6 +124,7 @@ for ii=1:N_sample_max
     if reached(T.Node{end},z_goal)
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         disp('Goal reached (via Muovi)!');
+        path_found = true;
         keyboard
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         break
@@ -167,6 +169,7 @@ for ii=1:N_sample_max
                 % needs this workaround for those
                 % times.
                 disp('Goal reached (via Eleva)!');
+                path_found = true;
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
                 keyboard
                 stop = true;
@@ -185,6 +188,7 @@ for ii=1:N_sample_max
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             keyboard
+            stop=false;
 %             break;
         end
     end

@@ -81,11 +81,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
     
     if feasible
         cardV = T.nnodes; % number of vertices in the graph
-        if idx_prim > 1
-            %%keyboard
-        end
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
+%         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 6:'),keyboard, end
         disp('###')
         %%keyboard
         %             idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
@@ -115,6 +113,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_vel = traj_vel_chooseparent;
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos traj_vel traj_y]; % assign arc-path
+%                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                 end
             end
             added_new = false;
@@ -122,6 +121,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
 %                     keyboard
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
+%                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 4:'),keyboard, end
                     added_new = true;
                 end
             else % idx_prim > 1
@@ -129,6 +129,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
 %                     keyboard
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
+%                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
                     added_new = true;
                 end
             end
@@ -163,6 +164,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
 %             if rewired,keyboard,end
             if rewired && any(~any(isnan(x_rewire)))
+%                 if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 2:'),keyboard, end
 %                     keyboard
                     traj_pos_rewire=x_rewire(1,:);
                     traj_vel_rewire=x_rewire(2,:);
@@ -178,6 +180,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 set(cerchio,'Visible','off')
             end
         end
+%         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 1:'),keyboard, end
         disp('###')
     end
     
@@ -201,9 +204,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 end
             end
         end
-        if prim_cost(idx_prim) == 0
-            keyboard
-        end
+%         if prim_cost(idx_prim) == 0 % PROBLEMA COSTO NULLO
+%             keyboard
+%         end
     else
         if verbose
             disp('No primitives found')
