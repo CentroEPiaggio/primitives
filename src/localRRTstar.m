@@ -9,19 +9,19 @@ feasible = 0;
 % keyboard
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 % z_rand_dimensions = prim.dimensions;
-%% HARDFIX for last-node bug, still could not find the reason of the bug but this is a good fix for it.
-if T.nnodes>1
-        temp1 = T.Node{end-1};
-        temp2 = fix_nans(z_rand,prim.dimensions);
-        disp(['Temp1: ' num2str(temp1(:)') ' Temp2: ' num2str(temp2(:)')])
-        if isequaln(temp1(:),temp2(:))
-            disp('uguale!')
-            z_new = NaN;
-            G = Graph; % update graph
-            E = Edges; % update edges
-            return
-        end
-end
+% %% HARDFIX for last-node bug, still could not find the reason of the bug but this is a good fix for it.
+% if T.nnodes>1
+%         temp1 = T.Node{end-1};
+%         temp2 = fix_nans(z_rand,prim.dimensions);
+%         disp(['Temp1: ' num2str(temp1(:)') ' Temp2: ' num2str(temp2(:)')])
+%         if isequaln(temp1(:),temp2(:))
+%             disp('uguale!')
+%             z_new = NaN;
+%             G = Graph; % update graph
+%             E = Edges; % update edges
+%             return
+%         end
+% end
 %% TODO FIX THIS Ptree.Node{idx_prim} instead of Ptree.Node{1}
 [idx_nearest,z_nearest] = nearest(z_rand,T,Ptree.Node{idx_prim});
 

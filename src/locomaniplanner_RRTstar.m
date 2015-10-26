@@ -127,7 +127,8 @@ for ii=1:N_sample_max
         path_found = true;
         keyboard
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-        break
+%         break
+        continue % for anytime behavior
     end
     %% Check for available primitives to extend the last sampled point in a new dimension
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
@@ -203,6 +204,7 @@ for ii=1:N_sample_max
             N_cost_vector = [N_cost_vector, ii];
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+            hold on
             keyboard
             stop=false;
             %             break;
