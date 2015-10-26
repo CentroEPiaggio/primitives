@@ -146,8 +146,24 @@ for ii=1:N_sample_max
             z_new = fix_nans(z_new_temp,prim.dimensions);
             
             T.Node{T.nnodes} = z_new;
+             if reached(T.Node{end},z_goal)
+                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+                % the -1 is a dirty fix for the fact
+                % that this node is inserted two
+                % times, once via prim.extend and
+                % one from localRRT*(Chi_aug). Does
+                % not happen always but still it
+                % needs this workaround for those
+                % times.
+                disp('Goal reached (via Eleva)!');
+                path_found = true;
+                %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+                keyboard
+                stop = true;
+                break
+             end
             
-            if mod(ii,10)==0
+            if mod(ii,10)==0 && ~path_found
                 z_aug = z_goal(1:3); % every once in a while push in a known number
             else
                 z_aug = prim.chi.sample;
@@ -189,9 +205,13 @@ for ii=1:N_sample_max
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             keyboard
             stop=false;
-%             break;
+            %             break;
         end
     end
+%     if isequaln(T.Node{end-1},T.Node{end})
+%         disp('uguale!')
+%         keyboard
+%     end
 end
 
 disp('PLANNING COMPLETED')
