@@ -15,7 +15,7 @@ py = d.*sin(theta);
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
-movie=1; % force
+% movie=0; % force
 
 if movie==1
     if ~exist('movies/','dir')
@@ -30,7 +30,7 @@ if movie==1
     open(vidObj);
 end
 
-for ii=1:10:length(rt_t)
+for ii=1:100:length(rt_t)
     figure(fnum)
     clf
     % cart
