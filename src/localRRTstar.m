@@ -88,7 +88,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             disp(['size durante la alza',num2str(size(x))]);
         end
         %                 keyboard
-        x = [traj_pos; traj_vel; traj_y]; % assign arc-path
+        x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
     end
     
     if feasible
@@ -124,7 +124,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_pos = traj_pos_chooseparent;
                     traj_vel = traj_vel_chooseparent;
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
-                    x = [traj_pos traj_vel traj_y]; % assign arc-path
+                    x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                 end
             end
@@ -185,7 +185,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 traj_pos = traj_pos_rewire;
                 traj_vel = traj_vel_rewire;
                 traj_y = traj_yp_rewire; % TODO: FIX NAMES
-                x = [traj_pos traj_vel traj_y]; % assign arc-path
+                x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
             end
             plot_edges=pe;
             plot_nodes=pn;

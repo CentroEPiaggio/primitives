@@ -5,19 +5,23 @@ prim_filepath = [run_filepath 'prim/'];
 % init
 q_reference = [0;0;0];
 % loop
-for ii=2:opt_plan.nnodes
-    time = opt_plan.Node{ii}.time;
-    traj_x_speed_cart = opt_plan.Node{ii}.x(2,:);
-    traj_y_speed_cart = gradient(opt_plan.Node{ii}.x(3,:))/mean(diff(opt_plan.Node{ii}.time));
-    if strcmp(opt_plan.Node{ii-1}.primitive,'Eleva') && strcmp(opt_plan.Node{ii}.primitive,'Muovi')
-        disp('Eleva after Muovi. What''s going on?')
-        keyboard
-    end
+for kk=2:opt_plan.nnodes
+    if debug,keyboard,end
+    time = opt_plan.Node{kk}.time;
+    traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);
+    traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/mean(diff(opt_plan.Node{kk}.time));
+%     if strcmp(opt_plan.Node{kk-1}.primitive,'Eleva') && strcmp(opt_plan.Node{kk}.primitive,'Muovi')
+%         disp('Eleva after Muovi. What''s going on?')
+%         keyboard
+%     end
     q_reference_add = [q_reference(1,end)+time(:)'; % conventionally SIMULINK requires that the first row of the vector q_reference (used in a from_file block) is the time
         traj_x_speed_cart(:)';
         traj_y_speed_cart(:)'];
     q_reference = [q_reference, q_reference_add];
+    kk
+    keyboard
 end
+return
 Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
 movie=0;
 if(movie==1)
@@ -34,6 +38,7 @@ end
 
 save([run_filepath 'runna.mat'],'q_reference');
 save([run_filepath 'rsim_tfdata.mat'],'q_reference');
+% save([run_filepath 'params_steering.mat'],'q_reference');
 Tend = q_reference(1,end)*1.1; % 10 percent more time, for the show
 q0 = [0;deg2rad(90);2];
 qp0 = [0;0;0];

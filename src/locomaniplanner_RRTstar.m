@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-
+debug=0;
 verbose = 1;
 
 run utils/startup_lmp.m;
@@ -23,6 +23,7 @@ z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both
 z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 z_goal = [17;   0;NaN;NaN]; % goal state for debug
 z_goal = [17;   0;1;NaN]; % goal state for debug
+z_goal = [17;   0;2;NaN]; % goal state for debug
 
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -51,7 +52,7 @@ plot3(z_goal(1),z_goal(2),z_goal(3),'ko','linewidth',4) % plot initial point
 % plot(z_goal(1),z_goal(2),'ro','linewidth',4) % plot initial point
 plot_nodes=0;
 plot_edges=0;
-
+% dbcont
 % define obstacles
 Obstacles = tree;
 speed_limit_bottom = -1;
@@ -123,7 +124,7 @@ for ii=1:N_sample_max
     dim = ~isnan(z_goal);
     if path_found % anytime optimization
         %         [path,cost]=plot_biograph(source_node,goal_node,G);
-        [cost,path,~] = graphshortestpath(G,source_node,goal_node);
+        [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
         % save cost and iteration for plotting (anytime) stuff
         if ~isempty(cost_vector) && cost<cost_vector(end)
             cost_vector = [cost_vector, cost];
@@ -132,14 +133,14 @@ for ii=1:N_sample_max
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             hold on
-            keyboard
+            if debug,keyboard,end
         end
     elseif reached(T.Node{end},z_goal) % first time a path is found
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
         path_found = true;
-        keyboard
+        if debug,keyboard,end
         %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
         %         break
         continue % for anytime behavior
@@ -163,7 +164,7 @@ for ii=1:N_sample_max
             T.Node{T.nnodes} = z_new;
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
-                [cost,path,~] = graphshortestpath(G,source_node,goal_node);
+                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
                 % save cost and iteration for plotting (anytime) stuff
                 if ~isempty(cost_vector) && cost<cost_vector(end)
                     cost_vector = [cost_vector, cost];
@@ -172,7 +173,7 @@ for ii=1:N_sample_max
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
                     hold on
-                    keyboard
+                    if debug,keyboard,end
                 end
             elseif reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
@@ -187,7 +188,7 @@ for ii=1:N_sample_max
                 disp('Goal reached (via Eleva)!');
                 path_found = true;
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                keyboard
+                if debug,keyboard,end
                 stop = true;
                 break
             end
@@ -206,7 +207,7 @@ for ii=1:N_sample_max
             [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
-                [cost,path,~] = graphshortestpath(G,source_node,goal_node);
+                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
                 % save cost and iteration for plotting (anytime) stuff
                 if ~isempty(cost_vector) && cost<cost_vector(end)
                     cost_vector = [cost_vector, cost];
@@ -215,7 +216,7 @@ for ii=1:N_sample_max
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
                     hold on
-                    keyboard
+                    if debug,keyboard,end
                 end
             elseif reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
@@ -230,7 +231,7 @@ for ii=1:N_sample_max
                 disp('Goal reached (via Eleva)!');
                 path_found = true;
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                keyboard
+                if debug,keyboard,end
                 stop = true;
                 break
             end
@@ -240,14 +241,14 @@ for ii=1:N_sample_max
             source_node = 1;
             goal_node = idz_Goal; % current goal node
             % visualize tree structure with optimal path in red
-            [path,cost]=plot_biograph(source_node,goal_node,G);
+            [opt_path,cost]=plot_biograph(source_node,goal_node,G);
             % save cost and iteration for plotting (anytime) stuff
             cost_vector = [cost_vector, cost];
             N_cost_vector = [N_cost_vector, ii];
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             hold on
-            keyboard
+            if debug,keyboard,end
             stop=false;
             %             break;
         end
@@ -263,7 +264,7 @@ disp('PLANNING COMPLETED')
 %% simulate the optimal plan that has been found
 
 %% obtain plan as the shortest path in the graph
-opt_plan=extract_plan(T,E,path);
+opt_plan=extract_plan(T,E,opt_path);
 
 %% TODO: FIX MOVIE STUFF
 % figure(fig_chi0)
