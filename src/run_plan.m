@@ -5,7 +5,7 @@ prim_filepath = [run_filepath 'prim/'];
 % init
 q_reference = [0;0;0];
 % loop
-for kk=2:4%opt_plan.nnodes
+for kk=2:opt_plan.nnodes
     if debug,keyboard,end
     time = opt_plan.Node{kk}.time;
     traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);

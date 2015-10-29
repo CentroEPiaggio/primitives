@@ -23,20 +23,6 @@ classdef Elevate < primitive_library.PrimitiveFun
             disp('E-le-va-tion!')
             z_start
             z_end
-            % STEERING_MUOVI
-            % this function takes as arguments the following:
-            % enable_muovi: true or false
-            % enable_alza:  true or false
-            % xi: horizontal initial position
-            % xf: horizontal final position
-            % yi: vertical initial position
-            % yf: vertical final position
-            % the function returns the following:
-            % feasible: true or false
-            % cost: the cost of performing such action
-            % data: the data to be added to the plan tree?
-            
-            %% function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_muovi(xi,xf,vi,vf)
             
             % initialization
             feasible=false;
@@ -57,8 +43,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             yi = z_start(3);
             yf = z_end(3);
             
-            % prepare data for alza
-            %             if enable_alza
+            % prepare data for simulation
             primitive_abbassa_params = struct('name','abbassa',    ...
                 'yi',yi,            ...
                 'yf',yf,            ...
@@ -71,10 +56,6 @@ classdef Elevate < primitive_library.PrimitiveFun
                 );
             [time,traj_yp_cart]=gen_primitives_abbassa(primitive_abbassa_params);
             traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
-            
-            %             else
-            %                 traj_y_cart = zeros(size(traj_vel_cart));
-            %             end
             % generate initial condition file for simulation
             %             xi = [0;0;0]; % HARDFIX
             xi = z_start(1);
@@ -99,7 +80,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             % disp(['zmp flag(end): ' num2str(rt_zmpflag(end))]) % display feasibility bit
             % disp('In steering_muovi:')
             % keyboard
-            keyboard
+%             keyboard
             if rt_zmpflag(end)==0
                 feasible = 1;
                 cost = rt_cost(end);
@@ -110,18 +91,8 @@ classdef Elevate < primitive_library.PrimitiveFun
             % pack return data
             q = [traj_y_cart(1) traj_y_cart(end)];
             
-            %             if enable_muovi == false
-            %                 traj_pos = z_start(1)*ones(length(time),1);
-            %                 traj_vel = z_start(2)*ones(length(time),1);
-            %             end
-            
-            %             x = [traj_pos traj_vel traj_yp_cart]';
-            
-            %             x = [traj_yp_cart]';
             x = [traj_y_cart]';
             feasible
-            %             anima
-            return
         end
     end
 end

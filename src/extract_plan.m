@@ -11,15 +11,21 @@ for ii=2:length(path)
     opt_plan=opt_plan.addnode(ii-1,E{idx_parent,idx_child});
 end
 
+return
+%%
 z_init = T.Node{1};
 x_values=z_init(1);
 y_values=z_init(2);
-for k=2:length(opt_plan.Node) % HARDFIX: formally correct but it has to be generalized
+for k=2:3%length(opt_plan.Node) % HARDFIX: formally correct but it has to be generalized
     if isequal(opt_plan.Node{k}.primitive,'Muovi')
-        x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
+%         x_values = horzcat(x_values,opt_plan.Node{k}.primitive_q(2));
+        x_values = horzcat(x_values,opt_plan.Node{k}.x(2,:));
         y_values = horzcat(y_values,y_values(end));
     elseif isequal(opt_plan.Node{k}.primitive,'Eleva')
         x_values = horzcat(x_values,x_values(end));
-        y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(2));
+%         y_values = horzcat(y_values,opt_plan.Node{k}.primitive_q(2));
+        y_values = horzcat(y_values,opt_plan.Node{k}.x(2,:));
     end
 end
+
+keyboard

@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-debug=0;
+debug=1; % enable breakpoints
 verbose = 1;
 
 run utils/startup_lmp.m;

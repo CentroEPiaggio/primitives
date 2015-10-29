@@ -6,22 +6,7 @@ actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasi
 fig_xv=2; fig_xy = 3; fig_yv = 4;
 feasible = 0;
 %% check if other dimensions can be activated from the newest point (x_rand)
-% keyboard
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
-% z_rand_dimensions = prim.dimensions;
-% %% HARDFIX for last-node bug, still could not find the reason of the bug but this is a good fix for it.
-% if T.nnodes>1
-%         temp1 = T.Node{end-1};
-%         temp2 = fix_nans(z_rand,prim.dimensions);
-%         disp(['Temp1: ' num2str(temp1(:)') ' Temp2: ' num2str(temp2(:)')])
-%         if isequaln(temp1(:),temp2(:))
-%             disp('uguale!')
-%             z_new = NaN;
-%             G = Graph; % update graph
-%             E = Edges; % update edges
-%             return
-%         end
-% end
 %% TODO FIX THIS Ptree.Node{idx_prim} instead of Ptree.Node{1}
 [idx_nearest,z_nearest] = nearest(z_rand,T,Ptree.Node{idx_prim});
 
@@ -30,47 +15,20 @@ z_min = z_nearest; % initialization of z_min which is the point in space that gi
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
 z_nearest_temp=z_nearest;
 
-% TODO: valutare il miglior parametro per muoversi in Chi0.
-% DONE: lo fa la steering function
+% % The next 6 lines of code allow a point to be extended with a coordinate
+% % in the new primitive (e.g. a dimension from NaN becomes a real number)
+% dimChi0 = Ptree.Node{1}.dimensions;%Chi.P.Dim;
+% dimP = prim.dimensions; %.chi.P.Dim;
+% dim_z_rand = ~isnan(z_rand);
+% dim_z_nearest = ~isnan(z_nearest);
 
-% The next 6 lines of code allow a point to be extended with a coordinate
-% in the new primitive (e.g. a dimension from NaN becomes a real number)
-dimChi0 = Ptree.Node{1}.dimensions;%Chi.P.Dim;
-dimP = prim.dimensions; %.chi.P.Dim;
-dim_z_rand = ~isnan(z_rand);
-dim_z_nearest = ~isnan(z_nearest);
-
-% if dimP > dimChi0 % add trailing zeros for dimensions outside Chi0
-%     z_rand_temp(dimChi0+1:dimP) = 0.0;
-%     z_nearest_temp(dimChi0+1:dimP) = 0.0;
-% end
-% to connect the two points with the primitive prim, it is necessary that
-% both of them are initialized in the same image space (e.g. same non-NaN
-% dimensions).
-% The method PrimitiveFun.extend does this.
-% z_nearest_temp=prim.extend(z_nearest_temp);
-% WRONG: it should be the rand sample that is extended, not the nearest!
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
-    % TODO: generalize i/o for different primitive types.
-    %%%keyboard
-    %     xi = z_nearest_temp(1); vi = z_nearest_temp(2);
-    %     xf = z_rand_temp(1); vf = z_rand_temp(2);
-    %     q = [xi xf vi vf];
-    %     [feasible,cost,q,traj_pos,traj_vel]=steering_muovi(xi,xf,vi,vf);
     [feasible,cost,q,x,time] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
-    %     keyboard
-    %     if feasible
-    %         z_new = z_nearest_temp;
-    %         z_new = fix_nans(x(:,end));
-    %     else
-    % keyboard
     z_new=z_rand;
-    %     end
     dim_z_new = prim.dimensions;
     disp(['size durante la muovi',num2str(size(x))]);
     if feasible
         if idx_prim == 1 % collision checking only if we are on the Move primitive
-            %             keyboard
             traj_pos = x(1,:);
             traj_vel = x(2,:);
             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
@@ -81,7 +39,6 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             end
             x = [traj_pos; traj_vel;];
         else % Eleva primitive
-            %             traj_pos = %x(1,:);
             traj_vel = z_nearest_temp(2)*ones(size(x));%x(2,:);
             traj_pos = z_nearest_temp(1)+cumtrapz(time,traj_vel);
             traj_y = x;
@@ -95,12 +52,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         cardV = T.nnodes; % number of vertices in the graph
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
-        %         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 6:'),keyboard, end
         disp('###')
-        %%keyboard
-        %             idx_near_bubble                                                 % get all the nodes with T.get(idx_near_bubble{1})
         if raggio>0
-            %                 disp(['raggio: ' num2str(raggio)]);
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
