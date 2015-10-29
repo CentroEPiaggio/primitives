@@ -1,4 +1,4 @@
-function [T,G,E,z_new,plot_nodes,plot_edges,feasible] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
@@ -15,6 +15,8 @@ z_min = z_nearest; % initialization of z_min which is the point in space that gi
 z_rand_temp=z_rand; % why the heck did we define this temp vars?
 z_nearest_temp=z_nearest;
 
+z_new=z_rand;
+
 % % The next 6 lines of code allow a point to be extended with a coordinate
 % % in the new primitive (e.g. a dimension from NaN becomes a real number)
 % dimChi0 = Ptree.Node{1}.dimensions;%Chi.P.Dim;
@@ -22,9 +24,12 @@ z_nearest_temp=z_nearest;
 % dim_z_rand = ~isnan(z_rand);
 % dim_z_nearest = ~isnan(z_nearest);
 
+if checkdiscontinuity(T,Edges)
+    keyboard
+end
+
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     [feasible,cost,q,x,time] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
-    z_new=z_rand;
     dim_z_new = prim.dimensions;
     disp(['size durante la muovi',num2str(size(x))]);
     if feasible
@@ -37,8 +42,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             else
                 traj_y   = ones(size(traj_vel)); % HARDFIX: default y is 1
             end
-            x = [traj_pos; traj_vel;];
         else % Eleva primitive
+%             keyboard
             traj_vel = z_nearest_temp(2)*ones(size(x));%x(2,:);
             traj_pos = z_nearest_temp(1)+cumtrapz(time,traj_vel);
             traj_y = x;
@@ -46,8 +51,18 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         end
         %                 keyboard
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
+        % this should fix the discontinuity problem
+        for jj=1:length(z_new)
+            if ~isnan(z_new(jj))
+                z_new(jj) = x(jj,end);
+            end
+        end
     end
     
+    if feasible && ~isequal(z_nearest_temp(1:2),x(1:2,1))
+        disp('WTF?')
+        keyboard
+    end
     if feasible
         cardV = T.nnodes; % number of vertices in the graph
         
@@ -79,6 +94,17 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
+                    % this should fix the discontinuity problem
+        for jj=1:length(z_new)
+            if ~isnan(z_new(jj))
+                z_new(jj) = x(jj,end);
+            end
+        end
+                end
+                tempnode = T.get(idx_min);
+                if feasible && ~isequal(tempnode(1:2),x(1:2,1))
+                    disp('WTF ChooseParent?')
+                    keyboard
                 end
             end
             added_new = false;
@@ -98,6 +124,12 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
                     added_new = true;
                 end
+            end
+            if added_new
+                if checkdiscontinuity(T,Edges)
+                    keyboard
+                end
+                
             end
             if verbose && added_new
                 figure(fig_xv)
@@ -126,12 +158,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             z_min = T.get(idx_min);
             
             idx_new = T.nnodes;
-            %             [T,Graph,Edges,traj_pos_rewire,traj_vel_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
             [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-            %             if rewired,keyboard,end
             if rewired && any(~any(isnan(x_rewire)))
-                %                 if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 2:'),keyboard, end
-                %                     keyboard
                 traj_pos_rewire=x_rewire(1,:);
                 traj_vel_rewire=x_rewire(2,:);
                 traj_yp_rewire =x_rewire(3,:);
@@ -139,7 +167,17 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 traj_vel = traj_vel_rewire;
                 traj_y = traj_yp_rewire; % TODO: FIX NAMES
                 x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+                % this should fix the discontinuity problem
+        for jj=1:length(z_new)
+            if ~isnan(z_new(jj))
+                z_new(jj) = x(jj,end);
             end
+        end
+            end
+%             if feasible && ~isequal((1:2),x(1:2,1))
+%                 disp('WTF ReWire?')
+%                 keyboard
+%             end
             plot_edges=pe;
             plot_nodes=pn;
             %             end
@@ -150,7 +188,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         %         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 1:'),keyboard, end
         disp('###')
     end
-        
+    
     if feasible
         if idx_prim ==1
             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
@@ -171,9 +209,6 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 end
             end
         end
-        %         if prim_cost(idx_prim) == 0 % PROBLEMA COSTO NULLO
-        %             keyboard
-        %         end
     else
         if verbose
             disp('No primitives found')
@@ -188,5 +223,8 @@ else
     % do nothing
 end
 
+Tree = T; % update tree
 G = Graph; % update graph
 E = Edges; % update edges
+
+

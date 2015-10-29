@@ -43,17 +43,20 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         %         keyboard
         % calculate feasibility and cost
         %         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
-%         z_near = z_near(:,i);
+        %         z_near = z_near(:,i);
         %         keyboard
         [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new); % uniform interface! Yeay!
         if feasible
-            if idx_prim == 1 % collision checking only if we are on the Move primitive
-                %             keyboard
+            if idx_prim == 1 % trying to fix the connection problem between different kind of primitives
                 traj_pos_chooseparent = x_chooseparent(1,:);
                 traj_vel_chooseparent = x_chooseparent(2,:);
-%                 keyboard
                 traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
-%                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+                if ~isnan(z_near(3)) % HARDFIX
+                    traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
+                else
+                    traj_y_chooseparent   = ones(size(traj_vel_chooseparent)); % HARDFIX: default y is 1
+                end
+                %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
             else % Eleva primitive
                 %             traj_pos = %x(1,:);
                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
@@ -62,6 +65,10 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 disp(['size durante la alza',num2str(size(x))]);
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
+            if feasible && ~isequal(z_near(1:2),x_chooseparent(1:2,1))
+                disp('WTF ChooseParent is doing?')
+                keyboard
+            end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree

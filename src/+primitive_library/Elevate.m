@@ -63,6 +63,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             vi = z_start(2);
             traj_vel_cart = ones(size(time))*vi; % HARDFIX
             q0 = [xi(:);deg2rad(90);z_start(3)];
+            q0 = [xi(:);deg2rad(90);traj_y_cart(1)];
             qp0 = [vi(:);0;0];
             qref0 = q0;
             ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);

@@ -50,16 +50,20 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_pos_rewire = x_rewire(1,:);
                 traj_vel_rewire = x_rewire(2,:);
 %                 keyboard
-                traj_y_rewire   = z_near(3,:)*ones(size(traj_vel_rewire));
+                traj_y_rewire   = z_new(3,:)*ones(size(traj_vel_rewire));
 %                 x_rewire = [traj_pos_rewire traj_vel_rewire];
             else % Eleva primitive
                 %             traj_pos = %x(1,:);
-                traj_vel_rewire = z_near(2)*ones(size(x_rewire));%x(2,:);
-                traj_pos_rewire = z_near(1)+cumtrapz(time_rewire,traj_vel_rewire);
+                traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
+                traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
                 traj_y_rewire = x_rewire;
                 disp(['size durante la alza',num2str(size(x_rewire))]); % WHAT IS THIS?
             end
             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
+            if feasible && ~isequal(z_new(1:2),x_rewire(1:2,1))
+                disp('WTF ReWire is doing?')
+                keyboard
+            end
         end
         if feasible && ~isinf(cost_rewire) && ~isnan(cost_rewire) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'],1)) % ObstacleFree
