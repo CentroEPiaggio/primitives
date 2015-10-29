@@ -15,7 +15,7 @@ py = d.*sin(theta);
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
-% movie=0; % force
+movie=1; % force
 
 if movie==1
     if ~exist('movies/','dir')
@@ -33,11 +33,15 @@ end
 for ii=1:100:length(rt_t)
     figure(fnum)
     clf
+    % plot obstacles
+    obs=Obstacles.get(2);
+    obs.P.plot('color','black','alpha',1);
+    hold on
     % cart
     X_cart = [x_cart(ii)-cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)-cart_width/2];
     Y_cart = [-cart_height;-cart_height;0;0];  
     patch(X_cart,Y_cart,'r');
-    hold on
+%     hold on
     % pendulum
     X_pend = [x_cart(ii);px(ii)];
     Y_pend = [0;py(ii)];

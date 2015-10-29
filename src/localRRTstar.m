@@ -17,40 +17,44 @@ z_nearest_temp=z_nearest;
 
 z_new=z_rand;
 
-% % The next 6 lines of code allow a point to be extended with a coordinate
-% % in the new primitive (e.g. a dimension from NaN becomes a real number)
-% dimChi0 = Ptree.Node{1}.dimensions;%Chi.P.Dim;
-% dimP = prim.dimensions; %.chi.P.Dim;
-% dim_z_rand = ~isnan(z_rand);
-% dim_z_nearest = ~isnan(z_nearest);
-
 if checkdiscontinuity(T,Edges)
-    keyboard
+    disp('discontinuity!')
+%     keyboard
 end
 
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
     [feasible,cost,q,x,time] = prim.steering(z_nearest_temp,z_rand_temp); % uniform interface! Yeay!
     dim_z_new = prim.dimensions;
-    disp(['size durante la muovi',num2str(size(x))]);
     if feasible
-        if idx_prim == 1 % collision checking only if we are on the Move primitive
+        % collision checking
+        if idx_prim == 1
+            %             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
+%             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
             traj_pos = x(1,:);
             traj_vel = x(2,:);
-            [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
             if ~isnan(z_nearest_temp(3)) % HARDFIX
-                traj_y   = z_nearest_temp(3,:)*ones(size(traj_vel));
+                traj_y   = z_nearest_temp(3,:)*ones(1,size(traj_vel,2));
             else
-                traj_y   = ones(size(traj_vel)); % HARDFIX: default y is 1
+                traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
             end
         else % Eleva primitive
-%             keyboard
-            traj_vel = z_nearest_temp(2)*ones(size(x));%x(2,:);
+%             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
+            traj_vel = z_nearest_temp(2)*ones(1,size(x,2));%x(2,:);
             traj_pos = z_nearest_temp(1)+cumtrapz(time,traj_vel);
-            traj_y = x;
-            disp(['size durante la alza',num2str(size(x))]);
+            if size(x,1)>2
+                traj_y = x(3,:);
+            elseif size(x,1)==1
+                traj_y = x;
+            else
+                disp('omg')
+                keyboard
+            end
         end
-        %                 keyboard
+        %         keyboard
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
+        disp('before collisionfree')
+        [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
+        disp('after  collisionfree')
         % this should fix the discontinuity problem
         for jj=1:length(z_new)
             if ~isnan(z_new(jj))
@@ -95,11 +99,11 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                     % this should fix the discontinuity problem
-        for jj=1:length(z_new)
-            if ~isnan(z_new(jj))
-                z_new(jj) = x(jj,end);
-            end
-        end
+                    for jj=1:length(z_new)
+                        if ~isnan(z_new(jj))
+                            z_new(jj) = x(jj,end);
+                        end
+                    end
                 end
                 tempnode = T.get(idx_min);
                 if feasible && ~isequal(tempnode(1:2),x(1:2,1))
@@ -168,16 +172,16 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 traj_y = traj_yp_rewire; % TODO: FIX NAMES
                 x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                 % this should fix the discontinuity problem
-        for jj=1:length(z_new)
-            if ~isnan(z_new(jj))
-                z_new(jj) = x(jj,end);
+                for jj=1:length(z_new)
+                    if ~isnan(z_new(jj))
+                        z_new(jj) = x(jj,end);
+                    end
+                end
             end
-        end
-            end
-%             if feasible && ~isequal((1:2),x(1:2,1))
-%                 disp('WTF ReWire?')
-%                 keyboard
-%             end
+            %             if feasible && ~isequal((1:2),x(1:2,1))
+            %                 disp('WTF ReWire?')
+            %                 keyboard
+            %             end
             plot_edges=pe;
             plot_nodes=pn;
             %             end

@@ -64,7 +64,13 @@ speed_limit_exit = 15;
 % speed_limit_entry = 0;
 % speed_limit_exit = 0;
 obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit_bottom;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit_bottom; speed_limit_exit speed_limit_top]'*1)');
+x_wall_min = 10;
+x_wall_max = x_wall_min + 5;
+y_wall_min = 1;
+y_wall_max = y_wall_min + 5;
+obstacle_wall = Imagespace(([x_wall_min y_wall_min; x_wall_min y_wall_max; x_wall_max y_wall_max; x_wall_max y_wall_min]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
+Obstacles = Obstacles.addnode(Obstacles.nnodes,obstacle_wall);
 % plot obstacles
 figure(fig_chi0)
 obstacle_speed_limit.P.plot('color','black','alpha',1);

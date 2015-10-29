@@ -21,8 +21,8 @@ classdef Move < primitive_library.PrimitiveFun
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('Move like Jagger!')
-            z_start
-            z_end
+%             z_start
+%             z_end
             % STEERING_MUOVI
             % this function takes as arguments the following:
             % enable_muovi: true or false
