@@ -147,7 +147,7 @@ for ii=1:N_sample_max
             plot_biograph(source_node,goal_node,G);
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-%             hold on
+            %             hold on
             save_test_data
             if debug,keyboard,end
         end
@@ -174,10 +174,26 @@ for ii=1:N_sample_max
             prim = Ptree.Node{jj};
             % Extend the z_new point (already in the tree) with its initial_extend
             % values (see PrimitiveFun.extend)
+            z_whatwas = z_new;
             z_new_temp=prim.extend(z_new);
-            z_new = fix_nans(z_new_temp,prim.dimensions);
-            
-            T.Node{T.nnodes} = z_new;
+            z_new_extended = fix_nans(z_new_temp,prim.dimensions);
+                        
+            if checkdiscontinuity(T,E)
+                keyboard
+            end
+            before = T.get(T.nnodes)
+            before_E = E{T.Parent(T.nnodes),T.nnodes};
+            before_T = T;
+            if before(1:2) ~= z_whatwas(1:2)
+                disp('ah-ah!')
+                keyboard
+            end
+            T.Node{T.nnodes} = z_new_extended;
+            after = T.get(T.nnodes)
+            after_E = E{T.Parent(T.nnodes),T.nnodes};
+            if checkdiscontinuity(T,E)
+                keyboard
+            end
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
@@ -188,9 +204,9 @@ for ii=1:N_sample_max
                     plot_biograph(source_node,goal_node,G);
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-%                     hold on
+                    %                     hold on
                     save_test_data
-                    if debug,keyboard,end                    
+                    if debug,keyboard,end
                 end
             elseif reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
@@ -221,7 +237,7 @@ for ii=1:N_sample_max
             plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
             Chi_aug = prim.chi;
             cprintf('red','Sto per provare con la eleva')
-            [T,G,E,z_new,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+            [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
@@ -232,7 +248,7 @@ for ii=1:N_sample_max
                     plot_biograph(source_node,goal_node,G);
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-%                     hold on
+                    %                     hold on
                     save_test_data
                     if debug,keyboard,end
                 end
@@ -265,7 +281,7 @@ for ii=1:N_sample_max
             N_cost_vector = [N_cost_vector, ii];
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-%             hold on
+            %             hold on
             save_test_data
             if debug,keyboard,end
             stop=false;
@@ -276,21 +292,21 @@ for ii=1:N_sample_max
     %         disp('uguale!')
     %         keyboard
     %     end
-%     for jj=2:T.nnodes
-%         idx_sorgente = T.Parent(jj);
-%         idx_destinazione = jj;
-%         sorgente = T.get(idx_sorgente);
-%         destinazione = T.get(idx_destinazione);
-%         x=E{idx_sorgente,idx_destinazione}.x;
-%         if x(1:2,1) ~= sorgente(1:2)
-%             disp('cazzo')
-%             keyboard
-%         end
-%         if x(1:2,end) ~= destinazione(1:2)
-%             disp('cazzo')
-%             keyboard
-%         end
-%     end
+    %     for jj=2:T.nnodes
+    %         idx_sorgente = T.Parent(jj);
+    %         idx_destinazione = jj;
+    %         sorgente = T.get(idx_sorgente);
+    %         destinazione = T.get(idx_destinazione);
+    %         x=E{idx_sorgente,idx_destinazione}.x;
+    %         if x(1:2,1) ~= sorgente(1:2)
+    %             disp('cazzo')
+    %             keyboard
+    %         end
+    %         if x(1:2,end) ~= destinazione(1:2)
+    %             disp('cazzo')
+    %             keyboard
+    %         end
+    %     end
 end
 
 disp('PLANNING COMPLETED')

@@ -20,7 +20,7 @@ z_new=z_rand;
 
 if checkdiscontinuity(T,Edges)
     disp('discontinuity!')
-%     keyboard
+    %     keyboard
 end
 
 if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.dimensions>0)],1)) % check if both points are in the image space of the primitive
@@ -30,7 +30,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         % collision checking
         if idx_prim == 1
             %             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
-%             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
+            %             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
             traj_pos = x(1,:);
             traj_vel = x(2,:);
             if ~isnan(z_nearest_temp(3)) % HARDFIX
@@ -39,7 +39,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
             end
         else % Eleva primitive
-%             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
+            %             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
             traj_vel = z_nearest_temp(2)*ones(1,size(x,2));%x(2,:);
             traj_pos = z_nearest_temp(1)+cumtrapz(time,traj_vel);
             if size(x,1)>2
@@ -56,6 +56,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         disp('before collisionfree')
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
         disp('after  collisionfree')
+        if checkdiscontinuity(T,Edges)
+            keyboard
+        end
         % this should fix the discontinuity problem
         for jj=1:length(z_new)
             if ~isnan(z_new(jj))
@@ -63,7 +66,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             end
         end
     end
-    
+    if checkdiscontinuity(T,Edges)
+        keyboard
+    end
     if feasible && ~isequal(z_nearest_temp(1:2),x(1:2,1))
         disp('WTF?')
         keyboard
@@ -99,12 +104,16 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
-                    % this should fix the discontinuity problem
-                    for jj=1:length(z_new)
-                        if ~isnan(z_new(jj))
-                            z_new(jj) = x(jj,end);
+                    if x(1:2,end) ~= z_new(1:2)
+                        disp('ChooseParent slightly changed the goal point!')
+                        %                     % this should fix the discontinuity problem
+                        for jj=1:length(z_new)
+                            if ~isnan(z_new(jj))
+                                z_new(jj) = x(jj,end);
+                            end
                         end
                     end
+                    
                 end
                 tempnode = T.get(idx_min);
                 if feasible && ~isequal(tempnode(1:2),x(1:2,1))
@@ -112,11 +121,20 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     keyboard
                 end
             end
+            
+            if checkdiscontinuity(T,Edges)
+                keyboard
+            end
+            
             added_new = false;
             
             if idx_prim==1
                 if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                     %                     keyboard
+                    if z_new(1:2) ~= x(1:2,end)
+                        disp('what???')
+                        keyboard
+                    end
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 4:'),keyboard, end
                     added_new = true;
@@ -125,10 +143,17 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 %                 keyboard
                 if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
                     %                     keyboard
+                    if z_new(1:2) ~= x(1:2,end)
+                        disp('what???')
+                        keyboard
+                    end
                     [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
                     added_new = true;
                 end
+            end
+            if checkdiscontinuity(T,Edges)
+                keyboard
             end
             if added_new
                 if checkdiscontinuity(T,Edges)
@@ -164,7 +189,11 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             
             idx_new = T.nnodes;
             [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-            if rewired && any(~any(isnan(x_rewire)))
+            
+            if checkdiscontinuity(T,Edges)
+                keyboard
+            end
+            if rewired % && any(~any(isnan(x_rewire)))
                 traj_pos_rewire=x_rewire(1,:);
                 traj_vel_rewire=x_rewire(2,:);
                 traj_yp_rewire =x_rewire(3,:);
@@ -177,6 +206,9 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     if ~isnan(z_new(jj))
                         z_new(jj) = x(jj,end);
                     end
+                end
+                if checkdiscontinuity(T,Edges)
+                    keyboard
                 end
             end
             %             if feasible && ~isequal((1:2),x(1:2,1))
@@ -232,4 +264,6 @@ Tree = T; % update tree
 G = Graph; % update graph
 E = Edges; % update edges
 
-
+if checkdiscontinuity(T,Edges)
+    keyboard
+end

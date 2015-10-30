@@ -1,7 +1,7 @@
 %INSERTNODE adds the new vertex z_new to the graph and creates an edge from
 % z_current to z_new
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
-function [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q, cost, x,time)
+function [T,G,E] = InsertNode(idx_current, z_new,  T,     G,     E, prim, q,     cost, x, time)
 disp('Entered inside InsertNode')
 if idx_current==0 % first node
     % add inial state to the tree
@@ -40,9 +40,7 @@ else
     end
 end
 
-if checkdiscontinuity(T,E)
-    keyboard
-end
+
 %
 % if T.nnodes>1
 %     if sum(isnan(T.Node{end})) == sum(isnan(T.Node{end-1}))
