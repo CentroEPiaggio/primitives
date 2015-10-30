@@ -29,7 +29,8 @@ for ii=1:Obstacles.nnodes
         %         keyboard
         %         close(fig)
     elseif ii==2
-        checkon = [traj_pos(:)'; traj_y(:)'];
+%         checkon = [traj_pos(:)'; traj_y(:)'];
+        checkon = [traj_pos(:)'; traj_vel(:)'; traj_y(:)'];
         %         % obstacle vs trajectory visualization
         %         fig=figure(35);
         %         Obstacles.Node{1}.P.plot('color','blue','alpha',0.5);

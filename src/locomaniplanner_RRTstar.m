@@ -23,7 +23,7 @@ z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both
 z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 z_goal = [17;   0;NaN;NaN]; % goal state for debug
 z_goal = [17;   0;1;NaN]; % goal state for debug
-z_goal = [17;   0;2;NaN]; % goal state for debug
+z_goal = [20;   0;3;NaN]; % goal state for debug
 
 [T,G,E] = InitializeTree();
 [T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -66,9 +66,15 @@ speed_limit_exit = 15;
 obstacle_speed_limit = Imagespace(([speed_limit_entry speed_limit_bottom;speed_limit_entry speed_limit_top;speed_limit_exit speed_limit_bottom; speed_limit_exit speed_limit_top]'*1)');
 x_wall_min = 10;
 x_wall_max = x_wall_min + 5;
-y_wall_min = 1;
+y_wall_min = 2;
 y_wall_max = y_wall_min + 5;
-obstacle_wall = Imagespace(([x_wall_min y_wall_min; x_wall_min y_wall_max; x_wall_max y_wall_max; x_wall_max y_wall_min]'*1)');
+v_wall_min = -5;
+v_wall_max = 5;
+obstacle_wall = Imagespace(([ ...
+    x_wall_min v_wall_min y_wall_min; x_wall_min v_wall_max y_wall_min; ...
+    x_wall_min v_wall_min y_wall_max; x_wall_min v_wall_max y_wall_max; ...
+    x_wall_max v_wall_min y_wall_max; x_wall_max v_wall_max y_wall_max; ...
+    x_wall_max v_wall_min y_wall_min; x_wall_max v_wall_max y_wall_min]'*1)');
 Obstacles = Obstacles.addnode(0,obstacle_speed_limit);
 Obstacles = Obstacles.addnode(Obstacles.nnodes,obstacle_wall);
 % plot obstacles
@@ -76,6 +82,8 @@ figure(fig_chi0)
 obstacle_speed_limit.P.plot('color','black','alpha',1);
 figure(fig_xy)
 Chi1.P.plot('color','lightblue','alpha',0.5); hold on;
+obstacle_wall.P.plot('color','black','alpha',1);
+
 % figure(fig_trajectories)
 % obstacle_speed_limit.P.plot('color','black','alpha',1);
 
