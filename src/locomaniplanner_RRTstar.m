@@ -20,6 +20,7 @@ end
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
 z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
+z_init = [0  ;0  ;3;NaN]; % initial state. Position and speed of cart are both zeros
 z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 z_goal = [17;   0;NaN;NaN]; % goal state for debug
 z_goal = [17;   0;1;NaN]; % goal state for debug

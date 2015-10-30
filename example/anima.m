@@ -8,10 +8,11 @@ x_cart  = rt_q(:,1);
 theta   = rt_q(:,2);
 d       = rt_q(:,3);
 px = x_cart + d.*cos(theta);
-py = d.*sin(theta);
+py = d.*sin(theta) + 1; % 1 is the offset value, has to be parametrized
 % plot routine
   fh=findall(0,'type','figure');
   fnum = length(fh)+1;
+  fnum = 100;
 figure(fnum)
 set( gcf, 'DoubleBuffer', 'on' );
 
@@ -29,14 +30,22 @@ if movie==1
     vidObj.FrameRate = 100;
     open(vidObj);
 end
-
+%%
+close all
+obs=Obstacles.get(2);
+obst=obs.P.projection([1 3],'fourier');
+start_region = z_init;
+goal_region = z_goal;
+%%
+    obs.P.plot('color','black','alpha',1);
 for ii=1:100:length(rt_t)
     figure(fnum)
     clf
     % plot obstacles
-    obs=Obstacles.get(2);
-    obs.P.plot('color','black','alpha',1);
+    obst.plot
     hold on
+    plot(start_region(1),1,'g*','Linewidth',4);
+    plot(goal_region(1),goal_region(3),'r*','Linewidth',4);
     % cart
     X_cart = [x_cart(ii)-cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)+cart_width/2;x_cart(ii)-cart_width/2];
     Y_cart = [-cart_height;-cart_height;0;0];  

@@ -5,6 +5,7 @@ prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any f
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_xv=2; fig_xy = 3; fig_yv = 4;
 feasible = 0;
+
 %% check if other dimensions can be activated from the newest point (x_rand)
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
 %% TODO FIX THIS Ptree.Node{idx_prim} instead of Ptree.Node{1}
