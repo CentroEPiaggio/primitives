@@ -11,9 +11,6 @@ disp('Inside ChooseParent')
 
 %CHOOSEPARENT determines the best parent in the cost sense
 idx_I = 1; % initial node is node 1
-% x_new = T.get(idx_new);
-x_nearest = T.get(idx_nearest);
-c_new = Inf;
 
 % costo = costo accumulato + costo nuovo campione
 cost_z_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
@@ -50,7 +47,6 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             if idx_prim == 1 % trying to fix the connection problem between different kind of primitives
                 traj_pos_chooseparent = x_chooseparent(1,:);
                 traj_vel_chooseparent = x_chooseparent(2,:);
-                traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
                 if ~isnan(z_near(3)) % HARDFIX
                     traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
                 else

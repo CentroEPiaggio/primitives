@@ -1,5 +1,5 @@
 source_node = 1;
-goal_node = 10% idz_Goal
+goal_node = idz_Goal
 [opt_path,cost]=plot_biograph(source_node,goal_node,G)
 opt_plan=extract_plan(T,E,opt_path)
 %%
@@ -21,8 +21,8 @@ title('pos')
 figure
 plot(opt_plan.Node{2}.time,opt_plan.Node{2}.x, ...
     10+opt_plan.Node{3}.time,opt_plan.Node{3}.x, ...
-     20+opt_plan.Node{4}.time,opt_plan.Node{4}.x, ...
-    30+opt_plan.Node{5}.time,opt_plan.Node{5}.x)
+     20+opt_plan.Node{4}.time,opt_plan.Node{4}.x);%, ...
+%     30+opt_plan.Node{5}.time,opt_plan.Node{5}.x)
 legend('pos','vel','height')
 grid on
 

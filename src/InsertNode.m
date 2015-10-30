@@ -40,6 +40,9 @@ else
     end
 end
 
+if checkdiscontinuity(T,E)
+    keyboard
+end
 %
 % if T.nnodes>1
 %     if sum(isnan(T.Node{end})) == sum(isnan(T.Node{end-1}))

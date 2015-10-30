@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-debug=1; % enable breakpoints
+debug=0; % enable breakpoints
 verbose = 1;
 
 run utils/startup_lmp.m;
@@ -20,7 +20,7 @@ end
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
 z_init = [0  ;0  ;NaN;NaN]; % initial state. Position and speed of cart are both zeros
-z_init = [0  ;0  ;3;NaN]; % initial state. Position and speed of cart are both zeros
+z_init = [0  ;0  ;1;NaN]; % initial state. Position and speed of cart are both zeros
 z_goal = [NaN;NaN;NaN;  1]; % goal state. Button shall be pressed
 z_goal = [17;   0;NaN;NaN]; % goal state for debug
 z_goal = [17;   0;1;NaN]; % goal state for debug
@@ -147,7 +147,8 @@ for ii=1:N_sample_max
             plot_biograph(source_node,goal_node,G);
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-            hold on
+%             hold on
+            save_test_data
             if debug,keyboard,end
         end
     elseif reached(T.Node{end},z_goal) % first time a path is found
@@ -187,8 +188,9 @@ for ii=1:N_sample_max
                     plot_biograph(source_node,goal_node,G);
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    hold on
-                    if debug,keyboard,end
+%                     hold on
+                    save_test_data
+                    if debug,keyboard,end                    
                 end
             elseif reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
@@ -230,7 +232,8 @@ for ii=1:N_sample_max
                     plot_biograph(source_node,goal_node,G);
                     figure(10)
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    hold on
+%                     hold on
+                    save_test_data
                     if debug,keyboard,end
                 end
             elseif reached(T.Node{end},z_goal)
@@ -262,7 +265,8 @@ for ii=1:N_sample_max
             N_cost_vector = [N_cost_vector, ii];
             figure(10)
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-            hold on
+%             hold on
+            save_test_data
             if debug,keyboard,end
             stop=false;
             %             break;
