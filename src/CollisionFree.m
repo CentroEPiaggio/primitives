@@ -16,26 +16,45 @@ traj_vel = x(2,:);
 traj_y = x(3,:);
 
 kk=1;
-obstaclefree=true;
+obstaclehit=true;
 for ii=1:Obstacles.nnodes
     if ii==1
         checkon = [traj_pos(:)'; traj_vel(:)'];
+        %         % obstacle vs trajectory visualization
+        %         fig=figure(35);
+        %         Obstacles.Node{1}.P.plot('color','black','alpha',0.5);
+        %         hold on
+        %         plot(traj_pos,traj_vel,'r','linewidth',2);
+        %         axis auto
+        %         keyboard
+        %         close(fig)
     elseif ii==2
         checkon = [traj_pos(:)'; traj_y(:)'];
+        %         % obstacle vs trajectory visualization
+        %         fig=figure(35);
+        %         Obstacles.Node{1}.P.plot('color','blue','alpha',0.5);
+        %         hold on
+        %         plot(traj_pos,traj_y,'r','linewidth',2);
+        %         axis auto
+        % %         keyboard
+        %         close(fig)
     else
         error('remember to extend it')
     end
-    obstaclefree=obstaclefree & any(Obstacles.Node{1}.P.contains(checkon,1));
+    obstaclehit=obstaclehit & any(Obstacles.Node{ii}.P.contains(checkon,1));
+    if obstaclehit
+        disp('in collision')
+        feasible = false;
+        cost = Inf;
+        %         keyboard
+        return
+    end
 end
-if obstaclefree
-    disp('obstaclefree')
-    feasible = true;
-    cost = costo;
-else
-    disp('in collision')
-    feasible = false;
-    cost = Inf;
-end
+% no obstacle encountered
+disp('obstaclefree')
+feasible = true;
+cost = costo;
+% keyboard
 return
 %% FIX THIS LOOP
 z_start = z_begin;
