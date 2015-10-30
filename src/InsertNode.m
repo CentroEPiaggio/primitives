@@ -3,9 +3,10 @@
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
 function [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q, cost, x,time)
 disp('Entered inside InsertNode')
-if isempty(prim)
+if idx_current==0 % first node
     % add inial state to the tree
     T = T.addnode(0,z_new);
+    return
 else
     if ~isinf(cost) && cost>0
         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
@@ -38,6 +39,7 @@ else
         keyboard
     end
 end
+
 %
 % if T.nnodes>1
 %     if sum(isnan(T.Node{end})) == sum(isnan(T.Node{end-1}))
