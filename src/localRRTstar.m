@@ -18,7 +18,7 @@ z_nearest_temp=z_nearest;
 
 z_new=z_rand;
 
-if checkdiscontinuity(T,Edges)
+if checkdiscontinuity(T,Edges,Ptree)
     disp('discontinuity!')
     %     keyboard
 end
@@ -56,7 +56,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         disp('before collisionfree')
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
         disp('after  collisionfree')
-        if checkdiscontinuity(T,Edges)
+        if checkdiscontinuity(T,Edges,Ptree)
             keyboard
         end
         % this should fix the discontinuity problem
@@ -66,7 +66,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             end
         end
     end
-    if checkdiscontinuity(T,Edges)
+    if checkdiscontinuity(T,Edges,Ptree)
         keyboard
     end
     if feasible && ~isequal(z_nearest_temp(1:2),x(1:2,1))
@@ -78,7 +78,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         disp('###')
-        if raggio>0
+        if raggio>0 && ~isempty(idx_near_bubble) % 
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
@@ -106,6 +106,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                     if x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
+%                         keyboard
                         %                     % this should fix the discontinuity problem
                         for jj=1:length(z_new)
                             if ~isnan(z_new(jj))
@@ -122,7 +123,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 end
             end
             
-            if checkdiscontinuity(T,Edges)
+            if checkdiscontinuity(T,Edges,Ptree)
                 keyboard
             end
             
@@ -152,11 +153,11 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     added_new = true;
                 end
             end
-            if checkdiscontinuity(T,Edges)
+            if checkdiscontinuity(T,Edges,Ptree)
                 keyboard
             end
             if added_new
-                if checkdiscontinuity(T,Edges)
+                if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
                 
@@ -190,10 +191,10 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             idx_new = T.nnodes;
             [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
             
-            if checkdiscontinuity(T,Edges)
+            if checkdiscontinuity(T,Edges,Ptree)
                 keyboard
             end
-            if rewired % && any(~any(isnan(x_rewire)))
+            if added_new && rewired % && any(~any(isnan(x_rewire)))
                 traj_pos_rewire=x_rewire(1,:);
                 traj_vel_rewire=x_rewire(2,:);
                 traj_yp_rewire =x_rewire(3,:);
@@ -207,7 +208,7 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                         z_new(jj) = x(jj,end);
                     end
                 end
-                if checkdiscontinuity(T,Edges)
+                if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
             end
@@ -221,6 +222,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
             if verbose
                 set(cerchio,'Visible','off')
             end
+        else % not feasible as no near point has been found inside the search volume
+            feasible = false;
         end
         %         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 1:'),keyboard, end
         disp('###')
@@ -264,6 +267,35 @@ Tree = T; % update tree
 G = Graph; % update graph
 E = Edges; % update edges
 
-if checkdiscontinuity(T,Edges)
+if checkdiscontinuity(T,Edges,Ptree)
     keyboard
+end
+
+% check se ha aggiunto il nodo giusto
+if feasible && ~rewired
+    % Extend the z_new point (already in the tree) with its initial_extend
+    % values (see PrimitiveFun.extend)
+    z_whatwas = z_new;
+    z_new_temp=prim.extend(z_new);
+    z_new_extended = fix_nans(z_new_temp,prim.dimensions);
+    if checkdiscontinuity(T,E,Ptree)
+        keyboard
+    end
+    before = T.get(T.nnodes)
+    if T.nnodes<2
+        disp('albero con un solo nodo')
+        return
+    end
+    before_E = E{T.Parent(T.nnodes),T.nnodes};
+    before_T = T;
+    if before(1:2) ~= z_whatwas(1:2)
+        disp('ah-ah!')
+        keyboard
+    end
+    T.Node{T.nnodes} = z_new_extended;
+    after = T.get(T.nnodes)
+    after_E = E{T.Parent(T.nnodes),T.nnodes};
+    if checkdiscontinuity(T,E,Ptree)
+        keyboard
+    end
 end

@@ -163,7 +163,9 @@ for ii=1:N_sample_max
     end
     %% Check for available primitives to extend the last sampled point in a new dimension
     idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
-    
+%     %% Check node insertion problems
+%     T.get(T.nnodes)
+%     keyboard
     %% Iterate over available primitives
     if feasible
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
@@ -177,8 +179,9 @@ for ii=1:N_sample_max
             z_whatwas = z_new;
             z_new_temp=prim.extend(z_new);
             z_new_extended = fix_nans(z_new_temp,prim.dimensions);
-                        
-            if checkdiscontinuity(T,E)
+            
+            if T.nnodes > 1
+            if checkdiscontinuity(T,E,Ptree)
                 keyboard
             end
             before = T.get(T.nnodes)
@@ -191,8 +194,9 @@ for ii=1:N_sample_max
             T.Node{T.nnodes} = z_new_extended;
             after = T.get(T.nnodes)
             after_E = E{T.Parent(T.nnodes),T.nnodes};
-            if checkdiscontinuity(T,E)
+            if checkdiscontinuity(T,E,Ptree)
                 keyboard
+            end
             end
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
@@ -270,6 +274,10 @@ for ii=1:N_sample_max
                 break
             end
         end
+%             %% Check node insertion problems
+%     T.get(T.nnodes)
+%     keyboard
+
         if stop
             disp('Found a feasible path!');
             source_node = 1;
@@ -288,25 +296,6 @@ for ii=1:N_sample_max
             %             break;
         end
     end
-    %     if isequaln(T.Node{end-1},T.Node{end})
-    %         disp('uguale!')
-    %         keyboard
-    %     end
-    %     for jj=2:T.nnodes
-    %         idx_sorgente = T.Parent(jj);
-    %         idx_destinazione = jj;
-    %         sorgente = T.get(idx_sorgente);
-    %         destinazione = T.get(idx_destinazione);
-    %         x=E{idx_sorgente,idx_destinazione}.x;
-    %         if x(1:2,1) ~= sorgente(1:2)
-    %             disp('cazzo')
-    %             keyboard
-    %         end
-    %         if x(1:2,end) ~= destinazione(1:2)
-    %             disp('cazzo')
-    %             keyboard
-    %         end
-    %     end
 end
 
 disp('PLANNING COMPLETED')
