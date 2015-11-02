@@ -37,7 +37,7 @@ stop=false;
 path_found = false;
 for ii=1:N_sample_max
     %% sampling
-    if mod(ii,10)==0 && ~path_found
+    if mod(ii,10)==0 %&& ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
@@ -150,7 +150,7 @@ for ii=1:N_sample_max
                 break
             end
             
-            if mod(ii,10)==0 && ~path_found
+            if mod(ii,10)==0 %&& ~path_found
                 z_aug = z_goal(1:3); % every once in a while push in a known number
             else
                 z_aug = prim.chi.sample;
