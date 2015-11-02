@@ -1,10 +1,12 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
 prim_cost = Inf(Ptree.nnodes,1);      % cost vector, to choose between different primitives the cheaper one
 prim_feasible = zeros(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 prim_params = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 actions = cell(Ptree.nnodes,1);      % feasibility vector, to check if any feasible primitive has been found
 fig_xv=2; fig_xy = 3; fig_yv = 4;
-feasible = 0;
+feasible = false;
+rewired = false;
+added_new = false;
 
 %% check if other dimensions can be activated from the newest point (x_rand)
 prim = Ptree.get(idx_prim);                   % prim is the current primitive
@@ -77,8 +79,8 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
         cardV = T.nnodes; % number of vertices in the graph
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
-        disp('###')
-        if raggio>0 && ~isempty(idx_near_bubble) % 
+        disp('### begin')
+        if raggio>0 %&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
@@ -93,8 +95,12 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
+                if isinf(cost_new) % no feasible neighbor found
+                    feasible=false;
+                    disp('ChooseParent has not found any viable parent.')
+                end
                 %                 keyboard
-                if ~isnan(x_chooseparent)
+                if feasible & ~isnan(x_chooseparent)
                     %                     keyboard
                     traj_pos_chooseparent=x_chooseparent(1,:);
                     traj_vel_chooseparent=x_chooseparent(2,:);
@@ -104,9 +110,10 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
+                    z_new_temp = z_new;
                     if x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
-%                         keyboard
+                        %                         keyboard
                         %                     % this should fix the discontinuity problem
                         for jj=1:length(z_new)
                             if ~isnan(z_new(jj))
@@ -127,106 +134,119 @@ if all(prim.chi.P.contains([z_rand_temp(prim.dimensions>0), z_nearest_temp(prim.
                 keyboard
             end
             
-            added_new = false;
-            
-            if idx_prim==1
-                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                    %                     keyboard
-                    if z_new(1:2) ~= x(1:2,end)
-                        disp('what???')
-                        keyboard
+            %             added_new = false;
+            if feasible
+                if idx_prim==1
+                    if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                        %                     keyboard
+                        if z_new(1:2) ~= x(1:2,end)
+                            disp('what???')
+                            keyboard
+                        end
+                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
+                        %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 4:'),keyboard, end
+                        %                     added_new = true;
                     end
-                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
-                    %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 4:'),keyboard, end
-                    added_new = true;
-                end
-            else % idx_prim > 1
-                %                 keyboard
-                if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                    %                     keyboard
-                    if z_new(1:2) ~= x(1:2,end)
-                        disp('what???')
-                        keyboard
+                else % idx_prim > 1
+                    %                 keyboard
+                    if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+                        %                     keyboard
+                        if z_new(1:2) ~= x(1:2,end)
+                            disp('what???')
+                            keyboard
+                        end
+                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
+                        %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
+                        %                     added_new = true;
                     end
-                    [T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
-                    %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
-                    added_new = true;
                 end
-            end
-            if checkdiscontinuity(T,Edges,Ptree)
-                keyboard
-            end
-            if added_new
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
+                end
+                if added_new
+                    if checkdiscontinuity(T,Edges,Ptree)
+                        keyboard
+                    end
+                    
+                    if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes))
+                        disp('cosa sta aggiungendo?')
+                        keyboard
+                    end
+                end
+                if verbose && added_new
+                    figure(fig_xv)
+                    z_min_visual = z_min;
+                    z_new_visual = z_new;
+                    if length(z_new_visual) == 2
+                        z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+                    end
+                    if isnan(z_min_visual(3))
+                        z_min_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+                    end
+                    node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
+                    plot_nodes = horzcat(plot_nodes,node);
+                    edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
+                    plot_edges = horzcat(plot_edges,edge);
+                    figure(fig_xy)
+                    %                 keyboard
+                    node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
+                    %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
+                    plot_nodes = horzcat(plot_nodes,node);
+                    edge = line([z_min_visual(1) z_new_visual(1)],[z_min_visual(2) z_new_visual(2)],[z_min_visual(3) z_new_visual(3)],'color','green','linewidth',2);
+                    %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
+                    plot_edges = horzcat(plot_edges,edge);
                 end
                 
-            end
-            if verbose && added_new
-                figure(fig_xv)
-                z_min_visual = z_min;
-                z_new_visual = z_new;
-                if length(z_new_visual) == 2
-                    z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+                if checkdiscontinuity(T,Edges,Ptree)
+                    keyboard
                 end
-                if isnan(z_min_visual(3))
-                    z_min_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
-                end
-                node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
-                plot_nodes = horzcat(plot_nodes,node);
-                edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
-                plot_edges = horzcat(plot_edges,edge);
-                figure(fig_xy)
-                %                 keyboard
-                node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
-                %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
-                plot_nodes = horzcat(plot_nodes,node);
-                edge = line([z_min_visual(1) z_new_visual(1)],[z_min_visual(2) z_new_visual(2)],[z_min_visual(3) z_new_visual(3)],'color','green','linewidth',2);
-                %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
-                plot_edges = horzcat(plot_edges,edge);
-            end
-            
-            z_min = T.get(idx_min);
-            
-            idx_new = T.nnodes;
-            [rewired,T,Graph,Edges,x_rewire,pn,pe] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-            
-            if checkdiscontinuity(T,Edges,Ptree)
-                keyboard
-            end
-            if added_new && rewired % && any(~any(isnan(x_rewire)))
-                traj_pos_rewire=x_rewire(1,:);
-                traj_vel_rewire=x_rewire(2,:);
-                traj_yp_rewire =x_rewire(3,:);
-                traj_pos = traj_pos_rewire;
-                traj_vel = traj_vel_rewire;
-                traj_y = traj_yp_rewire; % TODO: FIX NAMES
-                x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
-                % this should fix the discontinuity problem
-                for jj=1:length(z_new)
-                    if ~isnan(z_new(jj))
-                        z_new(jj) = x(jj,end);
-                    end
+                if added_new
+                    z_min = T.get(idx_min);
+                    
+                    idx_new = T.nnodes;
+                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                    plot_edges=pedges;
+                    plot_nodes=pnodes;
                 end
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
+                if added_new && rewired % && any(~any(isnan(x_rewire)))
+                    traj_pos_rewire=x_rewire(1,:);
+                    traj_vel_rewire=x_rewire(2,:);
+                    traj_yp_rewire =x_rewire(3,:);
+                    traj_pos = traj_pos_rewire;
+                    traj_vel = traj_vel_rewire;
+                    traj_y = traj_yp_rewire; % TODO: FIX NAMES
+                    x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+                    % this should fix the discontinuity problem
+                    for jj=1:length(z_new)
+                        if ~isnan(z_new(jj))
+                            z_new(jj) = x(jj,end);
+                        end
+                    end
+                    if checkdiscontinuity(T,Edges,Ptree)
+                        keyboard
+                    end
+                end
+                %             if feasible && ~isequal((1:2),x(1:2,1))
+                %                 disp('WTF ReWire?')
+                %                 keyboard
+                %             end
+                
+                %             end
+                
+                if verbose
+                    set(cerchio,'Visible','off')
+                end
             end
-            %             if feasible && ~isequal((1:2),x(1:2,1))
-            %                 disp('WTF ReWire?')
-            %                 keyboard
-            %             end
-            plot_edges=pe;
-            plot_nodes=pn;
-            %             end
-            if verbose
-                set(cerchio,'Visible','off')
-            end
+            
         else % not feasible as no near point has been found inside the search volume
+            disp('Near set is empty');
             feasible = false;
         end
         %         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 1:'),keyboard, end
-        disp('###')
+        disp('### end')
     end
     
     if feasible
@@ -272,7 +292,7 @@ if checkdiscontinuity(T,Edges,Ptree)
 end
 
 % check se ha aggiunto il nodo giusto
-if feasible && ~rewired
+if feasible && added_new %&& ~rewired
     % Extend the z_new point (already in the tree) with its initial_extend
     % values (see PrimitiveFun.extend)
     z_whatwas = z_new;
