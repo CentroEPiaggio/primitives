@@ -1,11 +1,13 @@
 %INSERTNODE adds the new vertex z_new to the graph and creates an edge from
 % z_current to z_new
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
-function [T,G,E] = InsertNode(idx_current, z_new,  T,     G,     E, prim, q,     cost, x, time)
+function [added_node,T,G,E] = InsertNode(idx_current, z_new,  T,     G,     E, prim, q,     cost, x, time)
 disp('Entered inside InsertNode')
+added_node = false;
 if idx_current==0 % first node
     % add inial state to the tree
     T = T.addnode(0,z_new);
+    added_node = true;
     return
 else
     if ~isinf(cost) && cost>0
@@ -34,6 +36,7 @@ else
             'x',x,...
             'time',time);
         E{idx_current,idx_last_added_node} = actions;
+        added_node = true;
     else
         cprintf('error','InsertNode: cost is 0 or Inf.\n');
         keyboard
