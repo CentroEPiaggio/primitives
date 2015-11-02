@@ -67,7 +67,8 @@ classdef PrimitiveFun
         function extended_state = extend(obj,z_test) % z_test must be already with its own NaNs
 %             keyboard
             nans = isnan(z_test);
-            if isequal(~nans(:),obj.dimensions(:)) %|| ~any(nans)
+            nans_wholedimensions = [~nans(:); zeros(length(obj.dimensions)-length(nans),1)];
+            if isequal(nans_wholedimensions,obj.dimensions(:)) %|| ~any(nans)
                 extended_state = z_test; % do nothing
                 return
             end
