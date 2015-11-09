@@ -57,7 +57,6 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
                 traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
                 traj_y_rewire = x_rewire;
-                disp(['size durante la alza',num2str(size(x_rewire))]); % WHAT IS THIS?
             end
             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
 %             keyboard

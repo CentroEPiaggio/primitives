@@ -58,7 +58,6 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
                 traj_y_chooseparent = x_chooseparent;
-                disp(['size durante la alza',num2str(size(x))]);
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
             if feasible && ~isequal(z_near(1:2),x_chooseparent(1:2,1))

@@ -14,7 +14,7 @@ classdef PrimitiveFun
         % constructor
 %         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
             function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
-            disp('Dentro costruttore di PrimitiveFun');
+%             disp('Dentro costruttore di PrimitiveFun');
             if nargin == 7 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
                 obj.cost_coeff = cost_coeff;

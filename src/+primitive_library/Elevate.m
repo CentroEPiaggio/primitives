@@ -93,7 +93,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             q = [traj_y_cart(1) traj_y_cart(end)];
             
             x = [traj_y_cart]';
-            feasible
+
         end
     end
 end

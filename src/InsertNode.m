@@ -37,6 +37,9 @@ else
             'time',time);
         E{idx_current,idx_last_added_node} = actions;
         added_node = true;
+        disp(['Added node: {' num2str(idx_last_added_node) '} as [' num2str(z_new(:)') ']. Parent: {' num2str(idx_current) '}.'])
+        disp(['From node {' num2str(idx_current) '}: [' num2str(T.get(idx_current)') '] or {' num2str(E{idx_current,idx_last_added_node}.source_node) '}'])
+        disp(['To   node {' num2str(idx_last_added_node) '}: [' num2str(T.get(idx_last_added_node)') '] or {' num2str(E{idx_current,idx_last_added_node}.dest_node) '}'])
     else
         cprintf('error','InsertNode: cost is 0 or Inf.\n');
         keyboard
