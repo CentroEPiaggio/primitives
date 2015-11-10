@@ -14,6 +14,7 @@ import primitive_library.*;
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
 z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
+z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
 z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();

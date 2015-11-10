@@ -86,4 +86,16 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         end
     end
 end
+if ~isnan(x) & ~isequaln(z_new(1:2),x(1:2,end))
+    if norm((x(1:2,end) - z_new(1:2)))/norm(z_new(1:2)) < 1e-9 % raw accuracy measure
+        disp('ChooseParent is changing the goal point by a slight bit, no worries.')
+    else
+        disp('ChooseParent is changing the goal point by a significant amount, worry.')
+        disp('x is')
+        x
+        disp('while z_new is')
+        z_new
+        keyboard
+    end
+end
 end

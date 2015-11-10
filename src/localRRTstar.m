@@ -1,4 +1,5 @@
 function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+disp('# entering localRRTstar #')
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
 feasible = false;
@@ -46,9 +47,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         end
         %         keyboard
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
-        disp('before collisionfree')
+        disp(['before collisionfree with primitive ' prim.name])
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
-        disp('after  collisionfree')
+        disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard
         end
@@ -71,7 +72,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         disp('### begin')
-        if raggio>0 %&& ~isempty(idx_near_bubble) %
+        if raggio>0 && ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
@@ -296,6 +297,7 @@ if feasible && added_new %&& ~rewired
     before = T.get(T.nnodes)
     if T.nnodes<2
         disp('albero con un solo nodo')
+        disp('# quitting localRRTstar #')
         return
     end
     before_E = E{T.Parent(T.nnodes),T.nnodes};
@@ -311,3 +313,5 @@ if feasible && added_new %&& ~rewired
         keyboard
     end
 end
+
+disp('# quitting localRRTstar #')

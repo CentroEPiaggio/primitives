@@ -10,6 +10,19 @@ if idx_current==0 % first node
     added_node = true;
     return
 else
+    % %% debug init
+    if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end))
+        disp('sth strange is happening here')
+        disp('forcing them to be equal')
+        z_new_old = z_new;
+        z_new(1:length(z_new)) = x(1:length(z_new),end);
+        if (norm(z_new_old-z_new)) < 1e-9
+            % do nothing
+        else
+            keyboard
+        end
+    end
+    % %% debug end
     if ~isinf(cost) && cost>0
         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
         test2 = fix_nans(z_new,prim.dimensions);
@@ -37,6 +50,7 @@ else
             'time',time);
         E{idx_current,idx_last_added_node} = actions;
         added_node = true;
+        disp(['Using primitive: ' prim.name]);
         disp(['Added node: {' num2str(idx_last_added_node) '} as [' num2str(z_new(:)') ']. Parent: {' num2str(idx_current) '}.'])
         disp(['From node {' num2str(idx_current) '}: [' num2str(T.get(idx_current)') '] or {' num2str(E{idx_current,idx_last_added_node}.source_node) '}'])
         disp(['To   node {' num2str(idx_last_added_node) '}: [' num2str(T.get(idx_last_added_node)') '] or {' num2str(E{idx_current,idx_last_added_node}.dest_node) '}'])
