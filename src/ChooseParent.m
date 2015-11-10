@@ -91,11 +91,12 @@ if ~isnan(x) & ~isequaln(z_new(1:2),x(1:2,end))
         disp('ChooseParent is changing the goal point by a slight bit, no worries.')
     else
         disp('ChooseParent is changing the goal point by a significant amount, worry.')
+        disp('If speed is constant then it''s normal')
         disp('x is')
         x
         disp('while z_new is')
         z_new
-        keyboard
+%         keyboard
     end
 end
 end

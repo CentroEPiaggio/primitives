@@ -103,7 +103,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                     z_new_temp = z_new;
-                    if x(1:2,end) ~= z_new(1:2)
+                    if ~isequaln(x(1:length(z_new)),z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
                         %                     % this should fix the discontinuity problem
@@ -129,7 +129,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             %             added_new = false;
             if feasible
                 if idx_prim==1
-                    if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                    if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                         %                     keyboard
                         if z_new(1:2) ~= x(1:2,end)
                             disp('what???')
@@ -141,7 +141,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                 else % idx_prim > 1
                     %                 keyboard
-                    if true %all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+                    if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
                         %                     keyboard
                         if z_new(1:2) ~= x(1:2,end)
                             disp('what???')

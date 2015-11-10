@@ -13,6 +13,7 @@ else
     % %% debug init
     if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end))
         disp('sth strange is happening here')
+        keyboard
         disp('forcing them to be equal')
         z_new_old = z_new;
         z_new(1:length(z_new)) = x(1:length(z_new),end);
