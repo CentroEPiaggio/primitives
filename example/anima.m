@@ -30,13 +30,13 @@ if movie==1
     vidObj.FrameRate = 100;
     open(vidObj);
 end
-if movie==1
-    frames=1;
-    vidObj=VideoWriter('rrtstar');
-    vidObj.Quality = 100;
-    vidObj.FrameRate = 1;
-    open(vidObj);
-end
+% if movie==1
+%     frames=1;
+%     vidObj=VideoWriter('rrtstar');
+%     vidObj.Quality = 100;
+%     vidObj.FrameRate = 1;
+%     open(vidObj);
+% end
 
 %%
 close all

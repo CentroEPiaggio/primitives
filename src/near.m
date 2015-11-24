@@ -44,6 +44,7 @@ points_mat = cell2mat(T.Node');
 idx_has_nan = any(isnan(points_mat(z_new_dimensions>0,:)));
 points_mat(:,idx_has_nan>0) = []
 z_new
+
 % finds the closest points inside the n-ball of volume volume and radius
 % radius
 if ~isempty(points_mat)

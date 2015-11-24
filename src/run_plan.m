@@ -23,7 +23,7 @@ for kk=2:opt_plan.nnodes
 end
 % return
 Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
-movie=0;
+movie=1;
 if(movie==1)
     disp('saving rrtstar video...');
     

@@ -1,4 +1,4 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node)
 disp('# entering localRRTstar #')
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
@@ -7,14 +7,19 @@ rewired = false;
 added_new = false;
 z_new=z_rand;
 
+if pushed_in_goal
+    disp(['pushed_in_goal is true: z_rand is ' num2str(z_rand(:)')]);
+end
+
 % select current primitive
 prim = Ptree.get(idx_prim);
 
 % find nearest point in the tree
 [idx_nearest,z_nearest] = Nearest(z_rand,T,Ptree.Node{idx_prim});
-
-% z_min = z_nearest; % initialization of z_min which is the point in space that gives the lower cost
-
+% make sure that we are not attaching to the goal_node
+if ~isempty(goal_node)
+    idx_nearest(idx_nearest==goal_node) = [];
+end
 % check if both points are in the image space of the primitive. This should
 % be a redundant check and could be removed later on.
 if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimensions>0)],1) )
@@ -23,8 +28,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     if feasible
         % collision checking
         if idx_prim == 1
-            %             [feasible,cost,q,traj_pos,traj_vel]=CollisionFree(Obstacles,q,traj_pos,traj_vel,cost);
-            %             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
             traj_pos = x(1,:);
             traj_vel = x(2,:);
             if ~isnan(z_nearest(3)) % HARDFIX
@@ -33,7 +36,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
             end
         else % Eleva primitive
-            %             [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest_temp,cost);
             traj_vel = z_nearest(2)*ones(1,size(x,2));%x(2,:);
             traj_pos = z_nearest(1)+cumtrapz(time,traj_vel);
             if size(x,1)>2
@@ -45,8 +47,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 keyboard
             end
         end
-        %         keyboard
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
+        disp('shit is happening already')
+        [z_new,x] = truncate_to_similar(z_new,x);
         disp(['before collisionfree with primitive ' prim.name])
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
         disp(['after  collisionfree with primitive ' prim.name])
@@ -54,11 +57,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             keyboard
         end
         % this should fix the discontinuity problem
-        for jj=1:length(z_new)
-            if ~isnan(z_new(jj))
-                z_new(jj) = x(jj,end);
-            end
-        end
+        [z_new,x] = truncate_to_similar(z_new,x);
     end
     if checkdiscontinuity(T,Edges,Ptree)
         keyboard
@@ -71,7 +70,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         cardV = T.nnodes; % number of vertices in the graph
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
-        disp('### begin')
+        if ~isempty(goal_node)
+            idx_near_bubble(idx_near_bubble==goal_node) = [];
+        end
+        disp('### begin radius loop')
         if raggio>0 && ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
@@ -91,9 +93,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
-                %                 keyboard
                 if feasible & ~isnan(x_chooseparent)
-                    %                     keyboard
                     traj_pos_chooseparent=x_chooseparent(1,:);
                     traj_vel_chooseparent=x_chooseparent(2,:);
                     traj_yp_chooseparent =x_chooseparent(3,:);
@@ -101,55 +101,28 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     traj_vel = traj_vel_chooseparent;
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
-                    %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 5:'),keyboard, end
                     z_new_temp = z_new;
                     if ~isequaln(x(1:length(z_new)),z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
-                        %                         keyboard
-                        %                     % this should fix the discontinuity problem
-                        for jj=1:length(z_new)
-                            if ~isnan(z_new(jj))
-                                z_new(jj) = x(jj,end);
-                            end
+                        if pushed_in_goal
+                            keyboard
                         end
+                        % this should fix the discontinuity problem
+                        [z_new,x] = truncate_to_similar(z_new,x);
                     end
-                    
-                end
-                tempnode = T.get(idx_min);
-                if feasible && ~isequal(tempnode(1:2),x(1:2,1))
-                    disp('WTF ChooseParent?')
-                    keyboard
                 end
             end
-            
             if checkdiscontinuity(T,Edges,Ptree)
                 keyboard
             end
-            
-            %             added_new = false;
             if feasible
                 if idx_prim==1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                        %                     keyboard
-                        if z_new(1:2) ~= x(1:2,end)
-                            disp('what???')
-                            keyboard
-                        end
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
-                        %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 4:'),keyboard, end
-                        %                     added_new = true;
                     end
                 else % idx_prim > 1
-                    %                 keyboard
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                        %                     keyboard
-                        if z_new(1:2) ~= x(1:2,end)
-                            disp('what???')
-                            keyboard
-                        end
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
-                        %                     if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 3:'),keyboard, end
-                        %                     added_new = true;
                     end
                 end
                 if checkdiscontinuity(T,Edges,Ptree)
@@ -213,21 +186,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     traj_y = traj_yp_rewire; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     % this should fix the discontinuity problem
-                    for jj=1:length(z_new)
-                        if ~isnan(z_new(jj))
-                            z_new(jj) = x(jj,end);
-                        end
-                    end
+                    [z_new,x] = truncate_to_similar(z_new,x);
                     if checkdiscontinuity(T,Edges,Ptree)
                         keyboard
                     end
                 end
-                %             if feasible && ~isequal((1:2),x(1:2,1))
-                %                 disp('WTF ReWire?')
-                %                 keyboard
-                %             end
-                
-                %             end
                 
                 if verbose
                     set(cerchio,'Visible','off')
@@ -245,18 +208,12 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     if feasible
         if idx_prim ==1
             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
-                
-                
-                
                 if verbose
                     disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
                 end
             end
         else
             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
-                
-                
-
                 if verbose
                     disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
                 end
@@ -266,11 +223,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         if verbose
             disp('No primitives found')
         end
-        
-        
-
-    end
-    
+    end   
 else
     cprintf('error','Random and Nearest are not connectable with the primitive %s\n',prim.getName);
     % do nothing

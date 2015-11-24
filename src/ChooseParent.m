@@ -76,11 +76,15 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 %                 c_x_new = graphshortestpath(G,idx_I,idx_new);
                 % costo fino al near + pezzettino near-new
                 c_prime = cost_up_to_z_near + cost_znear_znew;
-                if (c_prime < cost_z_new) && (c_prime < c_min) % cost_z_near) && % && (c_actual < c_x_new)
-                    idx_min = idX_near(i);
-                    c_min = c_prime;
-                    x=x_chooseparent;
-                    time = time_chooseparent;
+                try
+                    if ((c_prime < cost_z_new) && (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
+                        idx_min = idX_near(i);
+                        c_min = c_prime;
+                        x=x_chooseparent;
+                        time = time_chooseparent;
+                    end
+                catch
+                    keyboard
                 end
             end
         end

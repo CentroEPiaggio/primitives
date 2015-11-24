@@ -16,6 +16,7 @@ import primitive_library.*;
 z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
 z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
 z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
+z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -36,23 +37,26 @@ N_cost_vector = [];
 %% Main loop
 stop=false;
 path_found = false;
+goal_node = [];
 for ii=1:N_sample_max
     %% sampling
     if mod(ii,10)==0 %&& ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
+        disp('Pushing in goal')
+        pushed_in_goal=1;
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
+        pushed_in_goal=0;
     end
     
     if verbose
+        disp(['z_rand: ' num2str(z_rand(:)')])
         figure(fig_chi0)
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
-        %         figure(fig_trajectories)
-        %         plot(z_rand(1),z_rand(2),'x','linewidth',2)
     end
     
     %% Run sampling algorithm on the Chi0 space
-    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
     
     % check if path has been found and it needs to plot and save data
         if path_found % anytime optimization. If one feasible path was
@@ -75,8 +79,6 @@ for ii=1:N_sample_max
         disp('Goal reached (via Muovi)!');
         path_found = true;
         if debug,keyboard,end
-        %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-        %         break
         continue % for anytime behavior
     end
 
@@ -97,28 +99,11 @@ for ii=1:N_sample_max
 
             % Extend the z_new point (already in the tree) with its initial_extend
             % values (see PrimitiveFun.extend)
-            z_whatwas = z_new;
-            z_new_temp=prim.extend(z_new);
-            z_new_extended = fix_nans(z_new_temp,prim.dimensions);
+            z_whatwas = z_new
+            z_new_temp=prim.extend(z_new)
+            z_new_extended = fix_nans(z_new_temp,prim.dimensions)
             
-            % if T.nnodes > 1
-            %     if checkdiscontinuity(T,E,Ptree)
-            %         keyboard
-            %     end
-            %     before = T.get(T.nnodes)
-            %     before_E = E{T.Parent(T.nnodes),T.nnodes};
-            %     before_T = T;
-            %     if before(1:2) ~= z_whatwas(1:2)
-            %         disp('ah-ah!')
-            %         keyboard
-            %     end
-                T.Node{T.nnodes} = z_new_extended;
-            %     after = T.get(T.nnodes)
-            %     after_E = E{T.Parent(T.nnodes),T.nnodes};
-            %     if checkdiscontinuity(T,E,Ptree)
-            %         keyboard
-            %     end
-            % end
+            T.Node{T.nnodes} = z_new_extended;
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
@@ -152,21 +137,26 @@ for ii=1:N_sample_max
             end
             
             if mod(ii,10)==0 %&& ~path_found
-                z_aug = z_goal(1:3); % every once in a while push in a known number
+                z_aug
+                g = z_goal(1:3); % every once in a while push in a known number
+                disp('Pushing in aug goal')
+                pushed_in_goal=1;
             else
                 z_aug = prim.chi.sample;
+                pushed_in_goal=0;
             end
 
-            figure(fig_xy);
-            plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
-
             Chi_aug = prim.chi;
+            
+            if verbose
+                disp(['z_aug: ' num2str(z_aug(:)')])
+                figure(fig_xy);
+                plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
+                cprintf('red','Sto per provare con la eleva')
+            end
 
-            cprintf('red','Sto per provare con la eleva')
-
-            [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges);
+            [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
             if path_found
-                %         [path,cost]=plot_biograph(source_node,goal_node,G);
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
                 % save cost and iteration for plotting (anytime) stuff
                 if ~isempty(cost_vector) && cost<cost_vector(end)
@@ -197,10 +187,7 @@ for ii=1:N_sample_max
                 break
             end
         end
-        %             %% Check node insertion problems
-        %     T.get(T.nnodes)
-        %     keyboard
-        
+
         if stop
             disp('Found a feasible path!');
             source_node = 1;
@@ -228,16 +215,7 @@ disp('PLANNING COMPLETED')
 %% obtain plan as the shortest path in the graph
 opt_plan=extract_plan(T,E,opt_path);
 
-%% TODO: FIX MOVIE STUFF
-% figure(fig_chi0)
-% line(x_values, y_values,'color','yellow','LineWidth',4);
-% %     figure(fig_trajectories)
-% %     line(x_values, y_values,'color','yellow','LineWidth',4);
-% if(movie==1)
-%     movie_rrtstar(frames) = getframe(figure(fig_chi0));
-%     frames = frames +1;
-% end
-
+%%
 save_test_data
 %% showtime!
 movie = 1;

@@ -21,6 +21,7 @@ classdef Elevate < primitive_library.PrimitiveFun
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('E-le-va-tion!')
+            disp(['From z_start: ' num2str(z_start(:)') ' to z_end: ' num2str(z_end(:)')])
 %             z_start
 %             z_end
             
