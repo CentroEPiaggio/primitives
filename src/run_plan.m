@@ -24,17 +24,17 @@ end
 % return
 Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
 movie=1;
-if(movie==1)
-    disp('saving rrtstar video...');
-    
-    for iter=1:frames-1
-        vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
-    end
-    
-    close(vidObj);
-    
-    disp('...done!');
-end
+% if(movie==1)
+%     disp('saving rrtstar video...');
+%     
+%     for iter=1:frames-1
+%         vidObj.writeVideo(movie_rrtstar(iter).cdata(:,:,:));
+%     end
+%     
+%     close(vidObj);
+%     
+%     disp('...done!');
+% end
 
 save([run_filepath 'runna.mat'],'q_reference');
 % save([run_filepath 'rsim_tfdata.mat'],'q_reference');
@@ -64,11 +64,13 @@ hold on
 plot(rt_t,rt_qp,'Linewidth',2)
 grid on
 title('Speed profile')
+legend('x cart','theta pole','length pole')
 figure
 plot(rt_t,rt_q_ref,'--','Linewidth',2)
 hold on
 plot(rt_t,rt_q,'Linewidth',2)
 grid on
 title('Position profile')
+legend('x cart','theta pole','length pole')
 %%
 anima

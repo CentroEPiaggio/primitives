@@ -16,7 +16,7 @@ import primitive_library.*;
 z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
 z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
 z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
-z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
+% z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
