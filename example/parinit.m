@@ -4,6 +4,7 @@ nq = 3;
 q0 = zeros(nq,1);
 q0(3) = 0.1; % altrimenti diventa singolare
 qp0 = zeros(nq,1);
+qp0 = [1;0;0];
 % qp0 = rand(nq,1);
 q0 = rand(nq,1)
 % q0(2)=0;
