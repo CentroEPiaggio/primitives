@@ -1,5 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
+push_goal_freq = 1;
 
 % debug and visualization flags
 debug=0; % enable breakpoints
@@ -40,7 +41,7 @@ path_found = false;
 goal_node = [];
 for ii=1:N_sample_max
     %% sampling
-    if mod(ii,10)==0 %&& ~path_found
+    if mod(ii,push_goal_freq)==0 %&& ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
         disp('Pushing in goal')
         pushed_in_goal=1;
@@ -136,9 +137,8 @@ for ii=1:N_sample_max
                 break
             end
             
-            if mod(ii,10)==0 %&& ~path_found
-                z_aug
-                g = z_goal(1:3); % every once in a while push in a known number
+            if mod(ii,push_goal_freq)==0 %&& ~path_found
+                z_aug = z_goal(1:3); % every once in a while push in a known number
                 disp('Pushing in aug goal')
                 pushed_in_goal=1;
             else
