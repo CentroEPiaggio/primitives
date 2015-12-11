@@ -1,0 +1,14 @@
+{Error using <a href="matlab:helpUtils.errorDocCallback('cd')" style="font-weight:bold">cd</a>
+Cannot CD to utils (Name is nonexistent or not a directory).
+
+Error in <a href="matlab:helpUtils.errorDocCallback('run', '/usr/local/MATLAB/R2014a/toolbox/matlab/lang/run.m', 41)" style="font-weight:bold">run</a> (<a href="matlab: opentoline('/usr/local/MATLAB/R2014a/toolbox/matlab/lang/run.m',41,0)">line 41</a>)
+   cd(fileDir);
+
+Error in <a href="matlab:helpUtils.errorDocCallback('locomaniplanner_RRTstar', '/home/danilo/Documents/MATLAB/primitives/src/locomaniplanner_RRTstar.m', 11)" style="font-weight:bold">locomaniplanner_RRTstar</a> (<a href="matlab: opentoline('/home/danilo/Documents/MATLAB/primitives/src/locomaniplanner_RRTstar.m',11,0)">line 11</a>)
+run utils/startup_lmp.m;
+
+Error in <a href="matlab:helpUtils.errorDocCallback('runloco', '/home/danilo/Documents/MATLAB/primitives/src/runloco.m', 3)" style="font-weight:bold">runloco</a> (<a href="matlab: opentoline('/home/danilo/Documents/MATLAB/primitives/src/runloco.m',3,0)">line 3</a>)
+locomaniplanner_RRTstar
+} 
+cd ..
+runloco
