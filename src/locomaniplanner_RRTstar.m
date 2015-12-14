@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_goal_freq = 1;
+push_goal_freq = 10;
 
 % debug and visualization flags
 debug=0; % enable breakpoints
@@ -58,9 +58,9 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-    
+
     % check if path has been found and it needs to plot and save data
-        if path_found % anytime optimization. If one feasible path was
+    if path_found % anytime optimization. If one feasible path was
                   % found in a previous iteration, keep optimizing
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
         % save cost and iteration for plotting (anytime) stuff
