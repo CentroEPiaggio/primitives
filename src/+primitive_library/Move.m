@@ -84,9 +84,7 @@ classdef Move < primitive_library.PrimitiveFun
                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
                 traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
                 q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
-            end
-            %     keyboard
-            
+            end     
             
             traj_yp_cart = zeros(size(traj_vel_cart));
             
@@ -114,6 +112,7 @@ classdef Move < primitive_library.PrimitiveFun
             else
                 feasible = 0;
                 cost = Inf;
+                disp('Failed ZMP check');
             end
             % pack return data
             x = [traj_pos_cart;traj_vel_cart];
