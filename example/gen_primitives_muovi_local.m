@@ -8,18 +8,19 @@ xpf = prim_data.vf;%0;
 
 Tend = prim_data.Tend;
 Ts = prim_data.Ts;
-% keyboard
-amax = 10;
-% [time,traj_x_cart] = trajectory(xi,xf,xpi,xpf,Tend,Ts);
+
+amax = 0.5;
+jerkmax = 0.5;
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
-[time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
+x0 = [xi;xpi;0];
+xf = [xf;xpf;0];
+state_bounds = [-Inf Inf;
+    -Inf Inf;
+    -amax amax];
+control_bounds = [-jerkmax;jerkmax];
+
+[time,traj_vel_cart] = min_jerk_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 time = time(:)';
 traj_vel_cart = traj_vel_cart(:)';
 
-% keyboard
-% restrict the trajectory to be local
-% Tmax = 100; % local trajectory by restricting the integration time
-% [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax,Tmax);
-
-
-q = [xi xf xpi xpf];
+q = [prim_data.xi prim_data.xf prim_data.vi prim_data.vf];
