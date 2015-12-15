@@ -1,6 +1,10 @@
-function [time,speed] = min_jerk_trajectory(x0,xf,Ts,state_bounds,control_bounds)
+function [time,speed] = min_jerk_trajectory_nopos(x0,xf,Ts,state_bounds,control_bounds)
 % keyboard
 % ensure vectors are column
+x0_large = x0; x0 = x0(2:end);
+xf_large = xf; xf = xf(2:end);
+state_bounds_large = state_bounds(2:end,:); state_bounds = state_bounds(2:end,:);
+
 x0 = x0(:);
 xf = xf(:);
 control_bounds = control_bounds(:);
@@ -27,12 +31,17 @@ end
 %     Ts = 0.1;
 % end
 
-A = [0 1 0;
-    0 0 1;
-    0 0 0];
-B = [0; 0; 1];
-C = [1 0 0;
-    0 1 0];
+% A = [0 1 0;
+%     0 0 1;
+%     0 0 0];
+A = [0 1;
+    0 0];
+% B = [0; 0; 1];
+B = [0; 1];
+% C = [1 0 0;
+%     0 1 0];
+C = [1 0;
+    0 1];
 D = zeros(size(C,1),size(B,2));
 B_u = B;
 
@@ -211,7 +220,24 @@ disp(['Il tempo minimo ottenuto e'' pari a ' num2str(Ttot)]);
 time_largesampling=0:Ts:Ttot;
 Cextract = [0 1 0];
 states = zeros(3,steps+1);
-states(:,1) = x0;
+states(:,1) = x0_large;
+
+A = [0 1 0;
+    0 0 1;
+    0 0 0];
+B = [0; 0; 1];
+C = [1 0 0;
+    0 1 0];
+D = zeros(size(C,1),size(B,2));
+B_u = B;
+
+m = size(B,2);
+n = size(A,1);
+
+Ad = A*Ts+eye(size(A));
+Bd = Ts*B;
+Cd = C;
+% keyboard
 for ii=2:steps+1
     states(:,ii)=Ad*states(:,ii-1) + Bd*u(ii-1);
 end
