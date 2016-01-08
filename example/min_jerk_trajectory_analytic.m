@@ -287,8 +287,13 @@ if ~found
     end
 end
 if ~found
+    time = [];
+    pos = [];
+    speed = [];
+    acc = [];
+    jerk = [];
     disp('Nothing found!');
-    keyboard
+    return
 end
 %% Compute times
 Tfin = sum(tvec);
@@ -377,7 +382,6 @@ if ~isempty(T4)
     tau4 = time(T4)-time(T4(1));
     acc(T4) = zeros(size(T4));
     speed(T4) = v3*ones(length(T4),1);
-    keyboard
     pos(T4) = p3+v3*tau4;
     v4 = speed(T4(end));
     p4 = pos(T4(end));
@@ -408,10 +412,14 @@ else
 end
 
 tau7 = time(T7)-time(T7(1));
-jerk(T7) = -J;
+jerk(T7) = J;
 acc(T7) = -D+J*tau7;
 speed(T7) = v6-D*tau7+0.5*J*tau7.^2;
 pos(T7) = p6+v6*tau7-0.5*D*tau7.^2+J*tau7.^3/6;
+%% hard integration
+acc = cumtrapz(time,jerk);
+speed = x0(2)+cumtrapz(time,acc);
+pos = x0(1)+cumtrapz(time,speed);
 %% plot
 figure
 plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
