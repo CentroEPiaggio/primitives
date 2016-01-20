@@ -1,5 +1,6 @@
 function Times = getTimes(A,D,J,x,xhat,xbar)
-keyboard
+debug = 0;
+if debug,keyboard,end
 %% definition of times
 T1 = A/J;
 T2 = x-2*T1;

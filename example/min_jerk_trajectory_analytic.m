@@ -1,5 +1,13 @@
-function [time,pos,speed,acc,jerk] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds)
-% keyboard
+function [time,pos,speed,acc,jerk,retval] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds)
+debug = 0;
+verbose = 0;
+
+time = [];
+pos = [];
+speed = [];
+acc = [];
+jerk = [];
+
 % ensure vectors are column
 x0 = x0(:);
 xf = xf(:);
@@ -19,13 +27,11 @@ elseif size(state_bounds,2) == 1
     lower_state_bound = -abs(state_bounds(:,1));
     upper_state_bound = abs(state_bounds(:,1));
 else
-    error('Error in state constraint specification');
+    disp('Error in state constraint specification');
+    retval = -2;
+    return
 end
-% % default time step
-% Ts = 0.01; % HARDCODED for speeding up execution time
-% if nargin ~= 4
-%     Ts = 0.1;
-% end
+% default time step
 
 %%
 found = 0;
@@ -42,12 +48,8 @@ J = upper_control_bound
 L = xf(1)-x0(1)
 
 if abs(v0) > V || abs(vf) > V
-    time = [];
-    pos = [];
-    speed = [];
-    acc = [];
-    jerk = [];
     disp('Bounds are not consistent with the problem');
+    retval = -1;
     return
 end
 
@@ -61,7 +63,9 @@ elseif v0>vf && v0-vf <= D^2/J
 elseif v0>vf && v0-vf > D^2/J
     Tm = (v0-vf)/D + D/J;
 else
-    error('could not determine if acceleration profile is AFP or DFP');
+    disp('could not determine if acceleration profile is AFP or DFP');
+    retval = -3;
+    return
 end
 
 Lm = (v0+vf)/2*Tm;
@@ -72,9 +76,11 @@ elseif (v0 <= vf && Lm > L) || (v0 > vf && Lm >= L)
     AFP = 0;
     disp('DFP');
 else
-    error('could not determine if acceleration profile is AFP or DFP');
+    disp('could not determine if acceleration profile is AFP or DFP');
+    retval = -4;
+    return
 end
-keyboard
+if debug,keyboard,end
 %% rearrange problem in AFP form
 if ~AFP % if DFP
     p0 = -p0;
@@ -87,7 +93,7 @@ if ~AFP % if DFP
 end
 
 %% case 1: T4>0, T2>0, T6>0
-keyboard
+if debug,keyboard,end
 x=[];xbar=[];xhat=[];
 x = (V-v0)/A + A/J;
 xbar = (V-vf)/D + D/J;
@@ -99,7 +105,7 @@ if x>=2*A/J && xbar>=2*D/J && xhat>=0
         tvec = Times;
         vp = V;
         found = 1;
-        keyboard
+        if debug,keyboard,end
     end
 end
 %% case 2: T4>0, T2=0, T6>0
@@ -154,7 +160,7 @@ end
 if ~found
     xhat = 0;
 end
-keyboard
+if debug,keyboard,end
 %% case 5: T4=0, T2=0, T6=0
 if ~found
     x=[];xbar=[];
@@ -171,20 +177,27 @@ if ~found
         end
     end
     if ~isempty(x)
-        vp = v0+1/4*J*x^2;
-        coeffs = [1/4*J, 0, vf-vp];
-        sol = roots(coeffs);
-        jj=1;
-        xbar = [];
-        for ii=1:length(sol)
-            if isreal(sol(ii))
-                if sol(ii) >=0 && sol(ii)<=2*D/J % condition on x
-                    xbar(jj) = sol(ii);
-                    jj=jj+1;
+%         if length(x)>1
+%             keyboard
+%         end
+        vp = v0+1/4*J*x.^2;
+        %         coeffs = [1/4*J, 0, vf-vp]; % TODO: check dimensional issues
+        coeffs = [1/4*J*ones(length(vp),1), zeros(length(vp),1), vf-vp(:)]; % TODO: check dimensional issues
+        for kk=1:length(vp)
+            sol = roots(coeffs(kk,:));
+            jj=1;
+            xbar = [];
+            for ii=1:length(sol)
+                if isreal(sol(ii))
+                    if sol(ii) >=0 && sol(ii)<=2*D/J % condition on x
+                        xbar(jj,kk) = sol(ii);
+                        jj=jj+1;
+                    end
                 end
             end
         end
     end
+    xbar = xbar(xbar>0);
     if ~isempty(xbar)
         Times = getTimes(A,D,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)==0 && Times(6)==0
@@ -210,10 +223,14 @@ if ~found
         end
     end
     if ~isempty(xbar)
-        vp = vf+1/4*J*xbar^2;
+        %         if length(xbar)>1
+        %             keyboard
+        %         end
+        vp = vf+1/4*J*xbar.^2;
         x = (vp-v0+A^2/J)/A;
     end
-    if ~isempty(x) && x>= 2*A/J;
+    x = x(x>= 2*A/J);
+    if ~isempty(x)
         Times = getTimes(A,D,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)>0 && Times(6)==0
             disp('case 6: T4=0, T2>0, T6=0');
@@ -239,10 +256,14 @@ if ~found
         end
     end
     if ~isempty(x)
-        vp = v0+1/4*J*x^2;
+        %         if length(x)>1
+        %             keyboard
+        %         end
+        vp = v0+1/4*J*x.^2;
         xbar = (vp-vf+D^2/J)/D;
     end
-    if ~isempty(xbar) && xbar>= 2*D/J;
+    xbar = xbar(xbar>= 2*D/J);
+    if ~isempty(xbar)
         Times = getTimes(A,D,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)==0 && Times(6)>0
             disp('case 7: T4=0, T2=0, T6>0');
@@ -252,7 +273,7 @@ if ~found
     end
 end
 %% case 8: T4=0, T2>0, T6>0
-keyboard
+if debug,keyboard,end
 if ~found
     x=[];xbar=[];
     coeffs = [A*(A/D+1), 1/(J*D)*(A+D)*(A*D-2*A^2+2*v0*J), -2*L-1/D*(v0+vf-A^2/J)*(vf-v0+(A^2-D^2)/J)];
@@ -268,6 +289,9 @@ if ~found
         end
     end
     if ~isempty(x)
+        if length(x)>1
+            keyboard
+        end
         vp = v0-A^2/J+A*x;
         xbar = (vp-vf+D^2/J)/D;
         if length(xbar)>1
@@ -276,7 +300,7 @@ if ~found
             xbar = xbar(xbar>=0);
         end
     end
-    keyboard
+    if debug,keyboard,end
     if ~isempty(xbar) && xbar>= 2*D/J
         Times = getTimes(A,D,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)>0 && Times(6)>0
@@ -293,6 +317,7 @@ if ~found
     acc = [];
     jerk = [];
     disp('Nothing found!');
+    retval = 0;
     return
 end
 %% Compute times
@@ -318,7 +343,7 @@ T6 = find(time>=t5 & time<t6);
 T7 = find(time>=t6);
 
 %% readjust limits and recompute times
-keyboard
+if debug,keyboard,end
 if isempty(T2) || (vp-v0)>J/4*x^2
     A = 0.5*J*x;
 end
@@ -421,19 +446,21 @@ acc = cumtrapz(time,jerk);
 speed = x0(2)+cumtrapz(time,acc);
 pos = x0(1)+cumtrapz(time,speed);
 %% plot
-figure
-plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
-hold on
-plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
-plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
-plot([time(1),time(end)],[V V],'r--');
-plot([time(1),time(end)],[-V -V],'r--');
-plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
-plot([time(1),time(end)],[A A],'k--');
-plot([time(1),time(end)],[-D -D],'k--');
-plot([time(1),time(end)],[J J],'c--');
-plot([time(1),time(end)],[-J -J],'c--');
-title('before rearrangement')
+if verbose
+    figure
+    plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
+    hold on
+    plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
+    plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
+    plot([time(1),time(end)],[V V],'r--');
+    plot([time(1),time(end)],[-V -V],'r--');
+    plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
+    plot([time(1),time(end)],[A A],'k--');
+    plot([time(1),time(end)],[-D -D],'k--');
+    plot([time(1),time(end)],[J J],'c--');
+    plot([time(1),time(end)],[-J -J],'c--');
+    title('before rearrangement')
+end
 %% rearrange solution in AFP form
 if ~AFP
     p0 = -p0;
@@ -449,17 +476,21 @@ if ~AFP
     jerk = -jerk;
 end
 %% plot
-figure
-plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
-hold on
-% plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
-plot(time(1),x0(1),'bo',time(end),pf,'bo','linewidth',2)
-plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
-plot([time(1),time(end)],[V V],'r--');
-plot([time(1),time(end)],[-V -V],'r--');
-plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
-plot([time(1),time(end)],[A A],'k--');
-plot([time(1),time(end)],[-D -D],'k--');
-plot([time(1),time(end)],[J J],'c--');
-plot([time(1),time(end)],[-J -J],'c--');
-title('after rearrangement')
+if verbose
+    figure
+    plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
+    hold on
+    % plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
+    plot(time(1),x0(1),'bo',time(end),pf,'bo','linewidth',2)
+    plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
+    plot([time(1),time(end)],[V V],'r--');
+    plot([time(1),time(end)],[-V -V],'r--');
+    plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
+    plot([time(1),time(end)],[A A],'k--');
+    plot([time(1),time(end)],[-D -D],'k--');
+    plot([time(1),time(end)],[J J],'c--');
+    plot([time(1),time(end)],[-J -J],'c--');
+    title('after rearrangement')
+end
+%%
+retval = 1; % success

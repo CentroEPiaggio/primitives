@@ -1,30 +1,53 @@
 clear all;close all;clc;
 
-x0 = [0;0;0];
-xf = [1;0;0];
-x0 = [rand(2,1);0];
-xf = [rand(2,1);0];
-% x0 = [0;0;0];
-% xf = [10;0;0];
 Ts = 0.01;
-state_bounds = [Inf Inf; -2 2; -1 1]*1;
-state_bounds = [Inf Inf; -2 2; -1.5 1.5]*1;
-V = rand;
-A = rand;
-D = rand;
-J = rand;
-% state_bounds = [Inf Inf; -2 2; -1.5 1.5]*1;
-% control_bounds = [-1; 1]*2;
+V = 1;
+A = 1;
+D = 1;
+J = 1;
 state_bounds = [Inf Inf; -V V; -D A]*1;
-control_bounds = [-J; J]*10;
-% [time,pos,speed,acc] = optimal_profile(x0,xf,Ts,state_bounds,control_bounds)
-%%
-x0 = -x0;
-xf = -xf;
-%%
-Ts = 0.01;
-[time_an,pos_an,speed_an,acc_an,jerk_an] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds);
+control_bounds = [-J; J]*1;
 
+n = 6;
+
+results_retval = zeros(n,n,n);
+results_errnorm = zeros(n,n,n);
+
+for ii=0:n
+    for jj=0:n
+        for kk=0:n
+            disp([num2str(1+ii+jj+kk) '/' num2str((n+1)^3)]);
+            
+            v0 = ii/10;
+            vf = jj/10;
+            pf = kk/10;
+            
+            x0 = [0;v0;0];
+            xf = [pf;vf;0];
+            
+            [time_an,pos_an,speed_an,acc_an,jerk_an,retval] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds);
+            
+            if retval == 1
+                x0_res = [pos_an(1);speed_an(1);jerk_an(1)];
+                xf_res = [pos_an(end);speed_an(end);jerk_an(end)];
+            
+                plot_traj(time_an,pos_an,speed_an,acc_an,jerk_an,x0,xf,Ts,A,D,V,J);
+                results_errnorm(ii+1,jj+1,kk+1) = norm(x0-x0_res);
+                return
+            end
+            results_retval(ii+1,jj+1,kk+1) = retval;
+        end
+    end
+end
+
+%%
+% GRID = meshgrid(0:n,0:n,0:n);
+% mesh(GRID,results_retval)
+% %%
+% x0 = -x0;
+% xf = -xf;
+%%
+return
 %%
 % J=J/10;
 acc = cumtrapz(time_an,jerk_an);
