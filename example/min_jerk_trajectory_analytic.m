@@ -48,7 +48,7 @@ J = upper_control_bound
 L = xf(1)-x0(1)
 
 if abs(v0) > V || abs(vf) > V
-    disp('Bounds are not consistent with the problem');
+    disp('Bounds are not consistent with the problem: initial and/or final speed outside constraints');
     retval = -1;
     return
 end
@@ -93,6 +93,9 @@ if ~AFP % if DFP
 end
 
 %% case 1: T4>0, T2>0, T6>0
+if verbose
+    disp('attempt with case 1: T4>0, T2>0, T6>0');
+end
 if debug,keyboard,end
 x=[];xbar=[];xhat=[];
 x = (V-v0)/A + A/J;
@@ -109,12 +112,22 @@ if x>=2*A/J && xbar>=2*D/J && xhat>=0
     end
 end
 %% case 2: T4>0, T2=0, T6>0
+if verbose
+    disp('attempt with case 2: T4>0, T2=0, T6>0');
+end
 if ~found
     x=[];xbar=[];xhat=[];
     x = 2*sqrt((V-v0)/J);
     xbar = (V-vf)/D + D/J;
     xhat = (2*L-(v0+V)*x - (V+vf)*xbar)/(2*V);
     if x>=0 && x<=2*A/J && xbar>=2*D/J && xhat>=0
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        A_tmp = A;
+        vp = V;
+        if eps+(vp-v0) >= 0.25*J*x^2 % numerical issues, added eps to force solution in cases where it is true
+            A_tmp = 0.5*J*x;
+        end
+        
         Times = getTimes(A,D,J,x,xhat,xbar);
         if Times(4)>0 && Times(2)==0 && Times(6)>0
             disp('case 2: T4>0, T2=0, T6>0')
@@ -125,13 +138,23 @@ if ~found
     end
 end
 %% case 3: T4>0, T2>0, T6=0
+if verbose
+    disp('attempt with case 3: T4>0, T2>0, T6=0');
+end
 if ~found
     x=[];xbar=[];xhat=[];
     x = (V-v0)/A + A/J;
     xbar = 2*sqrt((V-vf)/J);
     xhat = (2*L-(v0+V)*x - (V+vf)*xbar)/(2*V);
     if x>=2*A/J && xbar>=0 && xbar<=2*D/J && xhat>=0
-        Times = getTimes(A,D,J,x,xhat,xbar);
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        D_tmp = D;
+        vp = V;
+        if eps+(vp-vf) >= 0.25*J*xbar^2 % numerical issues, added eps to force solution in cases where it is true
+            D_tmp = 0.5*J*xbar;
+        end
+        
+        Times = getTimes(A,D_tmp,J,x,xhat,xbar);
         if Times(4)>0 && Times(2)>0 && Times(6)==0
             disp('case 3: T4>0, T2>0, T6=0')
             tvec = Times;
@@ -141,13 +164,27 @@ if ~found
     end
 end
 %% case 4: T4>0, T2=0, T6=0
+if verbose
+    disp('attempt with case 4: T4>0, T2=0, T6=0');
+end
 if ~found
     x=[];xbar=[];xhat=[];
     x = 2*sqrt((V-v0)/J);
     xbar = 2*sqrt((V-vf)/J);
     xhat = (2*L-(v0+V)*x - (V+vf)*xbar)/(2*V);
     if x>=0 && x<=2*A/J && xbar>=0 && xbar<=2*D/J && xhat>=0
-        Times = getTimes(A,D,J,x,xhat,xbar);
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        A_tmp = A;
+        D_tmp = D;
+        vp = V;
+        if eps+(vp-v0) >= 0.25*J*x^2 % numerical issues, added eps to force solution in cases where it is true
+            A_tmp = 0.5*J*x;
+        end
+        if eps+(vp-vf) >= 0.25*J*xbar^2 % numerical issues, added eps to force solution in cases where it is true
+            D_tmp = 0.5*J*xbar;
+        end
+        
+        Times = getTimes(A_tmp,D_tmp,J,x,xhat,xbar);
         if Times(4)>0 && Times(2)==0 && Times(6)==0
             disp('case 4: T4>0, T2=0, T6=0')
             tvec = Times;
@@ -162,6 +199,9 @@ if ~found
 end
 if debug,keyboard,end
 %% case 5: T4=0, T2=0, T6=0
+if verbose
+    disp('attempt with case 5: T4=0, T2=0, T6=0');
+end
 if ~found
     x=[];xbar=[];
     coeffs = [1/4*(vf-v0)*J, J*L, -(vf-v0)^2, +8*v0*L, -4*(L^2+1/J*(v0+vf)^2*(vf-v0))];
@@ -199,7 +239,17 @@ if ~found
     end
     xbar = xbar(xbar>0);
     if ~isempty(xbar)
-        Times = getTimes(A,D,J,x,xhat,xbar);
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        A_tmp = A;
+        D_tmp = D;
+        if eps+(vp-v0) >= 0.25*J*x^2 % numerical issues, added eps to force solution in cases where it is true
+            A_tmp = 0.5*J*x;
+        end
+        if eps+(vp-vf) >= 0.25*J*xbar^2 % numerical issues, added eps to force solution in cases where it is true
+            D_tmp = 0.5*J*xbar;
+        end
+        
+        Times = getTimes(A_tmp,D_tmp,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)==0 && Times(6)==0
             disp('case 5: T4==0, T2=0, T6=0');
             tvec = Times;
@@ -208,6 +258,9 @@ if ~found
     end
 end
 %% case 6: T4=0, T2>0, T6=0
+if verbose
+    disp('attempt with case 6: T4=0, T2>0, T6=0');
+end
 if ~found
     x=[];xbar=[];
     coeffs = [J^2/(16*A), 1/4*J, 1/4*(2*(J*vf/A)+A), 2*vf, -2*L+1/A*(vf+v0)*(vf-v0+A^2/J)];
@@ -231,16 +284,26 @@ if ~found
     end
     x = x(x>= 2*A/J);
     if ~isempty(x)
-        Times = getTimes(A,D,J,x,xhat,xbar);
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        D_tmp = D;
+        if eps+(vp-vf) >= 0.25*J*xbar^2 % numerical issues, added eps to force solution in cases where it is true
+            D_tmp = 0.5*J*xbar;
+        end
+        Times = getTimes(A,D_tmp,J,x,xhat,xbar);
+        
         if Times(4)==0 && Times(2)>0 && Times(6)==0
             disp('case 6: T4=0, T2>0, T6=0');
             tvec = Times;
             found = 1;
         end
+        
     end
 end
 
 %% case 7: T4=0, T2=0, T6>0
+if verbose
+    disp('attempt with case 7: T4=0, T2=0, T6>0');
+end
 if ~found
     x=[];xbar=[];
     coeffs = [J^2/(16*D), 1/4*J, 1/4*(2*J*v0/D+D), 2*v0, -2*L+1/D*(v0+vf)*(v0-vf+D^2/J)];
@@ -264,7 +327,12 @@ if ~found
     end
     xbar = xbar(xbar>= 2*D/J);
     if ~isempty(xbar)
-        Times = getTimes(A,D,J,x,xhat,xbar);
+        % adjust boundaries when the constant acceleration or deceleration phase do not exist
+        A_tmp = A;
+        if eps+(vp-v0) >= 0.25*J*x^2 % numerical issues, added eps to force solution in cases where it is true
+            A_tmp = 0.5*J*x;
+        end
+        Times = getTimes(A_tmp,D,J,x,xhat,xbar);
         if Times(4)==0 && Times(2)==0 && Times(6)>0
             disp('case 7: T4=0, T2=0, T6>0');
             tvec = Times;
@@ -273,6 +341,9 @@ if ~found
     end
 end
 %% case 8: T4=0, T2>0, T6>0
+if verbose
+    disp('attempt with case 8: T4=0, T2>0, T6>0');
+end
 if debug,keyboard,end
 if ~found
     x=[];xbar=[];
@@ -289,9 +360,9 @@ if ~found
         end
     end
     if ~isempty(x)
-        if length(x)>1
-            keyboard
-        end
+%         if length(x)>1
+%             keyboard
+%         end
         vp = v0-A^2/J+A*x;
         xbar = (vp-vf+D^2/J)/D;
         if length(xbar)>1
@@ -318,6 +389,7 @@ if ~found
     jerk = [];
     disp('Nothing found!');
     retval = 0;
+%     keyboard
     return
 end
 %% Compute times
@@ -373,6 +445,7 @@ T6 = find(time>=t5 & time<t6);
 T7 = find(time>=t6);
 
 %% profile
+if ~isempty(T1)
 tau1 = time(T1)-time(T1(1));
 jerk(T1) = J;
 acc(T1) = J*tau1;
@@ -381,6 +454,10 @@ pos(T1) = p0+v0*tau1+J*tau1.^3/6;
 
 v1 = speed(T1(end));
 p1 = pos(T1(end));
+else
+    v1 = v0;
+    p1 = p0;
+end
 
 if ~isempty(T2)
     tau2 = time(T2)-time(T2(1));
@@ -394,7 +471,7 @@ else
     p2 = p1;
 end
 
-
+if ~isempty(T3)
 tau3 = time(T3)-time(T3(1));
 jerk(T3) = -J;
 acc(T3) = A-J*tau3;
@@ -402,6 +479,10 @@ speed(T3) = v2+A*tau3-0.5*J*tau3.^2;
 pos(T3) = p2+v2*tau3+0.5*A*tau3.^2-J*tau3.^3/6;
 v3 = speed(T3(end));
 p3 = pos(T3(end));
+else
+    v3 = v2;
+    p3 = p2;
+end
 
 if ~isempty(T4)
     tau4 = time(T4)-time(T4(1));
@@ -414,7 +495,8 @@ else
     v4 = v3;
     p4 = p3;
 end
-
+% keyboard
+if ~isempty(T5)
 tau5 = time(T5)-time(T5(1));
 jerk(T5) = -J;
 acc(T5) = -J*tau5;
@@ -422,7 +504,10 @@ speed(T5) = v4-0.5*J*tau5.^2;
 pos(T5) = p4+v4*tau5-J*tau5.^3/6;
 v5 = speed(T5(end));
 p5 = pos(T5(end));
-
+else
+    v5=v4;
+    p5=p4;
+end
 
 if ~isempty(T6)
     tau6 = time(T6)-time(T6(1));
@@ -436,15 +521,19 @@ else
     p6 = p5;
 end
 
+if ~isempty(T7)
 tau7 = time(T7)-time(T7(1));
 jerk(T7) = J;
 acc(T7) = -D+J*tau7;
 speed(T7) = v6-D*tau7+0.5*J*tau7.^2;
 pos(T7) = p6+v6*tau7-0.5*D*tau7.^2+J*tau7.^3/6;
+else
+    % do nothing
+end
 %% hard integration
-acc = cumtrapz(time,jerk);
-speed = x0(2)+cumtrapz(time,acc);
-pos = x0(1)+cumtrapz(time,speed);
+% acc = cumtrapz(time,jerk);
+% speed = x0(2)+cumtrapz(time,acc);
+% pos = x0(1)+cumtrapz(time,speed);
 %% plot
 if verbose
     figure
@@ -463,14 +552,14 @@ if verbose
 end
 %% rearrange solution in AFP form
 if ~AFP
-    p0 = -p0;
+%     p0 = -p0;
     pf = -pf;
     v0 = -v0;
-    vf = -vf;
+%     vf = -vf;
     temp = D;
     D = A;
     A = temp;
-    pos = -pos;
+%     pos = -pos;
     speed = -speed;
     acc = -acc;
     jerk = -jerk;

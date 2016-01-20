@@ -4,13 +4,11 @@ function plot_traj(time_an,pos_an,speed_an,acc_an,jerk_an,x0,xf,Ts,A,D,V,J)
 % pos = x0(1)+cumtrapz(time_an,speed);
 % pos = 3*x0(1)+pos_an;
 % speed = 2*x0(2)+speed_an;
-speed = -2*speed_an(1)+speed_an;
-acc = x0(3)+acc_an;
-pos = x0(1)-cumtrapz(time_an,speed);
+% speed = 2*speed_an(1)+speed_an;
 time = time_an;
 pf = xf(1);
 figure
-plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk_an,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
+plot(time,pos_an,'b',time,speed_an,'r',time,acc_an,'k',time,jerk_an,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
 hold on
 % plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
 plot(time(1),x0(1),'bo',time(end),pf,'bx','linewidth',2)
