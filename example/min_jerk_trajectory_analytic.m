@@ -455,15 +455,24 @@ pos   = zeros(size(time));
 T1 = find(time<t1);
 T2 = find(time>=t1 & time<t2);
 T3 = find(time>=t2 & time<t3);
-T4 = find(time>=t3 & time<t4);
+T4 = find(time>=t3 & time<=t4);
 T5 = find(time>=t4 & time<t5);
 T6 = find(time>=t5 & time<t6);
-T7 = find(time>=t6);
+T7 = find(time>t6);
 
-keyboard
+
+T1 = find(time<t1);
+T2 = find(time>=t1 & time<=t2);
+T3 = find(time>t2 & time<t3);
+T4 = find(time>=t3 & time<=t4);
+T5 = find(time>t4 & time<t5);
+T6 = find(time>=t5 & time<=t6);
+T7 = find(time>t6);
+
 %% profile
+T_last = 1;
 if ~isempty(T1)
-tau1 = time(T1)-time(T1(1));
+tau1 = time(T1);
 jerk(T1) = J;
 acc(T1) = J*tau1;
 speed(T1) = v0+0.5*J*tau1.^2;
@@ -471,81 +480,96 @@ pos(T1) = p0+v0*tau1+J*tau1.^3/6;
 
 v1 = speed(T1(end));
 p1 = pos(T1(end));
+
+T_last = T1(end);
 else
     v1 = v0;
     p1 = p0;
 end
 
 if ~isempty(T2)
-    tau2 = time(T2)-time(T2(1));
+    tau2 = time(T2)-time(T_last);
     acc(T2) = A*ones(length(T2),1);
     speed(T2) = v1+A*tau2;
     pos(T2) = p1+v1*tau2+0.5*A*tau2.^2;
     v2 = speed(T2(end));
     p2 = pos(T2(end));
+    
+    T_last = T2(end);
 else
     v2 = v1;
     p2 = p1;
+    
 end
 
 if ~isempty(T3)
-tau3 = time(T3)-time(T3(1));
+tau3 = time(T3)-time(T_last);
 jerk(T3) = -J;
 acc(T3) = A-J*tau3;
 speed(T3) = v2+A*tau3-0.5*J*tau3.^2;
 pos(T3) = p2+v2*tau3+0.5*A*tau3.^2-J*tau3.^3/6;
 v3 = speed(T3(end));
 p3 = pos(T3(end));
+
+T_last = T3(end);
 else
     v3 = v2;
     p3 = p2;
 end
-
+%%
 if ~isempty(T4)
-    tau4 = time(T4)-time(T4(1));
+    tau4 = time(T4)-time(T_last);
     acc(T4) = zeros(size(T4));
-    speed(T4) = v3*ones(length(T4),1);
+%     speed(T4) = v3*ones(length(T4),1);
+    speed(T4) = V*ones(length(T4),1);
     pos(T4) = p3+v3*tau4;
     v4 = speed(T4(end));
     p4 = pos(T4(end));
+    
+    T_last = T4(end);
 else
     v4 = v3;
     p4 = p3;
 end
 % keyboard
 if ~isempty(T5)
-tau5 = time(T5)-time(T5(1));
+tau5 = time(T5)-time(T_last);
 jerk(T5) = -J;
 acc(T5) = -J*tau5;
 speed(T5) = v4-0.5*J*tau5.^2;
 pos(T5) = p4+v4*tau5-J*tau5.^3/6;
 v5 = speed(T5(end));
 p5 = pos(T5(end));
+
+T_last = T5(end);
 else
     v5=v4;
     p5=p4;
 end
 
 if ~isempty(T6)
-    tau6 = time(T6)-time(T6(1));
+    tau6 = time(T6)-time(T_last);
     acc(T6) = -D*ones(length(T6),1);
     speed(T6) = v5-D*tau6;
     pos(T6) = p5+v5*tau6-0.5*D*tau6.^2;
     v6 = speed(T6(end));
     p6 = pos(T6(end));
+    
+    T_last = T6(end);
 else
     v6 = v5;
     p6 = p5;
 end
 
 if ~isempty(T7)
-tau7 = time(T7)-time(T7(1));
+tau7 = time(T7)-time(T_last);
 jerk(T7) = J;
 acc(T7) = -D+J*tau7;
 speed(T7) = v6-D*tau7+0.5*J*tau7.^2;
 pos(T7) = p6+v6*tau7-0.5*D*tau7.^2+J*tau7.^3/6;
 else
     % do nothing
+% keyboard
 end
 %% hard integration
 % acc = cumtrapz(time,jerk);

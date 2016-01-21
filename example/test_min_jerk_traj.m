@@ -1,4 +1,5 @@
-clear all;close all;clc;
+clear all;clc;
+close all;
 
 Ts = 0.01;
 V = 0.5;
@@ -15,14 +16,18 @@ results_errnorm = zeros(n,n,n);
 
 zz=1;
 
+p0vec = linspace(-n,n,n+1);
+v0vec = linspace(-n,n,n+1);
+vfvec = linspace(-n,n,n+1);
+
 for ii=0:n
     for jj=0:n
         for kk=0:n
             disp([num2str(1+ii+jj+kk) '/' num2str((n+1)^3)]);
             
-            v0 = ii;
-            vf = jj;
-            pf = kk;
+            v0 = v0vec(ii+1);
+            vf = vfvec(jj+1);
+            pf = p0vec(kk+1);
             
             if abs(v0) > V
                 v0 = V;
@@ -46,8 +51,12 @@ for ii=0:n
 %             x0 = [0;0.5;0];
 %             xf = [2;0;0];
 
-            x0 = [0;0.5;0];
-            xf = [1;0.5;0];
+%             x0 = [0;0.5;0];
+%             xf = [1;0.5;0];
+
+% discontinuita' su T3-T4
+%              x0 = [0;0;0];
+%              xf = [3;0;0];
 
             if isequal(x0,xf)
                 results_retval(ii+1,jj+1,kk+1) = -100;
@@ -67,14 +76,16 @@ for ii=0:n
                     zz=1;
 %                     return
                 end
-%                 subplot(3,3,zz);
+                subplot(3,3,zz);
                 zz=zz+1;
                 plot_traj(time_an,pos_an,speed_an,acc_an,jerk_an,x0,xf,Ts,A,D,V,J);
                 results_errnorm(ii+1,jj+1,kk+1) = norm(x0-x0_res);
 %                 return
+            else
+                keyboard
             end
             results_retval(ii+1,jj+1,kk+1) = retval;
-            return
+%             return
         end
     end
 end
