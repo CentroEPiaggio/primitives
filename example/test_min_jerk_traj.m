@@ -13,6 +13,8 @@ n = 3;
 results_retval = zeros(n,n,n);
 results_errnorm = zeros(n,n,n);
 
+zz=1;
+
 for ii=0:n
     for jj=0:n
         for kk=0:n
@@ -31,6 +33,22 @@ for ii=0:n
             
             x0 = [0;v0;0];
             xf = [pf;vf;0];
+            
+%             % in this case the solution should be extended with a further
+%             % T4>0 part
+%             x0 = [0;0;0];
+%             xf = [0.5;0.5;0];
+%             
+% %             % 
+% %             x0 = [0;0.5;0];
+% %             xf = [1;0;0];
+% 
+%             x0 = [0;0.5;0];
+%             xf = [2;0;0];
+
+            x0 = [0;0.5;0];
+            xf = [1;0.5;0];
+
             if isequal(x0,xf)
                 results_retval(ii+1,jj+1,kk+1) = -100;
                 continue;
@@ -43,12 +61,20 @@ for ii=0:n
             if retval == 1
                 x0_res = [pos_an(1);speed_an(1);jerk_an(1)];
                 xf_res = [pos_an(end);speed_an(end);jerk_an(end)];
-            
+                
+                if mod(zz,10)==0
+                    figure
+                    zz=1;
+%                     return
+                end
+%                 subplot(3,3,zz);
+                zz=zz+1;
                 plot_traj(time_an,pos_an,speed_an,acc_an,jerk_an,x0,xf,Ts,A,D,V,J);
                 results_errnorm(ii+1,jj+1,kk+1) = norm(x0-x0_res);
 %                 return
             end
             results_retval(ii+1,jj+1,kk+1) = retval;
+            return
         end
     end
 end

@@ -7,7 +7,7 @@ function plot_traj(time_an,pos_an,speed_an,acc_an,jerk_an,x0,xf,Ts,A,D,V,J)
 % speed = 2*speed_an(1)+speed_an;
 time = time_an;
 pf = xf(1);
-figure
+% figure
 plot(time,pos_an,'b',time,speed_an,'r',time,acc_an,'k',time,jerk_an,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
 hold on
 % plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)

@@ -82,7 +82,15 @@ else
 end
 if debug,keyboard,end
 %% rearrange problem in AFP form
+% TENTATIVE FOR AFP
+    AFPp0 = p0;
+    AFPpf = pf;
+    AFPv0 = v0;
+    AFPvf = vf;
+    AFPD = D;
+    AFPA = A;
 if ~AFP % if DFP
+    %
     p0 = -p0;
     pf = -pf;
     v0 = -v0;
@@ -90,6 +98,14 @@ if ~AFP % if DFP
     temp = D;
     D = A;
     A = temp;
+    L = pf-p0;
+    % REARRANGED FOR DFP
+    DFPp0 = p0;
+    DFPpf = pf;
+    DFPv0 = v0;
+    DFPvf = vf;
+    DFPD = D;
+    DPFA = A;
 end
 
 %% case 1: T4>0, T2>0, T6>0
@@ -127,8 +143,8 @@ if ~found
         if eps+(vp-v0) >= 0.25*J*x^2 % numerical issues, added eps to force solution in cases where it is true
             A_tmp = 0.5*J*x;
         end
-        
-        Times = getTimes(A,D,J,x,xhat,xbar);
+%         keyboard
+        Times = getTimes(A_tmp,D,J,x,xhat,xbar);
         if Times(4)>0 && Times(2)==0 && Times(6)>0
             disp('case 2: T4>0, T2=0, T6>0')
             tvec = Times;
@@ -444,6 +460,7 @@ T5 = find(time>=t4 & time<t5);
 T6 = find(time>=t5 & time<t6);
 T7 = find(time>=t6);
 
+keyboard
 %% profile
 if ~isempty(T1)
 tau1 = time(T1)-time(T1(1));
@@ -535,31 +552,31 @@ end
 % speed = x0(2)+cumtrapz(time,acc);
 % pos = x0(1)+cumtrapz(time,speed);
 %% plot
-if verbose
+if verbose & ~AFP
     figure
     plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
     hold on
-    plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
-    plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
+    plot(time(1),DFPp0,'bo',time(end),DFPpf,'bo','linewidth',2)
+    plot(time(1),DFPv0,'ro',time(end),DFPvf,'ro','linewidth',2)
     plot([time(1),time(end)],[V V],'r--');
     plot([time(1),time(end)],[-V -V],'r--');
     plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
-    plot([time(1),time(end)],[A A],'k--');
-    plot([time(1),time(end)],[-D -D],'k--');
+    plot([time(1),time(end)],[DPFA DPFA],'k--');
+    plot([time(1),time(end)],[-DFPD -DFPD],'k--');
     plot([time(1),time(end)],[J J],'c--');
     plot([time(1),time(end)],[-J -J],'c--');
     title('before rearrangement')
 end
 %% rearrange solution in AFP form
 if ~AFP
-%     p0 = -p0;
+     p0 = -p0;
     pf = -pf;
     v0 = -v0;
-%     vf = -vf;
+     vf = -vf;
     temp = D;
     D = A;
     A = temp;
-%     pos = -pos;
+     pos = -pos;
     speed = -speed;
     acc = -acc;
     jerk = -jerk;
@@ -570,16 +587,18 @@ if verbose
     plot(time,pos,'b',time,speed,'r',time,acc,'k',time,jerk,'c','linewidth',2),grid on,legend('pos','vel','acc','control jerk','location','best')
     hold on
     % plot(time(1),x0(1),'bo',time(end),xf(1),'bo','linewidth',2)
-    plot(time(1),x0(1),'bo',time(end),pf,'bo','linewidth',2)
-    plot(time(1),x0(2),'ro',time(end),xf(2),'ro','linewidth',2)
+    plot(time(1),AFPp0,'bo',time(end),AFPpf,'bo','linewidth',2)
+    plot(time(1),AFPv0,'ro',time(end),AFPvf,'ro','linewidth',2)
     plot([time(1),time(end)],[V V],'r--');
     plot([time(1),time(end)],[-V -V],'r--');
     plot(time(1),x0(3),'ko',time(end),xf(3),'ko','linewidth',2)
-    plot([time(1),time(end)],[A A],'k--');
-    plot([time(1),time(end)],[-D -D],'k--');
+    plot([time(1),time(end)],[AFPA AFPA],'k--');
+    plot([time(1),time(end)],[-AFPD -AFPD],'k--');
     plot([time(1),time(end)],[J J],'c--');
     plot([time(1),time(end)],[-J -J],'c--');
+    if ~AFP
     title('after rearrangement')
+    end
 end
 %%
 retval = 1; % success
