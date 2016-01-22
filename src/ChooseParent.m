@@ -1,6 +1,6 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-function [idx_min,q,cost_new_edge,x,time] = ChooseParent(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim)
+function [idx_min,q,cost_new_edge,x,time,z_new] = ChooseParent(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim)
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
@@ -60,9 +60,9 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_y_chooseparent = x_chooseparent;
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
-            if feasible && ~isequal(z_near(1:2),x_chooseparent(1:2,1))
+            if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(x_chooseparent(1:length(z_new),end),z_new))
                 disp('WTF ChooseParent is doing?')
-                keyboard
+%                 keyboard
             end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
@@ -77,7 +77,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 % costo fino al near + pezzettino near-new
                 c_prime = cost_up_to_z_near + cost_znear_znew;
                 try
-                    if ((c_prime < cost_z_new) && (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
+                    if ((c_prime < cost_z_new) & (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
                         idx_min = idX_near(i);
                         c_min = c_prime;
                         x=x_chooseparent;
@@ -97,10 +97,35 @@ if ~isnan(x) & ~isequaln(z_new(1:2),x(1:2,end))
         disp('ChooseParent is changing the goal point by a significant amount, worry.')
         disp('If speed is constant then it''s normal')
         disp('x is')
-        x
+        x(:,end)
         disp('while z_new is')
         z_new
-%         keyboard
+        %         keyboard
     end
 end
+
+if ~isnan(x)
+    if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
+        disp('ChooseParent slightly changed the goal point!')
+        x(1:length(z_new),end)
+        z_new
+%         keyboard
+        %                         if pushed_in_goal
+        %                             reached(x(1:length(z_new),end),z_new)
+        %                             keyboard
+        %                         end
+        % this should fix the discontinuity problem
+%                                [z_new,x] = truncate_to_similar(z_new,x);
+    else
+        disp('ChooseParent was actually good!')
+        keyboard
+    end
+end
+
+if any(any(~isnan(x_chooseparent)))
+%     disp('fix this')
+%     keyboard
+    z_new = x_chooseparent(prim.dimensions>0,end); % HACK to ensure continuity in the trajectories stored in the tree
+end
+
 end

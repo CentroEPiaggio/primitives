@@ -22,8 +22,8 @@ classdef Elevate < primitive_library.PrimitiveFun
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('E-le-va-tion!')
             disp(['From z_start: ' num2str(z_start(:)') ' to z_end: ' num2str(z_end(:)')])
-%             z_start
-%             z_end
+            %             z_start
+            %             z_end
             
             % initialization
             feasible=false;
@@ -39,8 +39,8 @@ classdef Elevate < primitive_library.PrimitiveFun
             prim_filepath = [run_filepath 'prim/'];
             
             Tend = 10; % TODO porcata. Il tempo va parametrizzato.
-            Ts = 0.01;
-                     
+            Ts = 0.001;
+            
             yi = z_start(3);
             yf = z_end(3);
             
@@ -55,46 +55,54 @@ classdef Elevate < primitive_library.PrimitiveFun
                 'yf_vec_len',1,     ...
                 'filepath',prim_filepath ...
                 );
-            [time,traj_yp_cart]=gen_primitives_abbassa(primitive_abbassa_params);
-            traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
-            % generate initial condition file for simulation
-            %             xi = [0;0;0]; % HARDFIX
-            xi = z_start(1);
-            %             vi = [0;0;0]; % HARDFIX
-            vi = z_start(2);
-            traj_vel_cart = ones(size(time))*vi; % HARDFIX
-            q0 = [xi(:);deg2rad(90);z_start(3)];
-            q0 = [xi(:);deg2rad(90);traj_y_cart(1)];
-            qp0 = [vi(:);0;0];
-            qref0 = q0;
-            ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
-            gen_ic(ic);
-            % simulate
-            q_reference = [time(:)';
-                traj_vel_cart(:)';
-                traj_yp_cart(:)'];
-            save('../example/runna.mat','q_reference');
-            runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
-            [status, result] = system(runstr);
-            if status ~= 0, error(result); end
-            % check if feasible
-            load('../src/modello.mat');
-            % disp(['zmp flag(end): ' num2str(rt_zmpflag(end))]) % display feasibility bit
-            % disp('In steering_muovi:')
-            % keyboard
-%             keyboard
-            if rt_zmpflag(end)==0
-                feasible = 1;
-                cost = rt_cost(end);
+            [time,traj_yp_cart,retval]=gen_primitives_abbassa(primitive_abbassa_params);
+            if retval==1
+                
+                traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
+                % generate initial condition file for simulation
+                %             xi = [0;0;0]; % HARDFIX
+                xi = z_start(1);
+                %             vi = [0;0;0]; % HARDFIX
+                vi = z_start(2);
+                traj_vel_cart = ones(size(time))*vi; % HARDFIX
+                q0 = [xi(:);deg2rad(90);z_start(3)];
+                q0 = [xi(:);deg2rad(90);traj_y_cart(1)];
+                qp0 = [vi(:);0;0];
+                qref0 = q0;
+                ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
+                gen_ic(ic);
+                % simulate
+                q_reference = [time(:)';
+                    traj_vel_cart(:)';
+                    traj_yp_cart(:)'];
+                save('../example/runna.mat','q_reference');
+                runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
+                [status, result] = system(runstr);
+                if status ~= 0, error(result); end
+                % check if feasible
+                load('../src/modello.mat');
+                % disp(['zmp flag(end): ' num2str(rt_zmpflag(end))]) % display feasibility bit
+                % disp('In steering_muovi:')
+                % keyboard
+                %             keyboard
+                if rt_zmpflag(end)==0
+                    feasible = 1;
+                    cost = rt_cost(end);
+                else
+                    feasible = 0;
+                    cost = Inf;
+                end
+                % pack return data
+                q = [traj_y_cart(1) traj_y_cart(end)];
+                
+                x = [traj_y_cart]';
             else
                 feasible = 0;
                 cost = Inf;
+                q = NaN;
+                x = NaN;
+                time = NaN;
             end
-            % pack return data
-            q = [traj_y_cart(1) traj_y_cart(end)];
-            
-            x = [traj_y_cart]';
-
         end
     end
 end

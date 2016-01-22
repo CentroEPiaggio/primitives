@@ -22,8 +22,8 @@ classdef Move < primitive_library.PrimitiveFun
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('Move like Jagger!')
             disp(['From z_start: ' num2str(z_start(:)') ' to z_end: ' num2str(z_end(:)')])
-%             z_start
-%             z_end
+            %             z_start
+            %             z_end
             % STEERING_MUOVI
             % this function takes as arguments the following:
             % enable_muovi: true or false
@@ -54,7 +54,7 @@ classdef Move < primitive_library.PrimitiveFun
             prim_filepath = [run_filepath 'prim/'];
             
             Tend = 10; % TODO porcata. Il tempo va parametrizzato.
-            Ts = 0.01;
+            Ts = 0.001;
             
             yi = rand;
             yf = yi*2;
@@ -73,49 +73,58 @@ classdef Move < primitive_library.PrimitiveFun
                 'filepath',prim_filepath ...
                 );
             %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
-            [time,traj_vel_cart,q]=gen_primitives_muovi_local(primitive_muovi_params);
-            traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
-            if any(isnan(time)) || any(isnan(traj_vel_cart))
-                feasible=0;
-                cost=Inf;
-                return
-            end
-            if nargout > 2 % if requested...
-                traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
-                traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
-                q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
-            end     
             
-            traj_yp_cart = zeros(size(traj_vel_cart));
-            
-            % generate initial condition file for simulation
-            q0 = [xi(:);deg2rad(90);2];
-            
-            qp0 = [vi(:);0;0];
-            qref0 = q0;
-            ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
-            gen_ic(ic);
-            % simulate
-            q_reference = [time(:)';
-                traj_vel_cart(:)';
-                traj_yp_cart(:)'];
-            save('../example/runna.mat','q_reference');
-            runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
-            [status, result] = system(runstr);
-            if status ~= 0, error(result); end
-            % check if feasible
-            load('../src/modello.mat');
-            
-            if rt_zmpflag(end)==0
-                feasible = 1;
-                cost = rt_cost(end);
+            [time,traj_pos_cart,traj_vel_cart,q,retval]=gen_primitives_muovi_local(primitive_muovi_params);
+            if retval==1
+%                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
+                if any(isnan(time)) || any(isnan(traj_vel_cart))
+                    feasible=0;
+                    cost=Inf;
+                    return
+                end
+                if nargout > 2 % if requested...
+%                     traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
+%                     traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
+                    q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
+                end
+                
+                traj_yp_cart = zeros(size(traj_vel_cart));
+                
+                % generate initial condition file for simulation
+                q0 = [xi(:);deg2rad(90);2];
+                
+                qp0 = [vi(:);0;0];
+                qref0 = q0;
+                ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
+                gen_ic(ic);
+                % simulate
+                q_reference = [time(:)';
+                    traj_vel_cart(:)';
+                    traj_yp_cart(:)'];
+                save('../example/runna.mat','q_reference');
+                runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
+                [status, result] = system(runstr);
+                if status ~= 0, error(result); end
+                % check if feasible
+                load('../src/modello.mat');
+                
+                if rt_zmpflag(end)==0
+                    feasible = 1;
+                    cost = rt_cost(end);
+                else
+                    feasible = 0;
+                    cost = Inf;
+                    disp('Failed ZMP check');
+                end
+                % pack return data
+                x = [traj_pos_cart;traj_vel_cart];
             else
                 feasible = 0;
                 cost = Inf;
-                disp('Failed ZMP check');
+                x = NaN;
+                time = NaN;
+                q = NaN;
             end
-            % pack return data
-            x = [traj_pos_cart;traj_vel_cart];
         end
     end
 end

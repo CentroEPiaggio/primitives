@@ -1,5 +1,6 @@
 % define obstacles
 Obstacles = tree;
+
 speed_limit_bottom = -1;
 speed_limit_top = 1;
 speed_limit_entry = 10;

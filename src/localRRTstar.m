@@ -16,9 +16,18 @@ prim = Ptree.get(idx_prim);
 
 % find nearest point in the tree
 [idx_nearest,z_nearest] = Nearest(z_rand,T,Ptree.Node{idx_prim});
-% make sure that we are not attaching to the goal_node
+% make sure that we are not attaching to the goal_node...
 if ~isempty(goal_node)
     idx_nearest(idx_nearest==goal_node) = [];
+end
+if isempty(idx_nearest) % ... if the goal noad is the only nearest node, then go away
+    % do nothing
+    Tree = T;
+    G = Graph;
+    E = Edges;
+    disp('Do nothing inside localRRTstar');
+%     keyboard
+    return
 end
 % check if both points are in the image space of the primitive. This should
 % be a redundant check and could be removed later on.
@@ -48,16 +57,18 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             end
         end
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
-        disp('shit is happening already')
-        [z_new,x] = truncate_to_similar(z_new,x);
+%         keyboard
+%         disp('shit is happening already')
+%         [z_new,x] = truncate_to_similar(z_new,x);
         disp(['before collisionfree with primitive ' prim.name])
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
         disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard
         end
-        % this should fix the discontinuity problem
-        [z_new,x] = truncate_to_similar(z_new,x);
+%         keyboard
+%         % this should fix the discontinuity problem
+%         [z_new,x] = truncate_to_similar(z_new,x);
     end
     if checkdiscontinuity(T,Edges,Ptree)
         keyboard
@@ -73,7 +84,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         if ~isempty(goal_node)
             idx_near_bubble(idx_near_bubble==goal_node) = [];
         end
-        disp('### begin radius loop')
+        disp(['### begin radius loop: raggio=' num2str(raggio)])
         if raggio>0 && ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
@@ -88,7 +99,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
-                [idx_min,q,cost_new,x_chooseparent,time_chooseparent] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
+                [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
                 if isinf(cost_new) % no feasible neighbor found
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
@@ -102,13 +113,15 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     z_new_temp = z_new;
-                    if ~isequaln(x(1:length(z_new)),z_new)%x(1:2,end) ~= z_new(1:2)
+                    if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
+%                         keyboard
                         if pushed_in_goal
-                            keyboard
+                            reached(x(1:length(z_new),end),z_new)
+%                             keyboard
                         end
-                        % this should fix the discontinuity problem
-                        [z_new,x] = truncate_to_similar(z_new,x);
+%                         % this should fix the discontinuity problem
+%                         [z_new,x] = truncate_to_similar(z_new,x);
                     end
                 end
             end
@@ -118,10 +131,18 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 if idx_prim==1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                        z_new = x(prim.dimensions>0,end); % TO FIX DISCONTINUITY PROBLEM
+                        if isempty(idx_min)
+                            keyboard
+                        end
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     end
                 else % idx_prim > 1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+                        z_new = x(prim.dimensions>0,end); % TO FIX DISCONTINUITY PROBLEM
+                        if isempty(idx_min)
+                            keyboard
+                        end
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     end
                 end
@@ -192,6 +213,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                 end
                 
+%                 keyboard % Uncomment here for tuning radius
                 if verbose
                     set(cerchio,'Visible','off')
                 end

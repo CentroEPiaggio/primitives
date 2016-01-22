@@ -2,6 +2,8 @@
 clear all; clear import; close all; clc;
 push_goal_freq = 10;
 
+multiple_primitives = 0;
+
 % debug and visualization flags
 debug=0; % enable breakpoints
 verbose = 1; % to plot stuff
@@ -16,8 +18,9 @@ import primitive_library.*;
 % NaN? We'll see.
 z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
 z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
-z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
-% z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
+% z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
+z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
+z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -29,7 +32,7 @@ InitObstacles; % initialize obstacles structure
 InitView; % open figures
 
 % algorithm parameters
-N_sample_max = 300; % max number of samples
+N_sample_max = 3000; % max number of samples
 
 % These vectors are used to save progress of anytime algorithm
 cost_vector = [];
@@ -39,7 +42,9 @@ N_cost_vector = [];
 stop=false;
 path_found = false;
 goal_node = [];
+source_node = 1;
 for ii=1:N_sample_max
+    cprintf('*[1,0.5,0]*','# %d\n',ii);
     %% sampling
     if mod(ii,push_goal_freq)==0 %&& ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
@@ -49,6 +54,9 @@ for ii=1:N_sample_max
         z_rand = Chi0.sample; % sample a point in Chi0.
         pushed_in_goal=0;
     end
+    
+    % round up to the second decimal
+    z_rand = round(z_rand*100)/100;
     
     if verbose
         disp(['z_rand: ' num2str(z_rand(:)')])
@@ -74,12 +82,19 @@ for ii=1:N_sample_max
             save_test_data
             if debug,keyboard,end
         end
+%     elseif pushed_in_goal || reached(T.Node{end},z_goal) % first time a path is found
     elseif reached(T.Node{end},z_goal) % first time a path is found
+        keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
         path_found = true;
         if debug,keyboard,end
+        
+        load handel;
+        player = audioplayer(y, Fs);
+        play(player);
+
         continue % for anytime behavior
     end
 
@@ -119,7 +134,7 @@ for ii=1:N_sample_max
                     save_test_data
                     if debug,keyboard,end
                 end
-            elseif reached(T.Node{end},z_goal)
+            elseif pushed_in_goal || reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
                 % the -1 is a dirty fix for the fact
@@ -146,6 +161,9 @@ for ii=1:N_sample_max
                 pushed_in_goal=0;
             end
 
+            % rounding up to the second decimal
+            z_aug = round(z_aug*100)/100;            
+            
             Chi_aug = prim.chi;
             
             if verbose
@@ -169,7 +187,7 @@ for ii=1:N_sample_max
                     save_test_data
                     if debug,keyboard,end
                 end
-            elseif reached(T.Node{end},z_goal)
+            elseif pushed_in_goal || reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
                 % the -1 is a dirty fix for the fact

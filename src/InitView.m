@@ -6,7 +6,7 @@ if verbose
     figure(fig_chi0)
     Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
                                                                % Chi1.P.plot('color','lightblue','alpha',0.5)
-    axis equal;
+%     axis equal;
     plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
     plot(z_goal(1),z_goal(2),'ko','linewidth',4) % plot initial point
     figure(fig_xy)
@@ -24,9 +24,11 @@ if verbose
     % plot obstacles
     figure(fig_chi0)
     obstacle_speed_limit.P.plot('color','black','alpha',1);
-    figure(fig_xy)
-    Chi1.P.plot('color','lightblue','alpha',0.5); hold on;
-    obstacle_wall.P.plot('color','black','alpha',1);
+    if multiple_primitives
+        figure(fig_xy)
+        Chi1.P.plot('color','lightblue','alpha',0.5); hold on;
+        obstacle_wall.P.plot('color','black','alpha',1);
+    end
 
 end
 

@@ -1,7 +1,6 @@
 function discontinuo=checkdiscontinuity(T,E,Ptree)
 discontinuo = false;
     for jj=2:T.nnodes
-%         keyboard
         idx_sorgente = T.Parent(jj);
         idx_destinazione = jj;
         sorgente = T.get(idx_sorgente);

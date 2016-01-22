@@ -26,15 +26,19 @@ else
     % %% debug end
     if ~isinf(cost) && cost>0
         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
-        test2 = fix_nans(z_new,prim.dimensions);
+        test2 = fix_nans(z_new,prim.dimensions); 
         
-        if length(test1)==length(test2) && all(test1==test2)
+        if isequal(test1,test2) % length(test1)==length(test2) && all(test1==test2)
             cprintf('error','InsertNode: last node exception. Not adding the node.\n');
             keyboard
             return
         end
         z_new=fix_nans(z_new,prim.dimensions);
-        T = T.addnode(idx_current,z_new);
+        try
+            T = T.addnode(idx_current,z_new);
+        catch
+            keyboard;
+        end
         idx_last_added_node = T.nnodes;
         % make the sparse matrix square % is this really needed here?
         sizeG = size(G);

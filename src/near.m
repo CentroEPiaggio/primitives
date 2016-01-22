@@ -26,7 +26,7 @@ if n<2
 %     disp('Gimme something more mate!');
         return
 end
-gam = 100000; % TUNE
+gam = 1000; % TUNE
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);

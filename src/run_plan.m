@@ -7,7 +7,8 @@ q_reference = [0;0;0];
 % loop
 for kk=2:opt_plan.nnodes
     if debug,keyboard,end
-    time = opt_plan.Node{kk}.time;
+    %time = opt_plan.Node{kk}.time;
+    time = 0:Ts:Ts*(length(opt_plan.Node{kk}.x(2,:))-1);
     traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);
     traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/mean(diff(opt_plan.Node{kk}.time));
 %     if strcmp(opt_plan.Node{kk-1}.primitive,'Eleva') && strcmp(opt_plan.Node{kk}.primitive,'Muovi')
