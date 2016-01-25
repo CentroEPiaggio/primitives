@@ -67,24 +67,8 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-
-    % check if path has been found and it needs to plot and save data
-    if path_found % anytime optimization. If one feasible path was
-                  % found in a previous iteration, keep optimizing
-        [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-        % save cost and iteration for plotting (anytime) stuff
-        if ~isempty(cost_vector) && cost<cost_vector(end)
-            cost_vector = [cost_vector, cost];
-            N_cost_vector = [N_cost_vector, ii];
-            plot_biograph(source_node,goal_node,G);
-            figure(10)
-            bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-            %             hold on
-            save_test_data
-            if debug,keyboard,end
-        end
-%     elseif pushed_in_goal || reached(T.Node{end},z_goal) % first time a path is found
-    elseif reached(T.Node{end},z_goal) % first time a path is found
+    
+    if reached(T.Node{end},z_goal) % first time a path is found
         keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
@@ -95,10 +79,68 @@ for ii=1:N_sample_max
         load handel;
         player = audioplayer(y, Fs);
         play(player);
-
+        [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+        % save cost and iteration for plotting (anytime) stuff
+        if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
+            cost_vector = [cost_vector, cost];
+            N_cost_vector = [N_cost_vector, ii];
+            plot_biograph(source_node,goal_node,G);
+            figure(10)
+            bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+            %             hold on
+            save_test_data
+            if debug,keyboard,end
+        end
         continue % for anytime behavior
     end
-
+    % check if path has been found and it needs to plot and save data
+    if path_found % anytime optimization. If one feasible path was
+        % found in a previous iteration, keep optimizing
+        [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+        % save cost and iteration for plotting (anytime) stuff
+        if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
+            cost_vector = [cost_vector, cost];
+            N_cost_vector = [N_cost_vector, ii];
+            plot_biograph(source_node,goal_node,G);
+            figure(10)
+            bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+            %             hold on
+            save_test_data
+            if debug,keyboard,end
+        end
+    end
+    
+    %     % check if path has been found and it needs to plot and save data
+    %     if path_found % anytime optimization. If one feasible path was
+    %                   % found in a previous iteration, keep optimizing
+    %         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+    %         % save cost and iteration for plotting (anytime) stuff
+    %         if ~isempty(cost_vector) && cost<cost_vector(end)
+    %             cost_vector = [cost_vector, cost];
+    %             N_cost_vector = [N_cost_vector, ii];
+    %             plot_biograph(source_node,goal_node,G);
+    %             figure(10)
+    %             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+    %             %             hold on
+    %             save_test_data
+    %             if debug,keyboard,end
+    %         end
+    % %     elseif pushed_in_goal || reached(T.Node{end},z_goal) % first time a path is found
+    %     elseif reached(T.Node{end},z_goal) % first time a path is found
+    %         keyboard
+    %         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+    %         goal_node = idz_Goal;
+    %         disp('Goal reached (via Muovi)!');
+    %         path_found = true;
+    %         if debug,keyboard,end
+    %
+    %         load handel;
+    %         player = audioplayer(y, Fs);
+    %         play(player);
+    %
+    %         continue % for anytime behavior
+    %     end
+    
     
     if feasible && added_new % last call to localRRTstart has produced a new
         % node z_new which was added to the tree?
@@ -113,9 +155,9 @@ for ii=1:N_sample_max
                 % this primitive jj is not available for this point. Keep going.
                 continue;
             end
-
+            
             prim = Ptree.Node{jj};
-
+            
             % Extend the z_new point (already in the tree) with its initial_extend
             % values (see PrimitiveFun.extend)
             z_whatwas = z_new
@@ -163,9 +205,9 @@ for ii=1:N_sample_max
                 z_aug = prim.chi.sample;
                 pushed_in_goal=0;
             end
-
+            
             % rounding up to the second decimal
-            z_aug = round(z_aug*100)/100;            
+            z_aug = round(z_aug*100)/100;
             
             Chi_aug = prim.chi;
             
@@ -175,7 +217,7 @@ for ii=1:N_sample_max
                 plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
                 cprintf('red','Sto per provare con la eleva')
             end
-
+            
             [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
             if path_found
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
@@ -208,7 +250,7 @@ for ii=1:N_sample_max
                 break
             end
         end
-
+        
         if stop
             disp('Found a feasible path!');
             source_node = 1;

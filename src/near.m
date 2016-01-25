@@ -27,10 +27,19 @@ if n<2
     %     disp('Gimme something more mate!');
     return
 end
-gam = 100; % TUNE
+gam = 100; % TUNE gam
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);
+% TUNE gam graphically with this
+% gam = 100
+% n = 1:1e3;
+% volume = gam*log(n)./n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
+% radius_elevated_n = gamma(1+n/2)./pi.^(n/2).*volume;
+% radius = radius_elevated_n.^(1./n);
+% figure
+% plot(n,volume,n,radius)
+%
 % BITTER crop the maximum radius at 4.43, see test_radius.m for the reason
 % disp('lo printa?')
 % radius = min(radius,4.43)

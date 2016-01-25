@@ -33,7 +33,7 @@ if isempty(idx_nearest) % ... if the goal noad is the only nearest node, then go
 end
 % rescale z_rand within a ball of radius \eta centered in z_nearest
 cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
-eta = 1; % TUNABLE PARAMETER
+eta = 1.2; % TUNABLE PARAMETER
 if idx_prim>1
     error('remember to fix this eta radius bubble stuff!');
 end
