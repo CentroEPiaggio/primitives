@@ -38,7 +38,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
             
-            Tend = 10; % TODO porcata. Il tempo va parametrizzato.
+%             Tend = 10; % TODO porcata. Il tempo va parametrizzato. % DONE
             Ts = 0.001;
             
             yi = z_start(3);
@@ -50,14 +50,13 @@ classdef Elevate < primitive_library.PrimitiveFun
                 'yf',yf,            ...
                 'ypi',0,            ...
                 'ypf',0,            ...
-                'Tend',Tend,        ...
                 'Ts',Ts,            ...
                 'yf_vec_len',1,     ...
                 'filepath',prim_filepath ...
-                );
+                ); %                 'Tend',Tend,        ...
             [time,traj_yp_cart,retval]=gen_primitives_abbassa(primitive_abbassa_params);
             if retval==1
-                
+                Tend = time(end);
                 traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
                 % generate initial condition file for simulation
                 %             xi = [0;0;0]; % HARDFIX
@@ -87,7 +86,8 @@ classdef Elevate < primitive_library.PrimitiveFun
                 %             keyboard
                 if rt_zmpflag(end)==0
                     feasible = 1;
-                    cost = rt_cost(end);
+%                     cost = rt_cost(end);
+                    cost = Tend; % for time-optimal problem
                 else
                     feasible = 0;
                     cost = Inf;

@@ -111,7 +111,8 @@ classdef Move < primitive_library.PrimitiveFun
 % keyboard                 % stop here to see simulated trajectories
                 if rt_zmpflag(end)==0
                     feasible = 1;
-                    cost = rt_cost(end);
+%                     cost = rt_cost(end);
+                    cost = Tend; % for time-optimal problem
                     cprintf('*[0,1,0]*','! OK ZMP check !\n');
                 else
                     feasible = 0;
