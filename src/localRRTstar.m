@@ -1,5 +1,5 @@
 function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node)
-disp('# entering localRRTstar #')
+cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
 feasible = false;
@@ -9,11 +9,13 @@ z_new=z_rand;
 
 if pushed_in_goal
     disp(['pushed_in_goal is true: z_rand is ' num2str(z_rand(:)')]);
+    keyboard
 end
 
 % select current primitive
 prim = Ptree.get(idx_prim);
 
+cprintf('*[0,0.7,1]*','* looking for nearest sample *\n');
 % find nearest point in the tree
 [idx_nearest,z_nearest] = Nearest(z_rand,T,Ptree.Node{idx_prim});
 % make sure that we are not attaching to the goal_node...
@@ -26,12 +28,26 @@ if isempty(idx_nearest) % ... if the goal noad is the only nearest node, then go
     G = Graph;
     E = Edges;
     disp('Do nothing inside localRRTstar');
-%     keyboard
+    %     keyboard
     return
 end
+% rescale z_rand within a ball of radius \eta centered in z_nearest
+cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
+eta = 1; % TUNABLE PARAMETER
+if idx_prim>1
+    error('remember to fix this eta radius bubble stuff!');
+end
+% keyboard
+if norm(z_rand-z_nearest(prim.dimensions>0)) > eta
+    alfa = eta/norm(z_rand-z_nearest(prim.dimensions>0)); % TODO check dimensions over other primitives!
+    z_rand = (1-alfa)*z_nearest(prim.dimensions>0)+(alfa)*z_rand;
+    z_new = z_rand;
+end
+
 % check if both points are in the image space of the primitive. This should
 % be a redundant check and could be removed later on.
 if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimensions>0)],1) )
+    cprintf('*[0,0.7,1]*','* Steering between nearest and random sample *\n');
     [feasible,cost,q,x,time] = prim.steering(z_nearest,z_rand); % uniform interface! Yeay!
     dim_z_new = prim.dimensions;
     if feasible
@@ -57,18 +73,19 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             end
         end
         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
-%         keyboard
-%         disp('shit is happening already')
-%         [z_new,x] = truncate_to_similar(z_new,x);
+        %         keyboard
+        %         disp('shit is happening already')
+        %         [z_new,x] = truncate_to_similar(z_new,x);
+        cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
         disp(['before collisionfree with primitive ' prim.name])
         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
         disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard
         end
-%         keyboard
-%         % this should fix the discontinuity problem
-%         [z_new,x] = truncate_to_similar(z_new,x);
+        %         keyboard
+        %         % this should fix the discontinuity problem
+        %         [z_new,x] = truncate_to_similar(z_new,x);
     end
     if checkdiscontinuity(T,Edges,Ptree)
         keyboard
@@ -78,24 +95,34 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         keyboard
     end
     if feasible
+        cprintf('*[0,0.7,1]*','* Search for Near samples in the tree *\n');
+        
         cardV = T.nnodes; % number of vertices in the graph
         
         [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
         if ~isempty(goal_node)
             idx_near_bubble(idx_near_bubble==goal_node) = [];
         end
+        idx_near_bubble
         disp(['### begin radius loop: raggio=' num2str(raggio)])
+        if isinf(raggio)
+            disp('infinite radius, why?');
+            keyboard
+        end
         if raggio>0 && ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
             cerchio = rectangle('position',[centro',diameter,diameter],... % Draw a circle around the nearest neighbors inside the bubble.
                 'curvature',[1 1],'EdgeColor','b'); % 'LineStyle',':'
-            set(cerchio,'visible','on')
+            if verbose
+                set(cerchio,'visible','on')
+            end
             
             % Find the parent with the lower cost
+            cprintf('*[0,0.7,1]*','* ChooseParent with the lower cost in the neighborhood *\n');
             cost_from_z_nearest_to_new = cost;
-            if isempty(idx_near_bubble)                                 % if there is no near vertex in the bubble keep the nearest node and proceed to insert it in the tree
+            if isempty(idx_near_bubble) || length(idx_near_bubble) == 1                                 % if there is no near vertex in the bubble (or there is just the nearest) keep the nearest node and proceed to insert it in the tree
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
@@ -115,13 +142,13 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     z_new_temp = z_new;
                     if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
-%                         keyboard
+                        %                         keyboard
                         if pushed_in_goal
                             reached(x(1:length(z_new),end),z_new)
-%                             keyboard
+                            %                             keyboard
                         end
-%                         % this should fix the discontinuity problem
-%                         [z_new,x] = truncate_to_similar(z_new,x);
+                        %                         % this should fix the discontinuity problem
+                        %                         [z_new,x] = truncate_to_similar(z_new,x);
                     end
                 end
             end
@@ -129,6 +156,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 keyboard
             end
             if feasible
+                cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if idx_prim==1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                         z_new = x(prim.dimensions>0,end); % TO FIX DISCONTINUITY PROBLEM
@@ -146,6 +174,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     end
                 end
+                if added_new
+                    cprintf('*[0,1,0]*','! Node Added !\n');
+                else
+                    cprintf('*[1,0,0]*','! Node Not Added !\n');
+                end
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
@@ -162,7 +195,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 if verbose && added_new
                     figure(fig_xv)
                     z_min = z_nearest; % just for the next line, which is a visualization thing
-                    z_min_visual = z_min; 
+                    z_min_visual = z_min;
                     z_new_visual = z_new;
                     if length(z_new_visual) == 2
                         z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
@@ -188,6 +221,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 if added_new
+                    cprintf('*[0,0.7,1]*','* ReWire *\n');
                     z_min = T.get(idx_min);
                     
                     idx_new = T.nnodes;
@@ -213,7 +247,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                 end
                 
-%                 keyboard % Uncomment here for tuning radius
+                %                 keyboard % Uncomment here for tuning radius
                 if verbose
                     set(cerchio,'Visible','off')
                 end
@@ -245,7 +279,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         if verbose
             disp('No primitives found')
         end
-    end   
+    end
 else
     cprintf('error','Random and Nearest are not connectable with the primitive %s\n',prim.getName);
     % do nothing
@@ -269,7 +303,7 @@ if feasible && added_new %&& ~rewired
     if checkdiscontinuity(T,E,Ptree)
         keyboard
     end
-    before = T.get(T.nnodes)
+    before = T.get(T.nnodes);
     if T.nnodes<2
         disp('albero con un solo nodo')
         disp('# quitting localRRTstar #')
@@ -282,11 +316,11 @@ if feasible && added_new %&& ~rewired
         keyboard
     end
     T.Node{T.nnodes} = z_new_extended;
-    after = T.get(T.nnodes)
+    after = T.get(T.nnodes);
     after_E = E{T.Parent(T.nnodes),T.nnodes};
     if checkdiscontinuity(T,E,Ptree)
         keyboard
     end
 end
 
-disp('# quitting localRRTstar #')
+cprintf('*[0,0.7,1]*','# quitting localRRTstar #\n');

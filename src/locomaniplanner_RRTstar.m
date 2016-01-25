@@ -45,6 +45,7 @@ goal_node = [];
 source_node = 1;
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
+    cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
     %% sampling
     if mod(ii,push_goal_freq)==0 %&& ~path_found
         z_rand = z_goal(1:2); % every once in a while push in a known number
@@ -102,10 +103,12 @@ for ii=1:N_sample_max
     if feasible && added_new % last call to localRRTstart has produced a new
         % node z_new which was added to the tree?
         % Check for available primitives to extend the last sampled point in a new dimension
+        cprintf('*[0,0.7,1]*','* Check for available primitives to extend the last point in new dimensions *\n');
         idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
         
         % Iterate over available primitives
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
+            cprintf('*[0,.7,0.5]*','* Iterate over all available primitives *\n');
             if ~idx_avail_prim(jj)
                 % this primitive jj is not available for this point. Keep going.
                 continue;

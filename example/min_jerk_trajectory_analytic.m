@@ -506,6 +506,7 @@ T6 = find(time>=t5 & time<t6);
 T7 = find(time>t6);
 
 
+% version that worked with the first test case of cani.m
 T1 = find(time<t1);
 T2 = find(time>=t1 & time<=t2);
 T3 = find(time>t2 & time<t3);
@@ -514,7 +515,16 @@ T5 = find(time>t4 & time<t5);
 T6 = find(time>=t5 & time<=t6);
 T7 = find(time>t6);
 
+% generalized solution
+T1 = find(time<t1);
+T2 = find(time>=t1 & time<t2);
+T3 = find(time>=t2 & time<t3);
+T4 = find(time>=t3 & time<t4);
+T5 = find(time>=t4 & time<t5);
+T6 = find(time>=t5 & time<t6);
+T7 = find(time>=t6);
 
+% keyboard
 
 T1 = find(time<=t1);
 T2 = find(time>t1 & time<t2);
@@ -525,9 +535,9 @@ T3 = find(time>=t2 & time<=t3);
 end
 T4 = find(time>t3 & time<t4);
 % T5 = find(time>=t4 & time<=t5);
-T5 = find(time>t4 & time<=t5);
+T5 = find(time>=t4 & time<t5);
 % T6 = find(time>t5 & time<t6);
-T6 = find(time>t5 & time<t6);
+T6 = find(time>=t5 & time<t6);
 % T7 = find(time>=t6);
 T7 = find(time>=t6);
 % 

@@ -53,7 +53,7 @@ classdef Move < primitive_library.PrimitiveFun
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
             
-            Tend = 10; % TODO porcata. Il tempo va parametrizzato.
+%             Tend = 10; % TODO porcata. Il tempo va parametrizzato. % DONE
             Ts = 0.001;
             
             yi = rand;
@@ -65,17 +65,18 @@ classdef Move < primitive_library.PrimitiveFun
                 'xf',xf,            ...
                 'vi',vi, ...
                 'vf',vf, ...
-                'Tend',Tend,        ...
                 'Ts',Ts,            ...
                 'xf_vec_len',1, ...
                 'vx0_vec_len',1,  ...
                 'vxf_vec_len',1, ...
                 'filepath',prim_filepath ...
-                );
+                ); %                 'Tend',Tend,        ...
             %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
             
             [time,traj_pos_cart,traj_vel_cart,q,retval]=gen_primitives_muovi_local(primitive_muovi_params);
+            
             if retval==1
+                Tend = time(end);
 %                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
                 if any(isnan(time)) || any(isnan(traj_vel_cart))
                     feasible=0;
@@ -107,14 +108,17 @@ classdef Move < primitive_library.PrimitiveFun
                 if status ~= 0, error(result); end
                 % check if feasible
                 load('../src/modello.mat');
-                
+% keyboard                 % stop here to see simulated trajectories
                 if rt_zmpflag(end)==0
                     feasible = 1;
                     cost = rt_cost(end);
+                    cprintf('*[0,1,0]*','! OK ZMP check !\n');
                 else
                     feasible = 0;
                     cost = Inf;
-                    disp('Failed ZMP check');
+%                     disp('Failed ZMP check');
+                    cprintf('*[1,0,0]*','! Failed ZMP check !\n');
+                    keyboard % stop here to check simulated trajectories for wrong reference trajectories
                 end
                 % pack return data
                 x = [traj_pos_cart;traj_vel_cart];

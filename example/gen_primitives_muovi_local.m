@@ -6,7 +6,7 @@ xf = prim_data.xf;
 xpi = prim_data.vi;%0;
 xpf = prim_data.vf;%0;
 
-Tend = prim_data.Tend;
+% Tend = prim_data.Tend; % DONE now it is parameterized
 
 %
 %  x0 = [0;0;0]
@@ -16,7 +16,7 @@ Tend = prim_data.Tend;
 Ts = prim_data.Ts;
 
 vmax = 1;
-amax = 1;
+amax = 0.5;
 jerkmax = 1;
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 x0 = [xi;xpi;0];
