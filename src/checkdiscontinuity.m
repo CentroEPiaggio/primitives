@@ -15,11 +15,11 @@ discontinuo = false;
             keyboard
         end
         %%
-        if x(prim.dimensions>0,1) ~= sorgente(prim.dimensions>0)
+        if round(x(prim.dimensions>0,1)*100)/100 ~= round(sorgente(prim.dimensions>0)*100)/100
             disp('discont sorgente')
             discontinuo = true;
         end
-        if x(prim.dimensions>0,end) ~= destinazione(prim.dimensions>0)
+        if round(x(prim.dimensions>0,end)*100)/100 ~= round(destinazione(prim.dimensions>0)*100)/100
             disp('discont destinazione')
             discontinuo = true;
         end

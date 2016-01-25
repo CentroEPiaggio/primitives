@@ -1,4 +1,5 @@
 function [rewired, T, G, E , x_rewire ,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points)
+% keyboard
 %REWIRE Summary of this function goes here
 rewired = false;
 traj_pos = NaN;
@@ -43,6 +44,15 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         %         [feasible,cost_rewire,q,x_rewire,time_rewire] =
         %         prim.steering(z_near,z_new); % uniform interface! Yeay! % WRONG!
         %         The steering has to be done between z_new and z_near!
+        
+        cost_up_to_z_near_without_rewiring = graphshortestpath(G,idx_I,idX_near(i)); %G(idx_I,idX_near(i)); % warning: here we got the vertex-to-vertex cost only, not the total cost from the beginning to each vertex
+        cost_up_to_z_new = graphshortestpath(G,idx_I,idx_new); % cost to reach z_new from the first root of the tree
+        
+        if cost_up_to_z_near_without_rewiring < cost_up_to_z_new % in this condition it is impossible to achieve a lower cost passing through z_new to get to z_near
+%             keyboard
+            continue;
+        end
+        
         [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
         if feasible
             if idx_prim == 1 % collision checking only if we are on the Move primitive
@@ -60,12 +70,15 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             end
             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
 %             keyboard
-            if isequaln(x_rewire(:,1),z_new) && isequaln(x_rewire(:,end),z_near)
+%             if isequaln(x_rewire(:,1),z_new) && isequaln(x_rewire(:,end),z_near)
+            if isequaln(round(x_rewire(prim.dimensions>0,1)*100)/100,round(z_new(prim.dimensions>0)*100)/100) && isequaln(round(x_rewire(prim.dimensions>0,end)*100)/100,z_near(prim.dimensions>0))
                 % do the rest of the rewiring, otherwise do not allow
                 % rewiring
-                disp('do rewire')
+%                 disp('do rewire')
+                cprintf('*[1 0.5 0]*','do rewire\n');
             else
-                disp('do not rewire')
+%                 disp('do not rewire')
+                cprintf('*[1 0.5 0]*','do not rewire\n');
                 feasible = false;
             end
             if feasible && ~isequal(z_new(1:2),x_rewire(1:2,1))
@@ -75,18 +88,28 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         end
         if feasible && ~isinf(cost_rewire) && ~isnan(cost_rewire) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'],1)) % ObstacleFree
-                cost_up_to_z_new = graphshortestpath(G,idx_I,idx_new); % cost to reach z_new from the first root of the tree
+                
                 c_prime = cost_rewire;
                 cost_tentative = cost_up_to_z_new + c_prime;
-                cost_up_to_z_near_without_rewiring = graphshortestpath(G,idx_I,idX_near(i)); %G(idx_I,idX_near(i)); % warning: here we got the vertex-to-vertex cost only, not the total cost from the beginning to each vertex
+                
                 disp(['ReConnect costo: ' num2str(cost_tentative) ' < ' num2str(cost_up_to_z_near_without_rewiring) ' ???']);
+                cprintf('*[1 0.5 0]*','ReConnect cost: %f < %f ??? ',cost_tentative,cost_up_to_z_near_without_rewiring);
+                if cost_tentative < cost_up_to_z_near_without_rewiring
+                    cprintf('*[0 1 0]*','YES!!!\n');
+                else
+                    cprintf('*[1 0 0]*','NO!!!\n');
+                end
                 if cost_tentative < cost_up_to_z_near_without_rewiring && ~isinf(cost_up_to_z_near_without_rewiring) % test for correlation between sleep hours and variable length, possibly inverse proportionality
-                    cprintf('[1 0.5 0]','Rewiring\n');
+                    cprintf('*[1 0.5 0]*','Rewiring\n');
                     %                     keyboard
                     if checkdiscontinuity(T,E,Ptree)
                         keyboard
                     end
+                    keyboard
+                    tmp=line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','yellow','linewidth',2,'linestyle','-.');
                     [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire, x_rewire, time_rewire,pn,pe,fig_points);
+                    keyboard
+                    delete(tmp);
                     if checkdiscontinuity(T,E,Ptree)
                         keyboard
                     end

@@ -1,7 +1,9 @@
 %RECONNECT
 % [T,G,E] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost)
 function [T,G,E,pn,pe] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost, x, time, pn,pe,fig_points)
-disp('Entered ReConnect');
+cprintf('*[0,0,0]*','>>> Enter ReConnect\n');
+keyboard
+
 z_near = T.get(idx_near);
 z_near = fix_nans(z_near,prim.dimensions);
 % re-insert the z_near node attaching it to the z_new node
@@ -32,3 +34,5 @@ figure(fig_points)
 %plot_nodes = horzcat(plot_nodes,node);
 edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','magenta','linewidth',2); 
 pe(idx_near)=edge; % THIS SEEMS TO BE RIGHT
+
+cprintf('*[0,0,0]*','<<< Exit ReConnect\n');

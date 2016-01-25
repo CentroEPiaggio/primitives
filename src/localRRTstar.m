@@ -9,7 +9,7 @@ z_new=z_rand;
 
 if pushed_in_goal
     disp(['pushed_in_goal is true: z_rand is ' num2str(z_rand(:)')]);
-    keyboard
+%     keyboard
 end
 
 % select current primitive
@@ -41,6 +41,7 @@ end
 if norm(z_rand-z_nearest(prim.dimensions>0)) > eta
     alfa = eta/norm(z_rand-z_nearest(prim.dimensions>0)); % TODO check dimensions over other primitives!
     z_rand = (1-alfa)*z_nearest(prim.dimensions>0)+(alfa)*z_rand;
+    z_rand = round(z_rand*100)/100;
     z_new = z_rand;
 end
 
@@ -140,6 +141,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     z_new_temp = z_new;
+                    z_new = round(z_new*100)/100;
                     if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
@@ -159,7 +161,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if idx_prim==1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                        z_new = x(prim.dimensions>0,end); % TO FIX DISCONTINUITY PROBLEM
+                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                         if isempty(idx_min)
                             keyboard
                         end
@@ -167,7 +169,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                 else % idx_prim > 1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                        z_new = x(prim.dimensions>0,end); % TO FIX DISCONTINUITY PROBLEM
+                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                         if isempty(idx_min)
                             keyboard
                         end
@@ -220,7 +222,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
-                if added_new
+                if added_new && T.nnodes>2
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
                     z_min = T.get(idx_min);
                     
