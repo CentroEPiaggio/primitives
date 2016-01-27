@@ -2,6 +2,9 @@ tbxmanager/
 pathdef.m
 
 xp/irobotcreate2ros/*
+xp/ros_utils_ws/build/*
+xp/ros_utils_ws/devel/*
+xp/ros_utils_ws/src/*
 
 # eps figure file
 *.eps
