@@ -86,6 +86,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 keyboard
             end
         end
+        feasible=false; %WARNING!! FORCING NOT TO DO REWIRE!
         if feasible && ~isinf(cost_rewire) && ~isnan(cost_rewire) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_rewire(:)'; traj_vel_rewire(:)'],1)) % ObstacleFree
                 
@@ -106,10 +107,13 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                         keyboard
                     end
                     keyboard
-                    tmp=line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','yellow','linewidth',2,'linestyle','-.');
+                    cprintf('*[1 0.5 0]*','ReConnect node: %d to pass through node %d instead of node %d\n',idX_near(i),idx_new,T.Parent(idX_near(i)));
+%                     tmp=line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','yellow','linewidth',2,'linestyle','-.');
+                    oldparents = T.Parent;
                     [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E, prim, q, cost_rewire, x_rewire, time_rewire,pn,pe,fig_points);
+                    [oldparent,T.Parent]
                     keyboard
-                    delete(tmp);
+%                     delete(tmp);
                     if checkdiscontinuity(T,E,Ptree)
                         keyboard
                     end

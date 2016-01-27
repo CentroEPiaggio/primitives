@@ -17,7 +17,9 @@ E{idx_old,idx_near} = [];
 % here and after G(idx_new,idx_near) = cost;
 G(idx_old,idx_near) = 0;
 % set(pe(idx_near),'visible','off');
-delete(pe(idx_near));
+% delete(pe(idx_near));
+delete(pe{1,idx_near});
+% delete(pe{2,idx_near}); % TODO on vertical graph
 
 G(idx_new,idx_near) = cost;
 actions = struct('source_node', idx_new,...
@@ -33,6 +35,6 @@ figure(fig_points)
 %node = plot(z_new(1),z_new(2),'bo','linewidth',2);
 %plot_nodes = horzcat(plot_nodes,node);
 edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','magenta','linewidth',2); 
-pe(idx_near)=edge; % THIS SEEMS TO BE RIGHT
+pe{1,idx_near}=edge; % THIS SEEMS TO BE RIGHT
 
 cprintf('*[0,0,0]*','<<< Exit ReConnect\n');

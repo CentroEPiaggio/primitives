@@ -43,6 +43,8 @@ stop=false;
 path_found = false;
 goal_node = [];
 source_node = 1;
+opt_path_edges = {};
+
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
@@ -67,9 +69,9 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-    
+    test_plot_opt
     if reached(T.Node{end},z_goal) % first time a path is found
-        keyboard
+%         keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
@@ -80,6 +82,8 @@ for ii=1:N_sample_max
         player = audioplayer(y, Fs);
         play(player);
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+        keyboard
+        opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
         % save cost and iteration for plotting (anytime) stuff
         if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
             cost_vector = [cost_vector, cost];
@@ -97,6 +101,7 @@ for ii=1:N_sample_max
     if path_found % anytime optimization. If one feasible path was
         % found in a previous iteration, keep optimizing
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+        opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
         % save cost and iteration for plotting (anytime) stuff
         if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
             cost_vector = [cost_vector, cost];
@@ -168,6 +173,7 @@ for ii=1:N_sample_max
             if path_found
                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
                 % save cost and iteration for plotting (anytime) stuff
                 if ~isempty(cost_vector) && cost<cost_vector(end)
                     cost_vector = [cost_vector, cost];
@@ -221,6 +227,7 @@ for ii=1:N_sample_max
             [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
             if path_found
                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
                 % save cost and iteration for plotting (anytime) stuff
                 if ~isempty(cost_vector) && cost<cost_vector(end)
                     cost_vector = [cost_vector, cost];

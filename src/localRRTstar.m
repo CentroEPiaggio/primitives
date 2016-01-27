@@ -207,8 +207,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                     node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
                     plot_nodes = horzcat(plot_nodes,node);
+%                     keyboard
                     edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
-                    plot_edges = horzcat(plot_edges,edge);
+%                     keyboard
+                    %plot_edges = horzcat(plot_edges,edge);
+                    plot_edges{1,T.nnodes} = edge;
                     figure(fig_xy)
                     %                 keyboard
                     node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
@@ -216,7 +219,8 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     plot_nodes = horzcat(plot_nodes,node);
                     edge = line([z_min_visual(1) z_new_visual(1)],[z_min_visual(2) z_new_visual(2)],[z_min_visual(3) z_new_visual(3)],'color','green','linewidth',2);
                     %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
-                    plot_edges = horzcat(plot_edges,edge);
+%                     plot_edges = horzcat(plot_edges,edge);
+                    plot_edges{2,T.nnodes} = edge;
                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)

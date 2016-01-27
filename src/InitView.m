@@ -1,5 +1,5 @@
-plot_nodes=0;
-plot_edges=0;
+plot_nodes={};
+plot_edges={};
 
 if verbose
     fig_chi0 = 2; % figure handle to plot the sampled points and their connections (i.e. graph vertices and edges)
