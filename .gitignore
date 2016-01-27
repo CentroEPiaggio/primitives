@@ -1,6 +1,8 @@
 tbxmanager/
 pathdef.m
 
+xp/irobotcreate2ros/*
+
 # eps figure file
 *.eps
 ##---------------------------------------------------
