@@ -1,3 +1,5 @@
+% NOTE: use roslaunch to launch irobotcreate2 package
+
 rosshutdown
 rosinit
 
