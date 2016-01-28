@@ -69,8 +69,8 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-    test_plot_opt
-    if reached(T.Node{end},z_goal) % first time a path is found
+%     test_plot_opt
+    if added_new && reached(T.Node{end},z_goal) % first time a path is found
 %         keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
