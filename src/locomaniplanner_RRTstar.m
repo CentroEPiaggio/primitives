@@ -82,7 +82,7 @@ for ii=1:N_sample_max
         player = audioplayer(y, Fs);
         play(player);
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-        keyboard
+%         keyboard
         opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
         % save cost and iteration for plotting (anytime) stuff
         if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))

@@ -1,5 +1,5 @@
 % assemble the optimal plan
-Ts = 0.01;
+Ts = 0.001;
 run_filepath = '../example/';
 prim_filepath = [run_filepath 'prim/'];
 % init
@@ -10,7 +10,10 @@ for kk=2:opt_plan.nnodes
     %time = opt_plan.Node{kk}.time;
     time = 0:Ts:Ts*(length(opt_plan.Node{kk}.x(2,:))-1);
     traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);
-    traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/mean(diff(opt_plan.Node{kk}.time));
+%     traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/Ts; % WARNING:
+%     use other dimensions
+    disp('Warning: use other dimensions!');
+    traj_y_speed_cart = zeros(size(traj_x_speed_cart));
 %     if strcmp(opt_plan.Node{kk-1}.primitive,'Eleva') && strcmp(opt_plan.Node{kk}.primitive,'Muovi')
 %         disp('Eleva after Muovi. What''s going on?')
 %         keyboard
@@ -20,7 +23,9 @@ for kk=2:opt_plan.nnodes
         traj_y_speed_cart(:)'];
     q_reference = [q_reference, q_reference_add];
     kk
+%     plot(time,traj_y_speed_cart)
 %     keyboard
+    
 end
 % return
 Tend = q_reference(1,end); % DONE. Il tempo della simulazione ora e' parametrizzato.
