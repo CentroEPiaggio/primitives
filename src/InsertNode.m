@@ -11,18 +11,18 @@ if idx_current==0 % first node
     return
 else
     % %% debug init
-    if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end))
-        disp('sth strange is happening here')
-        keyboard
-        disp('forcing them to be equal')
-        z_new_old = z_new;
-        z_new(1:length(z_new)) = x(1:length(z_new),end);
-        if (norm(z_new_old-z_new)) < 1e-9
-            % do nothing
-        else
-            keyboard
-        end
-    end
+%     if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end)) % this check should not be necessary anymore thanks to rounding
+%         disp('sth strange is happening here')
+%         keyboard
+%         disp('forcing them to be equal')
+%         z_new_old = z_new;
+%         z_new(1:length(z_new)) = x(1:length(z_new),end);
+%         if (norm(z_new_old-z_new)) < 1e-9
+%             % do nothing
+%         else
+%             keyboard
+%         end
+%     end
     % %% debug end
     if ~isinf(cost) && cost>0
         test1 = fix_nans(T.Node{idx_current},prim.dimensions);

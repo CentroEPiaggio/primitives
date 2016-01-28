@@ -10,10 +10,10 @@ for kk=2:opt_plan.nnodes
     %time = opt_plan.Node{kk}.time;
     time = 0:Ts:Ts*(length(opt_plan.Node{kk}.x(2,:))-1);
     traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);
-%     traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/Ts; % WARNING:
+    traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/Ts; % WARNING:
 %     use other dimensions
     disp('Warning: use other dimensions!');
-    traj_y_speed_cart = zeros(size(traj_x_speed_cart));
+%     traj_y_speed_cart = zeros(size(traj_x_speed_cart));
 %     if strcmp(opt_plan.Node{kk-1}.primitive,'Eleva') && strcmp(opt_plan.Node{kk}.primitive,'Muovi')
 %         disp('Eleva after Muovi. What''s going on?')
 %         keyboard

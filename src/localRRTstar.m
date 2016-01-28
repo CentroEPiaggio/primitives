@@ -35,7 +35,8 @@ end
 cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
 eta = 1.2; % TUNABLE PARAMETER
 if idx_prim>1
-    error('remember to fix this eta radius bubble stuff!');
+%     error('remember to fix this eta radius bubble stuff!');
+    cprintf('*[0,0.7,1]*','* remember to fix this eta radius bubble stuff! *\n');
 end
 % keyboard
 if norm(z_rand-z_nearest(prim.dimensions>0)) > eta
@@ -227,15 +228,18 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
-                if added_new && T.nnodes>2
-                    cprintf('*[0,0.7,1]*','* ReWire *\n');
-                    z_min = T.get(idx_min);
-                    
-                    idx_new = T.nnodes;
-                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-                    plot_edges=pedges;
-                    plot_nodes=pnodes;
-                end
+                
+                cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+%                 if added_new && T.nnodes>2
+%                     cprintf('*[0,0.7,1]*','* ReWire *\n');
+%                     z_min = T.get(idx_min);
+%                     
+%                     idx_new = T.nnodes;
+%                     [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+%                     plot_edges=pedges;
+%                     plot_nodes=pnodes;
+%                 end
+                
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end

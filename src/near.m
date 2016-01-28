@@ -27,7 +27,7 @@ if n<2
     %     disp('Gimme something more mate!');
     return
 end
-gam = 100; % TUNE gam
+gam = 50; % TUNE gam
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);
@@ -63,7 +63,8 @@ if ~isempty(points_mat)
     idX_near_temp = cell2mat(idX_near_temp);
     if isempty(idX_near_temp)
         % no close point
-        keyboard
+%         keyboard
+        cprintf('*[0,0,0]*','Near: no close point, maybe radius is too small?\n');
         idX_near = []
     else
         idx_compatible = find(~idx_has_nan>0)

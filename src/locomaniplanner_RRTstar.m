@@ -2,7 +2,7 @@
 clear all; clear import; close all; clc;
 push_goal_freq = 10;
 
-multiple_primitives = 0;
+multiple_primitives = 1;
 
 % debug and visualization flags
 debug=0; % enable breakpoints
@@ -18,9 +18,9 @@ import primitive_library.*;
 % NaN? We'll see.
 z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
 z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
-% z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
-z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
-z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
+z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
+% z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
+% z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -69,9 +69,9 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-%     test_plot_opt
+    %     test_plot_opt
     if added_new && reached(T.Node{end},z_goal) % first time a path is found
-%         keyboard
+        keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
@@ -82,7 +82,7 @@ for ii=1:N_sample_max
         player = audioplayer(y, Fs);
         play(player);
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-%         keyboard
+        %         keyboard
         opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
         % save cost and iteration for plotting (anytime) stuff
         if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
@@ -170,22 +170,8 @@ for ii=1:N_sample_max
             z_new_extended = fix_nans(z_new_temp,prim.dimensions)
             
             T.Node{T.nnodes} = z_new_extended;
-            if path_found
-                %         [path,cost]=plot_biograph(source_node,goal_node,G);
-                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-                % save cost and iteration for plotting (anytime) stuff
-                if ~isempty(cost_vector) && cost<cost_vector(end)
-                    cost_vector = [cost_vector, cost];
-                    N_cost_vector = [N_cost_vector, ii];
-                    plot_biograph(source_node,goal_node,G);
-                    figure(10)
-                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    %                     hold on
-                    save_test_data
-                    if debug,keyboard,end
-                end
-            elseif pushed_in_goal || reached(T.Node{end},z_goal)
+            if added_new && reached(T.Node{end},z_goal)
+                keyboard
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
                 % the -1 is a dirty fix for the fact
@@ -202,6 +188,56 @@ for ii=1:N_sample_max
                 stop = true;
                 break
             end
+            if path_found
+                %         [path,cost]=plot_biograph(source_node,goal_node,G);
+                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+                % save cost and iteration for plotting (anytime) stuff
+                if ~isempty(cost_vector) && cost<cost_vector(end)
+                    cost_vector = [cost_vector, cost];
+                    N_cost_vector = [N_cost_vector, ii];
+                    plot_biograph(source_node,goal_node,G);
+                    figure(10)
+                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+                    %                     hold on
+                    save_test_data
+                    if debug,keyboard,end
+                end
+            end
+            
+            %             if path_found
+            %                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
+            %                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+            %                 opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+            %                 % save cost and iteration for plotting (anytime) stuff
+            %                 if ~isempty(cost_vector) && cost<cost_vector(end)
+            %                     cost_vector = [cost_vector, cost];
+            %                     N_cost_vector = [N_cost_vector, ii];
+            %                     plot_biograph(source_node,goal_node,G);
+            %                     figure(10)
+            %                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+            %                     %                     hold on
+            %                     save_test_data
+            %                     if debug,keyboard,end
+            %                 end
+            %             elseif pushed_in_goal || reached(T.Node{end},z_goal)
+            %                 keyboard
+            %                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+            %                 goal_node = idz_Goal;
+            %                 % the -1 is a dirty fix for the fact
+            %                 % that this node is inserted two
+            %                 % times, once via prim.extend and
+            %                 % one from localRRT*(Chi_aug). Does
+            %                 % not happen always but still it
+            %                 % needs this workaround for those
+            %                 % times.
+            %                 disp('Goal reached (via Eleva)!');
+            %                 path_found = true;
+            %                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+            %                 if debug,keyboard,end
+            %                 stop = true;
+            %                 break
+            %             end
             
             if mod(ii,push_goal_freq)==0 %&& ~path_found
                 z_aug = z_goal(1:3); % every once in a while push in a known number
@@ -225,21 +261,7 @@ for ii=1:N_sample_max
             end
             
             [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node);
-            if path_found
-                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-                % save cost and iteration for plotting (anytime) stuff
-                if ~isempty(cost_vector) && cost<cost_vector(end)
-                    cost_vector = [cost_vector, cost];
-                    N_cost_vector = [N_cost_vector, ii];
-                    plot_biograph(source_node,goal_node,G);
-                    figure(10)
-                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    %                     hold on
-                    save_test_data
-                    if debug,keyboard,end
-                end
-            elseif pushed_in_goal || reached(T.Node{end},z_goal)
+            if added_new && reached(T.Node{end},z_goal)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
                 % the -1 is a dirty fix for the fact
@@ -256,6 +278,52 @@ for ii=1:N_sample_max
                 stop = true;
                 break
             end
+            if path_found
+                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+                % save cost and iteration for plotting (anytime) stuff
+                if ~isempty(cost_vector) && cost<cost_vector(end)
+                    cost_vector = [cost_vector, cost];
+                    N_cost_vector = [N_cost_vector, ii];
+                    plot_biograph(source_node,goal_node,G);
+                    figure(10)
+                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+                    %                     hold on
+                    save_test_data
+                    if debug,keyboard,end
+                end
+            end
+            %                 if path_found
+            %                     [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+            %                     opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+            %                     % save cost and iteration for plotting (anytime) stuff
+            %                     if ~isempty(cost_vector) && cost<cost_vector(end)
+            %                         cost_vector = [cost_vector, cost];
+            %                         N_cost_vector = [N_cost_vector, ii];
+            %                         plot_biograph(source_node,goal_node,G);
+            %                         figure(10)
+            %                         bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+            %                         %                     hold on
+            %                         save_test_data
+            %                         if debug,keyboard,end
+            %                     end
+            %                 elseif pushed_in_goal || reached(T.Node{end},z_goal)
+            %                     idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+            %                     goal_node = idz_Goal;
+            %                     % the -1 is a dirty fix for the fact
+            %                     % that this node is inserted two
+            %                     % times, once via prim.extend and
+            %                     % one from localRRT*(Chi_aug). Does
+            %                     % not happen always but still it
+            %                     % needs this workaround for those
+            %                     % times.
+            %                     disp('Goal reached (via Eleva)!');
+            %                     path_found = true;
+            %                     %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+            %                     if debug,keyboard,end
+            %                     stop = true;
+            %                     break
+            %                 end
         end
         
         if stop

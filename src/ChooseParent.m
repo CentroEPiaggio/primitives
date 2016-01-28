@@ -60,10 +60,21 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_y_chooseparent = x_chooseparent;
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
-            if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(x_chooseparent(1:length(z_new),end),z_new))
+            if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
                 disp('WTF ChooseParent is doing?')
-%                 keyboard
+                keyboard
+%                 z_new = round(x_chooseparent(1:length(z_new),end)*100)/100;
+%                 [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new);
+%                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
+%                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
+%                 traj_y_chooseparent = x_chooseparent;
+%                 x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
+% %                 feasible = false; % this happens when keeping the same speed moves the cart to a final position different from the one available...
             end
+%             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
+%                 disp('WTF ChooseParent is doing? So you really want to piss me off!')
+%                 keyboard
+%             end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree

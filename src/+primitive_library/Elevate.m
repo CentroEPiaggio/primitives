@@ -20,6 +20,7 @@ classdef Elevate < primitive_library.PrimitiveFun
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend);
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
+%             keyboard
             disp('E-le-va-tion!')
             disp(['From z_start: ' num2str(z_start(:)') ' to z_end: ' num2str(z_end(:)')])
             %             z_start
@@ -54,10 +55,10 @@ classdef Elevate < primitive_library.PrimitiveFun
                 'yf_vec_len',1,     ...
                 'filepath',prim_filepath ...
                 ); %                 'Tend',Tend,        ...
-            [time,traj_yp_cart,retval]=gen_primitives_abbassa(primitive_abbassa_params);
+            [time,traj_y_cart,traj_yp_cart,retval]=gen_primitives_abbassa(primitive_abbassa_params);
             if retval==1
                 Tend = time(end);
-                traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
+%                 traj_y_cart = yi+cumtrapz(time,traj_yp_cart);
                 % generate initial condition file for simulation
                 %             xi = [0;0;0]; % HARDFIX
                 xi = z_start(1);

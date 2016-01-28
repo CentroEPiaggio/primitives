@@ -39,7 +39,7 @@ end
 % end
 
 %%
-close all
+% close all
 obs=Obstacles.get(2);
 obst=obs.P.projection([1 3],'fourier');
 start_region = z_init;
