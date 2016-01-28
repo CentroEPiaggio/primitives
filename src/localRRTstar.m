@@ -196,7 +196,8 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 end
                 if verbose && added_new
                     figure(fig_xv)
-                    z_min = z_nearest; % just for the next line, which is a visualization thing
+%                     z_min = z_nearest; % just for the next line, which is a visualization thing
+                    z_min = T.get(idx_min);
                     z_min_visual = z_min;
                     z_new_visual = z_new;
                     if length(z_new_visual) == 2
