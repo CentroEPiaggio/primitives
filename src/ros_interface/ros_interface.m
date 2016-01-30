@@ -3,6 +3,8 @@
 rosshutdown
 rosinit
 
+disp(' - publishing twist')
+
 vel_pub = rospublisher('/iRobot_0/cmd_vel',rostype.geometry_msgs_Twist); %create a publisher
 pause(1); %ensure publisher is setup
 
@@ -23,5 +25,20 @@ for j=1:numel(des_vel)
     send(vel_pub, vel_msg); %sending the message
     pause(0.1); %ensure
 end
+
+pause(1); %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(' - publishing joint angles')
+
+joint_pub = rospublisher('/iRobot_0/arm_joints',rostype.std_msgs_Int16MultiArray);
+joint_msg = rosmessage(joint_pub);
+
+joint_msg.Data(5) = 0; %gripper
+
+for j=1:4
+    joint_msg.Data(j)=j*10;
+end
+
+send(joint_pub, joint_msg); %sending the message
+pause(0.1); %ensure
 
 rosshutdown
