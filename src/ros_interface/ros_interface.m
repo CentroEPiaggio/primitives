@@ -23,10 +23,9 @@ des_vel = sin(i);
 for j=1:numel(des_vel)
     vel_msg.Linear.X=des_vel(j);
     send(vel_pub, vel_msg); %sending the message
-    pause(0.1); %ensure
+    pause(0.5); %ensure
 end
 
-pause(1); %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(' - publishing joint angles')
 
 joint_pub = rospublisher('/iRobot_0/arm_joints',rostype.std_msgs_Int16MultiArray);
@@ -39,6 +38,6 @@ for j=1:4
 end
 
 send(joint_pub, joint_msg); %sending the message
-pause(0.1); %ensure
+pause(0.5); %ensure
 
 rosshutdown
