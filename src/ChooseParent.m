@@ -1,6 +1,6 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-function [idx_min,q,cost_new_edge,x,time,z_new] = ChooseParent(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim)
+function [idx_min,q,cost_new_edge,x,time,z_new,added_intermediate_node,intermediate_primitives_list,x_list,time_list,q_list,cost_list] = ChooseParent(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim)
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
@@ -25,6 +25,7 @@ cost_new_edge = c_min; % default initialization row 2 algorithm 2
 x = NaN;
 time = NaN;
 % keyboard
+added_intermediate_node = false;
 
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
@@ -63,18 +64,71 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
                 disp('WTF ChooseParent is doing?')
                 keyboard
-%                 z_new = round(x_chooseparent(1:length(z_new),end)*100)/100;
-%                 [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new);
-%                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
-%                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
-%                 traj_y_chooseparent = x_chooseparent;
-%                 x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
-% %                 feasible = false; % this happens when keeping the same speed moves the cart to a final position different from the one available...
+                % BUGFIX: Fixing incongruences in the trajectory with the final point by adding intermediate trajectories made with
+                % other primitives
+                z_temp = round(x_chooseparent(1:length(z_new),end)*100)/100;
+                dim_differences = abs(z_temp-z_new);
+                map_differences = dim_differences>0;
+                for jj=1:Ptree.nnodes
+                    prim_extend = Ptree.Node{jj};
+                    if ~isequal(prim_extend.name,prim.name)
+                        if isequal(reshape(prim_extend.dimensions(1:length(map_differences)),length(map_differences),1),map_differences(:))
+                            % ok, use this primitive to extend the pattern
+                            [feasible_extend,cost_new_edge_extend,q_extend,x_chooseparent_extend,time_chooseparent_extend] = prim_extend.steering(z_temp,z_new); % uniform interface! Yeay!
+                            if feasible_extend
+                                if jj == 1 % trying to fix the connection problem between different kind of primitives
+                                    traj_pos_chooseparent_extend = x_chooseparent_extend(1,:);
+                                    traj_vel_chooseparent_extend = x_chooseparent_extend(2,:);
+                                    if ~isnan(z_temp(3)) % HARDFIX
+                                        traj_y_chooseparent_extend   = z_temp(3,:)*ones(size(traj_vel_chooseparent_extend));
+                                    else
+                                        traj_y_chooseparent_extend   = ones(size(traj_vel_chooseparent_extend)); % HARDFIX: default y is 1
+                                    end
+                                    %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+                                else % Eleva primitive
+                                    %             traj_pos = %x(1,:);
+                                    traj_vel_chooseparent_extend = z_temp(2)*ones(size(x_chooseparent_extend));%x(2,:);
+                                    traj_pos_chooseparent_extend = z_temp(1)+cumtrapz(time_chooseparent_extend,traj_vel_chooseparent_extend);
+                                    traj_y_chooseparent_extend = x_chooseparent_extend;
+                                end
+                                x_chooseparent_extend = [traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)';]; % assign arc-path
+                                
+                                x_chooseparent_tentative = [x_chooseparent, x_chooseparent_extend];
+                                time_chooseparent_tentative = [time_chooseparent(:)' time_chooseparent(end)+time_chooseparent_extend(:)'];
+                                cost_new_edge_tentative = cost_new_edge + cost_new_edge_extend;
+                                if (~isequal(z_near(1:2),x_chooseparent_tentative(1:2,1)) || ~isequaln(round(x_chooseparent_tentative(1:length(z_new),end)*100)/100,z_new))
+                                    % keep_going
+                                else
+                                    % pack data to return from chooseparent
+                                    added_intermediate_node = true;
+                                    intermediate_primitives_list = {prim.name, prim_extend.name};
+                                    x_list = {x_chooseparent, x_chooseparent_extend};
+                                    time_list = {time_chooseparent, time_chooseparent_extend};
+                                    cost_list = {cost_new_edge, cost_new_edge_extend};
+                                    % pack data to finish chooseparent
+                                    % calculations
+                                    x_chooseparent = x_chooseparent_tentative;
+                                    time_chooseparent = time_chooseparent_tentative;
+                                    cost_new_edge = cost_new_edge_tentative;
+                                    break;
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                %                 z_new = round(x_chooseparent(1:length(z_new),end)*100)/100;
+                %                 [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new);
+                %                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
+                %                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
+                %                 traj_y_chooseparent = x_chooseparent;
+                %                 x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
+                % %                 feasible = false; % this happens when keeping the same speed moves the cart to a final position different from the one available...
             end
-%             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
-%                 disp('WTF ChooseParent is doing? So you really want to piss me off!')
-%                 keyboard
-%             end
+            %             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
+            %                 disp('WTF ChooseParent is doing? So you really want to piss me off!')
+            %                 keyboard
+            %             end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
             if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree
@@ -120,13 +174,13 @@ if ~isnan(x)
         disp('ChooseParent slightly changed the goal point!')
         x(1:length(z_new),end)
         z_new
-%         keyboard
+        %         keyboard
         %                         if pushed_in_goal
         %                             reached(x(1:length(z_new),end),z_new)
         %                             keyboard
         %                         end
         % this should fix the discontinuity problem
-%                                [z_new,x] = truncate_to_similar(z_new,x);
+        %                                [z_new,x] = truncate_to_similar(z_new,x);
     else
         disp('ChooseParent was actually good!')
         keyboard
@@ -134,8 +188,8 @@ if ~isnan(x)
 end
 
 if any(any(~isnan(x_chooseparent)))
-%     disp('fix this')
-%     keyboard
+    %     disp('fix this')
+    %     keyboard
     z_new = x_chooseparent(prim.dimensions>0,end); % HACK to ensure continuity in the trajectories stored in the tree
 end
 

@@ -7,6 +7,8 @@ rewired = false;
 added_new = false;
 z_new=z_rand;
 
+added_intermediate_node = false;
+
 if pushed_in_goal
     disp(['pushed_in_goal is true: z_rand is ' num2str(z_rand(:)')]);
 %     keyboard
@@ -128,8 +130,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
-                [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new] = ChooseParent(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
-                if isinf(cost_new) % no feasible neighbor found
+                [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
+                    parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
+                    q_list,cost_list] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
+                if ~parent_found
+%                 if isinf(cost_new) % no feasible neighbor found
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
@@ -160,6 +165,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             end
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
+                if ~added_intermediate_node
                 if idx_prim==1
                     if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                         z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
@@ -175,6 +181,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                             keyboard
                         end
                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
+                    end
+                end
+                else
+                    keyboard
+                    for kk=1:length(intermediate_primitives_list)
                     end
                 end
                 if added_new
