@@ -1,4 +1,4 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive)
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
@@ -11,7 +11,7 @@ added_intermediate_node = false;
 
 if pushed_in_goal
     disp(['pushed_in_goal is true: z_rand is ' num2str(z_rand(:)')]);
-%     keyboard
+    %     keyboard
 end
 
 % select current primitive
@@ -37,7 +37,7 @@ end
 cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
 eta = 1.2; % TUNABLE PARAMETER
 if idx_prim>1
-%     error('remember to fix this eta radius bubble stuff!');
+    %     error('remember to fix this eta radius bubble stuff!');
     cprintf('*[0,0.7,1]*','* remember to fix this eta radius bubble stuff! *\n');
 end
 % keyboard
@@ -132,9 +132,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             else                                                        % otherwise look for possibly more convenient paths
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
                     parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
-                    q_list,cost_list] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim);
-                if ~parent_found
-%                 if isinf(cost_new) % no feasible neighbor found
+                    q_list,cost_list,z_intermediate_list] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
+                %                 if ~parent_found
+                if isinf(cost_new) % no feasible neighbor found
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
@@ -166,26 +166,51 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
-                if idx_prim==1
-                    if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
-                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
-                        if isempty(idx_min)
-                            keyboard
+                    if idx_prim==1
+                        if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                            z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                            if isempty(idx_min)
+                                keyboard
+                            end
+                            [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                         end
-                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
-                    end
-                else % idx_prim > 1
-                    if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
-                        if isempty(idx_min)
-                            keyboard
+                    else % idx_prim > 1
+                        if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+                            z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                            if isempty(idx_min)
+                                keyboard
+                            end
+                            [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                         end
-                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time);
                     end
-                end
                 else
                     keyboard
                     for kk=1:length(intermediate_primitives_list)
+                        prim_intermediate = Ptree.get(intermediate_primitives_list{kk});
+                        if intermediate_primitives_list{kk}==1
+                            traj_pos = x_list{kk}(1,:);
+                            traj_vel = x_list{kk}(2,:);
+                            if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % TODO: MISSING COLLISION AVOIDANCE HERE???
+                                z_new_intermediate = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                                if isempty(idx_min)
+                                    keyboard
+                                end
+                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim, q, cost_new, x, time);
+                            end
+                        else % idx_prim > 1
+%                             if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))  % TODO: MISSING COLLISION AVOIDANCE HERE???
+                            if all(prim_intermediate.chi.P.contains([x_list{kk}],1)) % TODO: MISSING COLLISION AVOIDANCE HERE???
+                                z_new_intermediate = round(x(prim_intermediate.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                                if isempty(idx_min)
+                                    keyboard
+                                end
+                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
+                            end
+                        end
+                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_intermediate_list{kk}, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
+                        if added_new
+                            idx_min = T.nnodes;
+                        end
                     end
                 end
                 if added_new
@@ -208,7 +233,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 end
                 if verbose && added_new
                     figure(fig_xv)
-%                     z_min = z_nearest; % just for the next line, which is a visualization thing
+                    %                     z_min = z_nearest; % just for the next line, which is a visualization thing
                     z_min = T.get(idx_min);
                     z_min_visual = z_min;
                     z_new_visual = z_new;
@@ -220,9 +245,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     end
                     node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
                     plot_nodes = horzcat(plot_nodes,node);
-%                     keyboard
+                    %                     keyboard
                     edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
-%                     keyboard
+                    %                     keyboard
                     %plot_edges = horzcat(plot_edges,edge);
                     plot_edges{1,T.nnodes} = edge;
                     figure(fig_xy)
@@ -232,7 +257,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     plot_nodes = horzcat(plot_nodes,node);
                     edge = line([z_min_visual(1) z_new_visual(1)],[z_min_visual(2) z_new_visual(2)],[z_min_visual(3) z_new_visual(3)],'color','green','linewidth',2);
                     %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
-%                     plot_edges = horzcat(plot_edges,edge);
+                    %                     plot_edges = horzcat(plot_edges,edge);
                     plot_edges{2,T.nnodes} = edge;
                 end
                 
@@ -241,15 +266,15 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 end
                 
                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-%                 if added_new && T.nnodes>2
-%                     cprintf('*[0,0.7,1]*','* ReWire *\n');
-%                     z_min = T.get(idx_min);
-%                     
-%                     idx_new = T.nnodes;
-%                     [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-%                     plot_edges=pedges;
-%                     plot_nodes=pnodes;
-%                 end
+                %                 if added_new && T.nnodes>2
+                %                     cprintf('*[0,0.7,1]*','* ReWire *\n');
+                %                     z_min = T.get(idx_min);
+                %
+                %                     idx_new = T.nnodes;
+                %                     [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                %                     plot_edges=pedges;
+                %                     plot_nodes=pnodes;
+                %                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
