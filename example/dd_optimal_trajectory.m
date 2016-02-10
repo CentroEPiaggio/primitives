@@ -43,6 +43,10 @@ found = 0;
 % The goal is considered as the origin of the reference frame to compute
 % the optimal control w.r.t. the start configuration
 
+
+
+% Cap.11 procedures, TODO: recursive behavior
+
 new_x0 = x0+xf;
 new_xf = xf*0;
 
@@ -75,7 +79,7 @@ if y < 0
    th = new_x0(3); 
 end
 
-% compute cost
+% compute type of trajectory and cost
 cost = 0;
 
 if z <= th
