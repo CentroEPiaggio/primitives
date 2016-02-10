@@ -64,9 +64,29 @@ for ii=0:n
             end
 %             x0 = [0;0.4;0];
 %             xf = [0.3;0.6;0];
-            
-            [time_an,pos_an,speed_an,acc_an,jerk_an,retval] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds);
+%% TODO: THIS CASE FAILS!
+vmax = 1;
+amax = 0.5;
+jerkmax = 1;
+% [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 
+state_bounds = [-Inf Inf;
+    -vmax vmax;
+    -amax amax];
+control_bounds = [-jerkmax;jerkmax];
+
+% also this one!
+% x0 = [2.6600; 0.4000; 0];
+% xf = [2.4300; 0.5000; 0];
+% here is a nice collection of suspected wrong test points
+% wrong_points = importdata('log_move_wrong.txt');
+
+                    
+x0 =[ 1.7000;     0.7700; 0];
+xf = [1.8100; 
+    0.7300; 0];
+            [time_an,pos_an,speed_an,acc_an,jerk_an,retval] = min_jerk_trajectory_analytic(x0,xf,Ts,state_bounds,control_bounds);
+return
             if retval == 1
                 x0_res = [pos_an(1);speed_an(1);jerk_an(1)];
                 xf_res = [pos_an(end);speed_an(end);jerk_an(end)];
