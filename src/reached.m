@@ -1,6 +1,6 @@
 function state = reached(A,B)
 state = 0;
-tol=0.05; % custom
+tol=1;%0.05; % custom
 if isequal(isnan(A),isnan(B)) % check if the two points live in the same subspace
     A = fix_nans(A,~isnan(A));
     B = fix_nans(B,~isnan(B));

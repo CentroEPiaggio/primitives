@@ -258,7 +258,7 @@ for ii=1:N_sample_max
                 disp(['z_aug: ' num2str(z_aug(:)')])
                 figure(fig_xy);
                 plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
-                cprintf('red','Sto per provare con la eleva')
+                cprintf('red','Sto per provare con la eleva\n')
             end
             
             idx_parent_primitive = 1;

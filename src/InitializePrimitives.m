@@ -25,6 +25,7 @@ xmax = 25;
 vmin = -5;
 vmax = +5;
 vmin = -0.01;
+vmin = -1;
 vmax = +1;
 dimensioni = [1 1 0 0]; % only sample in x and v cart.
 initial_extend = [0 0 NaN NaN];
