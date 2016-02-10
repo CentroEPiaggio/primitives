@@ -10,14 +10,14 @@ classdef Elevate < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = Elevate(V,cost_coeff,cost_table,name,dimensions,default_extend)
+        function obj = Elevate(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color)
             disp('dentro costruttore di Elevate')
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the Move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend);
+            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color);
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
 %             keyboard
