@@ -148,12 +148,13 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     z_new_temp = z_new;
                     z_new = round(z_new*100)/100;
-                    if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
+                    if ~isequaln(round(x(1:length(z_new),end)*100)/100,z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
                         if pushed_in_goal
-                            reached(x(1:length(z_new),end),z_new)
-                            %                             keyboard
+                            if reached(x(1:length(z_new),end),z_new)
+                                keyboard
+                            end
                         end
                         %                         % this should fix the discontinuity problem
                         %                         [z_new,x] = truncate_to_similar(z_new,x);
@@ -166,6 +167,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
+%                     keyboard
                     if idx_prim==1
                         if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
@@ -186,32 +188,38 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 else
                     keyboard
                     for kk=1:length(intermediate_primitives_list)
+                        %%
                         prim_intermediate = Ptree.get(intermediate_primitives_list{kk});
                         if intermediate_primitives_list{kk}==1
                             traj_pos = x_list{kk}(1,:);
                             traj_vel = x_list{kk}(2,:);
                             if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % TODO: MISSING COLLISION AVOIDANCE HERE???
-                                z_new_intermediate = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                                z_new_intermediate = round(x_list{kk}(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                                 if isempty(idx_min)
                                     keyboard
                                 end
-                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim, q, cost_new, x, time);
+                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
                             end
                         else % idx_prim > 1
 %                             if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))  % TODO: MISSING COLLISION AVOIDANCE HERE???
                             if all(prim_intermediate.chi.P.contains([x_list{kk}],1)) % TODO: MISSING COLLISION AVOIDANCE HERE???
-                                z_new_intermediate = round(x(prim_intermediate.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                                z_new_intermediate = round(x_list{kk}(prim_intermediate.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                                 if isempty(idx_min)
                                     keyboard
                                 end
-                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
+                                [added_new,T,Graph,Edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
                             end
                         end
-                        [added_new,T,Graph,Edges] = InsertNode(idx_min, z_intermediate_list{kk}, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
+%                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_intermediate_list{kk}, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
                         if added_new
-                            idx_min = T.nnodes;
+                            idx_min = T.nnodes; % TODO: warning, this should point to the parent of the last added node but it might point directly to the last node in this case
                         end
+                        %%
                     end
+                end
+                dimG = size(Graph);
+                if dimG(1) ~= dimG(2)
+                    keyboard;
                 end
                 if added_new
                     cprintf('*[0,1,0]*','! Node Added !\n');
@@ -310,17 +318,17 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     
     if feasible
         if idx_prim ==1
-            if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+%             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
                 if verbose
                     disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
                 end
-            end
+%             end
         else
-            if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+%             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
                 if verbose
                     disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
                 end
-            end
+%             end
         end
     else
         if verbose

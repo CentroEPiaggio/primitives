@@ -5,13 +5,15 @@ function [idx_min,q,cost_new_edge,x,time,z_new,parent_found,added_intermediate_n
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
-sizeG = size(G);
-[~,shorterDim]=min(sizeG);
-G(sizeG(shorterDim)+1:max(sizeG),:)=0;
+% sizeG = size(G);
+% [~,shorterDim]=min(sizeG);
+% G(sizeG(shorterDim)+1:max(sizeG),:)=0;
 disp('Inside ChooseParent')
 parent_found = false;
 %CHOOSEPARENT determines the best parent in the cost sense
 idx_I = 1; % initial node is node 1
+
+feasible_extend = false; % initialization
 
 % costo = costo accumulato + costo nuovo campione
 cost_z_nearest = graphshortestpath(G,idx_I,idx_nearest); % calculates the optimal cost from the first node to the nearest one\
@@ -61,19 +63,34 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     traj_y_chooseparent   = ones(size(traj_vel_chooseparent)); % HARDFIX: default y is 1
                 end
                 %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+                if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1))
+                    feasible = false;
+                end
             else % Eleva primitive
                 %             traj_pos = %x(1,:);
                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
                 traj_y_chooseparent = x_chooseparent;
+                if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)'],1))
+                    feasible = false;
+                    keyboard
+                end
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
+            %             if isequal(prim.name,'Eleva')
+            %             keyboard
+            %             end
             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
                 disp('WTF ChooseParent is doing?')
-                keyboard
+%                 keyboard
                 if isempty(idx_parent_primitive)
-                    disp('WTF ChooseParent is doing? Maybe Move is doing wrong?')
-                    keyboard
+                    disp('WTF ChooseParent is doing? Maybe Move is doing wrong? Logging this points for further analysis.')
+%                     keyboard
+                    fid=fopen('log_move_wrong.txt','at');
+                    fprintf(fid,'%.2f,%.2f,%.2f,%.2f\n',z_near(1), z_near(2), z_new(1), z_new(2));
+                    fclose(fid);
+                    feasible = false;
+                    return
                 end
                 % BUGFIX: Fixing incongruences in the trajectory with the final point by adding intermediate trajectories made with
                 % other primitives
@@ -95,48 +112,50 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                                     traj_y_chooseparent_extend   = ones(size(traj_vel_chooseparent_extend)); % HARDFIX: default y is 1
                                 end
                                 %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+                                if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'],1))
+                                    feasible_extend = false;
+                                end
                             else % Eleva primitive
                                 %             traj_pos = %x(1,:);
                                 traj_vel_chooseparent_extend = z_temp(2)*ones(size(x_chooseparent_extend));%x(2,:);
                                 traj_pos_chooseparent_extend = z_temp(1)+cumtrapz(time_chooseparent_extend,traj_vel_chooseparent_extend);
                                 traj_y_chooseparent_extend = x_chooseparent_extend;
+                                if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_pos_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)'],1))
+                                    feasible_extend = false;
+                                end
                             end
-                            x_chooseparent_extend = [traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)';]; % assign arc-path
-                            
-                            x_chooseparent_tentative = [x_chooseparent, x_chooseparent_extend];
-                            time_chooseparent_tentative = [time_chooseparent(:)' time_chooseparent(end)+time_chooseparent_extend(:)'];
-                            cost_new_edge_tentative = cost_new_edge + cost_new_edge_extend;
-                            if (~isequal(z_near(1:2),x_chooseparent_tentative(1:2,1)) || ~isequaln(round(x_chooseparent_tentative(1:length(z_new),end)*100)/100,z_new))
-                                % keep_going
-                            else
-                                % pack data to return from chooseparent
-                                added_intermediate_node = true;
-                                intermediate_primitives_list = {idx_prim, idx_parent_primitive};
-                                x_list = {x_chooseparent, x_chooseparent_extend};
-                                q_list = {q_chooseparent, q_extend};
-                                time_list = {time_chooseparent, time_chooseparent_extend};
-                                cost_list = {cost_new_edge, cost_new_edge_extend};
-                                z_intermediate_list = {x_chooseparent(:,end), z_new};
-                                % pack data to finish chooseparent
-                                % calculations
-                                x_chooseparent = x_chooseparent_tentative;
-                                time_chooseparent = time_chooseparent_tentative;
-                                cost_new_edge = cost_new_edge_tentative;
-                                keyboard
-%                                 break;
+                            if feasible_extend
+                                x_chooseparent_extend = [traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)';]; % assign arc-path
+                                
+                                x_chooseparent_tentative = [x_chooseparent, x_chooseparent_extend];
+                                time_chooseparent_tentative = [time_chooseparent(:)' time_chooseparent(end)+time_chooseparent_extend(:)'];
+                                cost_new_edge_tentative = cost_new_edge + cost_new_edge_extend;
+                                if (~isequal(z_near(1:2),x_chooseparent_tentative(1:2,1)) || ~isequaln(round(x_chooseparent_tentative(1:length(z_new),end)*100)/100,z_new))
+                                    % keep_going
+                                else
+                                    % pack data to return from chooseparent
+                                    added_intermediate_node = true;
+                                    intermediate_primitives_list = {idx_prim, idx_parent_primitive};
+                                    x_list = {x_chooseparent, x_chooseparent_extend};
+                                    q_list = {q_chooseparent, q_extend};
+                                    time_list = {time_chooseparent, time_chooseparent_extend};
+                                    cost_list = {cost_new_edge, cost_new_edge_extend};
+                                    z_intermediate_list = {x_chooseparent(:,end), z_new};
+                                    % pack data to finish chooseparent
+                                    % calculations
+                                    x_chooseparent = x_chooseparent_tentative;
+                                    time_chooseparent = time_chooseparent_tentative;
+                                    cost_new_edge = cost_new_edge_tentative;
+%                                     keyboard
+                                    %                                 break;
+                                end
                             end
                         end
                     end
                 end
-                
-                
-                %                 z_new = round(x_chooseparent(1:length(z_new),end)*100)/100;
-                %                 [feasible,cost_new_edge,q,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new);
-                %                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
-                %                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
-                %                 traj_y_chooseparent = x_chooseparent;
-                %                 x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
-                % %                 feasible = false; % this happens when keeping the same speed moves the cart to a final position different from the one available...
+                if ~feasible_extend
+                    feasible = false;
+                end
             end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
@@ -150,22 +169,31 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 %                 c_x_new = graphshortestpath(G,idx_I,idx_new);
                 % costo fino al near + pezzettino near-new
                 c_prime = cost_up_to_z_near + cost_znear_znew;
-                try
-                    if ((c_prime < cost_z_new) & (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
-                        idx_min = idX_near(i);
-                        c_min = c_prime;
-                        x=x_chooseparent;
-                        time = time_chooseparent;
-                        parent_found = true;
+                
+                if ((c_prime < cost_z_new) && (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
+                    if feasible_extend
+                        disp('Found a new trajectory by adding an intermediate node!')
+%                         keyboard
                     end
-                catch
-                    keyboard
+                    idx_min = idX_near(i);
+                    c_min = c_prime;
+                    x=x_chooseparent;
+                    time = time_chooseparent;
+                    parent_found = true;
+                else % cost not good enough
+                    if feasible_extend
+%                         keyboard
+                        added_intermediate_node = false; % adding the nodes did not produce a lower cost so let's just connect to the nearest node.
+                        
+                    end
+%                     feasible = false;
                 end
+                
             end
         end
     end
 end
-if ~isnan(x) & ~isequaln(z_new(1:2),x(1:2,end))
+if ~isnan(x) & ~isequaln(z_new(1:2),round(x(1:2,end)*100/100))
     if norm((x(1:2,end) - z_new(1:2)))/norm(z_new(1:2)) < 1e-9 % raw accuracy measure
         disp('ChooseParent is changing the goal point by a slight bit, no worries.')
     else
@@ -197,10 +225,11 @@ if ~isnan(x)
     end
 end
 
+% is this really needed now?
 if any(any(~isnan(x_chooseparent)))
     %     disp('fix this')
     %     keyboard
-    z_new = x_chooseparent(prim.dimensions>0,end); % HACK to ensure continuity in the trajectories stored in the tree
+    z_new = round(x_chooseparent(prim.dimensions>0,end)*100)/100; % HACK to ensure continuity in the trajectories stored in the tree
 end
 
 end
