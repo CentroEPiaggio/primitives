@@ -119,7 +119,7 @@ classdef Move < primitive_library.PrimitiveFun
                     cost = Inf;
 %                     disp('Failed ZMP check');
                     cprintf('*[1,0,0]*','! Failed ZMP check !\n');
-                    keyboard % stop here to check simulated trajectories for wrong reference trajectories
+                    keyboard % stop here to check simulated trajectories for wrong reference trajectories with: figure,plot(rt_t,rt_qp_ref)
                 end
                 % pack return data
                 x = [traj_pos_cart;traj_vel_cart];
