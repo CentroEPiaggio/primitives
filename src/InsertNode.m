@@ -25,7 +25,6 @@ else
 %     end
     % %% debug end
     if ~isinf(cost) && cost>0
-%         keyboard
         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
         test2 = fix_nans(z_new,prim.dimensions); 
         
@@ -42,11 +41,14 @@ else
         end
         idx_last_added_node = T.nnodes;
         % make the sparse matrix square % is this really needed here?
+        % add new arc to the matrix: this was moved here, before assignig
+        % zeros to null elements, to ensure that G is squared AFTER it has been modified
+        G(idx_current,idx_last_added_node) = cost;
         sizeG = size(G);
         [~,shorterDim]=min(sizeG);
         G(sizeG(shorterDim)+1:max(sizeG),:)=0;
-        % add new arc to the matrix
-        G(idx_current,idx_last_added_node) = cost;
+%         % add new arc to the matrix
+%         G(idx_current,idx_last_added_node) = cost;
         %     keyboard
         actions = struct('source_node', idx_current,...
             'dest_node', idx_last_added_node,...
