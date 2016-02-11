@@ -34,7 +34,9 @@ z_new = T.get(idx_new);
 figure(fig_points)
 %node = plot(z_new(1),z_new(2),'bo','linewidth',2);
 %plot_nodes = horzcat(plot_nodes,node);
-edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','magenta','linewidth',2); 
+edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','magenta','linewidth',2); % just useful when debugging
+delete(edge);
+edge = line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color',prim.edge_color,'linewidth',2);
 pe{1,idx_near}=edge; % THIS SEEMS TO BE RIGHT
 
 cprintf('*[0,0,0]*','<<< Exit ReConnect\n');
