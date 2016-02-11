@@ -37,6 +37,23 @@ else
             return
         end
         z_new=fix_nans(z_new,prim.dimensions);
+        %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
+        current_node = T.get(idx_current);
+        
+        if current_node(3) > 1 && z_new(3) == 1
+            disp('Strange!!!!')
+            keyboard
+        end
+        
+        z_new(~prim.dimensions) = current_node(~prim.dimensions);
+        
+        if any(any(isnan(x)))
+            disp('NaNs!!!!')
+            keyboard
+        end
+        
+        
+        %%
         try
             T = T.addnode(idx_current,z_new);
         catch
@@ -70,6 +87,11 @@ else
             E{idx_current,idx_last_added_node}.x(3,end), T.Node{idx_last_added_node}(3)
             keyboard
         end
+        
+        if previous(3)>1 & thisone(3)==1
+            disp('brought to ground floor... but how?')
+            keyboard
+        end
     else
         cprintf('error','InsertNode: cost is 0 or Inf.\n');
         keyboard
@@ -81,10 +103,16 @@ if verbose && added_node
 %     if isequal(prim.name,'Eleva')
 %         keyboard
 %     end
+    
     fig_xv=2; fig_xy = 3; fig_yv = 4;
     figure(fig_xv)
     %                     z_min = z_nearest; % just for the next line, which is a visualization thing
     z_start = T.get(idx_current);
+    
+    if xor(isnan(z_start(3)),isnan(z_new(3))) 
+        keyboard
+    end
+    
     z_start_visual = z_start;
     z_new_visual = z_new;
     if length(z_new_visual) == 2
@@ -103,8 +131,8 @@ if verbose && added_node
     %                     keyboard
     %plot_edges = horzcat(plot_edges,edge);
     plot_edges{1,T.nnodes} = edge;
+%     keyboard
     figure(fig_xy)
-    %                 keyboard
     node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
     %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
     plot_nodes = horzcat(plot_nodes,node);

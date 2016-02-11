@@ -138,13 +138,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
-                if feasible & ~isnan(x_chooseparent)
-                    traj_pos_chooseparent=x_chooseparent(1,:);
-                    traj_vel_chooseparent=x_chooseparent(2,:);
-                    traj_yp_chooseparent =x_chooseparent(3,:);
-                    traj_pos = traj_pos_chooseparent;
-                    traj_vel = traj_vel_chooseparent;
-                    traj_y = traj_yp_chooseparent; % TODO: FIX NAMES
+                if feasible && ~any(any(isnan(x_chooseparent)))
+                    traj_pos = x_chooseparent(1,:);
+                    traj_vel = x_chooseparent(2,:);
+                    traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     z_new_temp = z_new;
                     z_new = round(z_new*100)/100;
@@ -234,10 +231,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         keyboard
                     end
                     
-                    if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes))
-                        disp('cosa sta aggiungendo?')
-                        keyboard
-                    end
+%                     if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes)) % this is now triggered by bringing nan dimensions to non-nan. No necessary.
+%                         disp('cosa sta aggiungendo?')
+%                         keyboard
+%                     end
                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)
@@ -261,15 +258,16 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 if added_new && rewired % && any(~any(isnan(x_rewire)))
-                    traj_pos_rewire=x_rewire(1,:);
-                    traj_vel_rewire=x_rewire(2,:);
-                    traj_yp_rewire =x_rewire(3,:);
-                    traj_pos = traj_pos_rewire;
-                    traj_vel = traj_vel_rewire;
-                    traj_y = traj_yp_rewire; % TODO: FIX NAMES
-                    x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+%                     traj_pos_rewire=x_rewire(1,:);
+%                     traj_vel_rewire=x_rewire(2,:);
+%                     traj_yp_rewire =x_rewire(3,:);
+%                     traj_pos = traj_pos_rewire;
+%                     traj_vel = traj_vel_rewire;
+%                     traj_y = traj_yp_rewire; % TODO: FIX NAMES
+%                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     % this should fix the discontinuity problem
-                    [z_new,x] = truncate_to_similar(z_new,x);
+                    z_new = round(x_rewire(:,1)*100)/100;
+%                     [z_new,x] = truncate_to_similar(z_new,x);
                     if checkdiscontinuity(T,Edges,Ptree)
                         keyboard
                     end
@@ -321,34 +319,34 @@ if checkdiscontinuity(T,Edges,Ptree)
     keyboard
 end
 
-% check se ha aggiunto il nodo giusto
-if feasible && added_new %&& ~rewired
-    % Extend the z_new point (already in the tree) with its initial_extend
-    % values (see PrimitiveFun.extend)
-    z_whatwas = z_new;
-    z_new_temp=prim.extend(z_new);
-    z_new_extended = fix_nans(z_new_temp,prim.dimensions);
-    if checkdiscontinuity(T,E,Ptree)
-        keyboard
-    end
-    before = T.get(T.nnodes);
-    if T.nnodes<2
-        disp('albero con un solo nodo')
-        disp('# quitting localRRTstar #')
-        return
-    end
-    before_E = E{T.Parent(T.nnodes),T.nnodes};
-    before_T = T;
-    if before(1:2) ~= z_whatwas(1:2)
-        disp('ah-ah!')
-        keyboard
-    end
-    T.Node{T.nnodes} = z_new_extended;
-    after = T.get(T.nnodes);
-    after_E = E{T.Parent(T.nnodes),T.nnodes};
-    if checkdiscontinuity(T,E,Ptree)
-        keyboard
-    end
-end
+% % check se ha aggiunto il nodo giusto
+% if feasible && added_new %&& ~rewired
+%     % Extend the z_new point (already in the tree) with its initial_extend
+%     % values (see PrimitiveFun.extend)
+%     z_whatwas = z_new;
+%     z_new_temp=prim.extend(z_new);
+%     z_new_extended = fix_nans(z_new_temp,prim.dimensions);
+%     if checkdiscontinuity(T,E,Ptree)
+%         keyboard
+%     end
+%     before = T.get(T.nnodes);
+%     if T.nnodes<2
+%         disp('albero con un solo nodo')
+%         disp('# quitting localRRTstar #')
+%         return
+%     end
+%     before_E = E{T.Parent(T.nnodes),T.nnodes};
+%     before_T = T;
+%     if before(1:2) ~= z_whatwas(1:2)
+%         disp('ah-ah!')
+%         keyboard
+%     end
+%     T.Node{T.nnodes} = z_new_extended;
+%     after = T.get(T.nnodes);
+%     after_E = E{T.Parent(T.nnodes),T.nnodes};
+%     if checkdiscontinuity(T,E,Ptree)
+%         keyboard
+%     end
+% end
 
 cprintf('*[0,0.7,1]*','# quitting localRRTstar #\n');
