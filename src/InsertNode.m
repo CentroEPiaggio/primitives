@@ -50,9 +50,6 @@ else
         sizeG = size(G);
         [~,shorterDim]=min(sizeG);
         G(sizeG(shorterDim)+1:max(sizeG),:)=0;
-        %         % add new arc to the matrix
-        %         G(idx_current,idx_last_added_node) = cost;
-        %     keyboard
         actions = struct('source_node', idx_current,...
             'dest_node', idx_last_added_node,...
             'primitive',prim.name,...
@@ -70,17 +67,6 @@ else
         keyboard
     end
 end
-
-
-%
-% if T.nnodes>1
-%     if sum(isnan(T.Node{end})) == sum(isnan(T.Node{end-1}))
-%         if all(fix_nans(T.Node{end})==fix_nans(T.Node{end-1}))
-%             disp('InsertNode is the worst!')
-%             keyboard
-%         end
-%     end
-% end
 
 %% Plotting tree in the state space
 if verbose && added_node
