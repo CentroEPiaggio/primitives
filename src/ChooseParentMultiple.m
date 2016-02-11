@@ -73,7 +73,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 traj_y_chooseparent = x_chooseparent;
                 if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)'],1))
                     feasible = false;
-                    keyboard
+%                     keyboard % TODO: make sure this conditions is not due to errors
                 end
             end
             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path

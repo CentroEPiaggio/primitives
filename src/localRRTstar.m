@@ -167,7 +167,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
-%                     keyboard
+                    %                     keyboard
                     if idx_prim==1
                         if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
@@ -186,7 +186,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         end
                     end
                 else
-%                     keyboard
+                                        keyboard
                     for kk=1:length(intermediate_primitives_list)
                         %%
                         prim_intermediate = Ptree.get(intermediate_primitives_list{kk});
@@ -201,7 +201,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                                 [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
                             end
                         else % idx_prim > 1
-%                             if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))  % TODO: MISSING COLLISION AVOIDANCE HERE???
+                            %                             if all(prim_intermediate.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))  % TODO: MISSING COLLISION AVOIDANCE HERE???
                             if all(prim_intermediate.chi.P.contains([x_list{kk}],1)) % TODO: MISSING COLLISION AVOIDANCE HERE???
                                 z_new_intermediate = round(x_list{kk}(prim_intermediate.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                                 if isempty(idx_min)
@@ -210,7 +210,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                                 [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
                             end
                         end
-%                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_intermediate_list{kk}, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
+                        %                         [added_new,T,Graph,Edges] = InsertNode(idx_min, z_intermediate_list{kk}, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk});
                         if added_new
                             idx_min = T.nnodes; % TODO: warning, this should point to the parent of the last added node but it might point directly to the last node in this case
                         end
@@ -244,16 +244,18 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 
-                cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                %                 if added_new && T.nnodes>2
-                %                     cprintf('*[0,0.7,1]*','* ReWire *\n');
-                %                     z_min = T.get(idx_min);
-                %
-                %                     idx_new = T.nnodes;
-                %                     [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-                %                     plot_edges=pedges;
-                %                     plot_nodes=pnodes;
-                %                 end
+                %                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+                if added_new && T.nnodes>2
+                    cprintf('*[0,0.7,1]*','* ReWire *\n');
+%                     z_min = T.get(idx_min);
+                    idx_new = T.nnodes;
+%                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+%                         keyboard
+%                     end
+                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                    plot_edges=pedges;
+                    plot_nodes=pnodes;
+                end
                 
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
@@ -289,17 +291,17 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     
     if feasible
         if idx_prim ==1
-%             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
-                if verbose
-                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
-                end
-%             end
+            %             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+            if verbose
+                disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
+            end
+            %             end
         else
-%             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
-                if verbose
-                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
-                end
-%             end
+            %             if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1)) % after the AND we check if the trajectories go outside the primitive space (5th order polynomials are quite shitty)
+            if verbose
+                disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
+            end
+            %             end
         end
     else
         if verbose

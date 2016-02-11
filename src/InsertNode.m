@@ -62,6 +62,14 @@ else
         disp(['Added node: {' num2str(idx_last_added_node) '} as [' num2str(z_new(:)') ']. Parent: {' num2str(idx_current) '}.'])
         disp(['From node {' num2str(idx_current) '}: [' num2str(T.get(idx_current)') '] or {' num2str(E{idx_current,idx_last_added_node}.source_node) '}'])
         disp(['To   node {' num2str(idx_last_added_node) '}: [' num2str(T.get(idx_last_added_node)') '] or {' num2str(E{idx_current,idx_last_added_node}.dest_node) '}'])
+        %%
+        previous = T.get(T.Parent(idx_last_added_node));
+        thisone = T.Node{idx_last_added_node};
+        if ~isequaln(round(E{idx_current,idx_last_added_node}.x(3,end)*100)/100, round(T.Node{idx_last_added_node}(3)*100)/100) && ~isequaln(previous(3),thisone(3))
+            disp('look at this shitface!')
+            E{idx_current,idx_last_added_node}.x(3,end), T.Node{idx_last_added_node}(3)
+            keyboard
+        end
     else
         cprintf('error','InsertNode: cost is 0 or Inf.\n');
         keyboard

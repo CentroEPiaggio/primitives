@@ -2,7 +2,9 @@
 % [T,G,E] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost)
 function [T,G,E,pn,pe] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost, x, time, pn,pe,fig_points)
 cprintf('*[0,0,0]*','>>> Enter ReConnect\n');
-% keyboard
+if isequal(prim.name,'Eleva')
+    keyboard
+end
 
 z_near = T.get(idx_near);
 z_near = fix_nans(z_near,prim.dimensions);
