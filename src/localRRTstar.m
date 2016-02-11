@@ -239,35 +239,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         keyboard
                     end
                 end
-%                 if verbose && added_new
-%                     figure(fig_xv)
-%                     %                     z_min = z_nearest; % just for the next line, which is a visualization thing
-%                     z_min = T.get(idx_min);
-%                     z_min_visual = z_min;
-%                     z_new_visual = z_new;
-%                     if length(z_new_visual) == 2
-%                         z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
-%                     end
-%                     if isnan(z_min_visual(3))
-%                         z_min_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
-%                     end
-%                     node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
-%                     plot_nodes = horzcat(plot_nodes,node);
-%                     %                     keyboard
-%                     edge = line([z_min(1) z_new_visual(1)],[z_min(2) z_new_visual(2)],'color','blue','linewidth',2);
-%                     %                     keyboard
-%                     %plot_edges = horzcat(plot_edges,edge);
-%                     plot_edges{1,T.nnodes} = edge;
-%                     figure(fig_xy)
-%                     %                 keyboard
-%                     node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
-%                     %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
-%                     plot_nodes = horzcat(plot_nodes,node);
-%                     edge = line([z_min_visual(1) z_new_visual(1)],[z_min_visual(2) z_new_visual(2)],[z_min_visual(3) z_new_visual(3)],'color','green','linewidth',2);
-%                     %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
-%                     %                     plot_edges = horzcat(plot_edges,edge);
-%                     plot_edges{2,T.nnodes} = edge;
-%                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
