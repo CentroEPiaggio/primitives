@@ -47,6 +47,8 @@ classdef DD_move < primitive_library.PrimitiveFun
             vi = z_start(2);
             xf = z_end(1);
             vf = z_end(2);
+            thi = z_start(1);
+            thf = z_start(2);
             traj_pos_cart=NaN;
             traj_vel_cart=NaN;
             
@@ -63,8 +65,10 @@ classdef DD_move < primitive_library.PrimitiveFun
             primitive_dd_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
                 'xf',xf,            ...
-                'vi',vi, ...
-                'vf',vf, ...
+                'yi',yi,            ...
+                'yf',yf,            ...
+                'thi',thi,          ...
+                'thf',thf,          ...
                 'Ts',Ts,            ...
                 'xf_vec_len',1, ...
                 'vx0_vec_len',1,  ...
@@ -74,7 +78,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
             
             [time,traj_pos_cart,traj_vel_cart,q,retval,cost]=gen_primitives_dd_muovi_local(primitive_dd_muovi_params);
-            
+
             if retval==1
                 Tend = time(end);
 %                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
@@ -102,34 +106,35 @@ classdef DD_move < primitive_library.PrimitiveFun
                 q_reference = [time(:)';
                     traj_vel_cart(:)';
                     traj_yp_cart(:)'];
+                
                 save('../example/runna.mat','q_reference');
                 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
-                [status, result] = system(runstr);
-                if status ~= 0, error(result); end
+                %%[status, result] = system(runstr);
+                %%if status ~= 0, error(result); end
                 % check if feasible
-                load('../src/modello.mat');
+                %%load('../src/modello.mat');
 % keyboard                 % stop here to see simulated trajectories
-                if rt_zmpflag(end)==0
+                %%if rt_zmpflag(end)==0
                     feasible = 1;
 %                     cost = rt_cost(end);
                     %cost = Tend; % for time-optimal problem
                     % cost remains the same returned
-                    cprintf('*[0,1,0]*','! OK ZMP check !\n');
-                else
-                    feasible = 0;
-                    cost = Inf;
+                %%    cprintf('*[0,1,0]*','! OK ZMP check !\n');
+                %%else
+                %%    feasible = 0;
+                %%    cost = Inf;
 %                     disp('Failed ZMP check');
-                    cprintf('*[1,0,0]*','! Failed ZMP check !\n');
-                    keyboard % stop here to check simulated trajectories for wrong reference trajectories
-                end
+                %%    cprintf('*[1,0,0]*','! Failed ZMP check !\n');
+                %%    keyboard % stop here to check simulated trajectories for wrong reference trajectories
+                %%end
                 % pack return data
                 x = [traj_pos_cart;traj_vel_cart];
-            else
-                feasible = 0;
-                cost = Inf;
-                x = NaN;
-                time = NaN;
-                q = NaN;
+            %%else
+                %%feasible = 0;
+                %%cost = Inf;
+                %%x = NaN;
+                %%time = NaN;
+                %%q = NaN;
             end
         end
     end

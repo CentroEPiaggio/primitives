@@ -28,8 +28,14 @@ vmin = -0.01;
 vmax = +1;
 dimensioni = [1 1 0 0]; % only sample in x and v cart.
 initial_extend = [0 0 NaN NaN];
+
 % Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend);
-Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend); % instantiate the primitive Move in Muovi
+if monodimensional
+    Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend); % instantiate the primitive Move in Muovi
+else
+    Muovi = DD_move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend);
+end
+
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;

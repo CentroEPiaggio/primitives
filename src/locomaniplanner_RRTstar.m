@@ -3,6 +3,7 @@ clear all; clear import; close all; clc;
 push_goal_freq = 10;
 
 multiple_primitives = 1;
+monodimensional=0;
 
 % debug and visualization flags
 debug=0; % enable breakpoints
