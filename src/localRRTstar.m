@@ -1,4 +1,4 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol)
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
@@ -152,7 +152,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
                         if pushed_in_goal
-                            if reached(x(1:length(z_new),end),z_new)
+                            if reached(x(1:length(z_new),end),z_new,tol)
                                 keyboard
                             end
                         end
