@@ -5,14 +5,13 @@
 % Graph: the graph with the costs of connecting the search tree
 % Edges: the edges between the nodes in the graph
 % cardV: cardinality of the vertices in the graph (i.e. number of nodes)
+% gam: a proportionality term on the volume to be considered
 % OUTPUT:
 % x_near_bubble:    the nearest point inside the bubble
 % idx_near_bubble:  the index of such point in the tree structure (i.e. to
 %                   be able to call Tree.get(idx_near_bubble) to fetch
 %                   that node).
-% PARAMETERS (to be tuned inside the function):
-% gam: a proportionality term on the volume to be considered
-function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV)
+function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV,gam)
 cprintf('*[0,0,0]*','>>> Enter Near\n');
 idX_near=NaN;
 radius = 0;
@@ -27,7 +26,7 @@ if n<2
     %     disp('Gimme something more mate!');
     return
 end
-gam = 50; % TUNE gam
+% gam = 50; % TUNE gam
 volume = gam*log(n)/n; % CHECK: we use natural logarithm here, it is not clear if this is the case.
 radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 radius = radius_elevated_n^(1/n);

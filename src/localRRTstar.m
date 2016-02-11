@@ -1,4 +1,4 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam)
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
@@ -103,7 +103,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         
         cardV = T.nnodes; % number of vertices in the graph
         
-        [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV);     % Check for nearest point inside a certain bubble
+        [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
         if ~isempty(goal_node)
             idx_near_bubble(idx_near_bubble==goal_node) = [];
         end
@@ -186,7 +186,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         end
                     end
                 else
-                    keyboard
+%                     keyboard
                     for kk=1:length(intermediate_primitives_list)
                         %%
                         prim_intermediate = Ptree.get(intermediate_primitives_list{kk});
