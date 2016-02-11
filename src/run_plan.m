@@ -11,6 +11,9 @@ for kk=2:opt_plan.nnodes
     time = 0:Ts:Ts*(length(opt_plan.Node{kk}.x(2,:))-1);
     traj_x_speed_cart = opt_plan.Node{kk}.x(2,:);
     traj_y_speed_cart = gradient(opt_plan.Node{kk}.x(3,:))/Ts; % WARNING:
+    if any(isnan(traj_y_speed_cart))
+        keyboard
+    end
 %     use other dimensions
     disp('Warning: use other dimensions!');
 %     traj_y_speed_cart = zeros(size(traj_x_speed_cart));
