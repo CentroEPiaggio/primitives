@@ -5,7 +5,7 @@ push_goal_freq = 10;
 multiple_primitives = 1;
 
 % Algorithm's parameters
-gam = 50; % constant for radius of search of near nodes in near.m
+gam = 10; % constant for radius of search of near nodes in near.m
 tol=0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
@@ -20,9 +20,9 @@ import primitive_library.*;
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
-z_init = [0  ;0  ;1;NaN]; % initial state: [position,speed,end-effector height].
-z_init = [0  ;0  ;NaN;NaN]; % initial state: [position,speed,end-effector height].
-z_goal = [20;   0;3;NaN]; % goal state:    [position,speed,end-effector height].
+z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
+z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
+z_goal = [20;   0;3]; % goal state:    [position,speed,end-effector height].
 % z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
 % z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
 
