@@ -120,38 +120,6 @@ for ii=1:N_sample_max
         end
     end
     
-    %     % check if path has been found and it needs to plot and save data
-    %     if path_found % anytime optimization. If one feasible path was
-    %                   % found in a previous iteration, keep optimizing
-    %         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-    %         % save cost and iteration for plotting (anytime) stuff
-    %         if ~isempty(cost_vector) && cost<cost_vector(end)
-    %             cost_vector = [cost_vector, cost];
-    %             N_cost_vector = [N_cost_vector, ii];
-    %             plot_biograph(source_node,goal_node,G);
-    %             figure(10)
-    %             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-    %             %             hold on
-    %             save_test_data
-    %             if debug,keyboard,end
-    %         end
-    % %     elseif pushed_in_goal || reached(T.Node{end},z_goal) % first time a path is found
-    %     elseif reached(T.Node{end},z_goal) % first time a path is found
-    %         keyboard
-    %         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-    %         goal_node = idz_Goal;
-    %         disp('Goal reached (via Muovi)!');
-    %         path_found = true;
-    %         if debug,keyboard,end
-    %
-    %         load handel;
-    %         player = audioplayer(y, Fs);
-    %         play(player);
-    %
-    %         continue % for anytime behavior
-    %     end
-    
-    
     if feasible && added_new % last call to localRRTstart has produced a new
         % node z_new which was added to the tree?
         % Check for available primitives to extend the last sampled point in a new dimension
@@ -210,40 +178,6 @@ for ii=1:N_sample_max
                 end
             end
             
-            %             if path_found
-            %                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
-            %                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-            %                 opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-            %                 % save cost and iteration for plotting (anytime) stuff
-            %                 if ~isempty(cost_vector) && cost<cost_vector(end)
-            %                     cost_vector = [cost_vector, cost];
-            %                     N_cost_vector = [N_cost_vector, ii];
-            %                     plot_biograph(source_node,goal_node,G);
-            %                     figure(10)
-            %                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-            %                     %                     hold on
-            %                     save_test_data
-            %                     if debug,keyboard,end
-            %                 end
-            %             elseif pushed_in_goal || reached(T.Node{end},z_goal)
-            %                 keyboard
-            %                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-            %                 goal_node = idz_Goal;
-            %                 % the -1 is a dirty fix for the fact
-            %                 % that this node is inserted two
-            %                 % times, once via prim.extend and
-            %                 % one from localRRT*(Chi_aug). Does
-            %                 % not happen always but still it
-            %                 % needs this workaround for those
-            %                 % times.
-            %                 disp('Goal reached (via Eleva)!');
-            %                 path_found = true;
-            %                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-            %                 if debug,keyboard,end
-            %                 stop = true;
-            %                 break
-            %             end
-            
             if mod(ii,push_goal_freq)==0 %&& ~path_found
                 z_aug = z_goal(1:3); % every once in a while push in a known number
                 disp('Pushing in aug goal')
@@ -300,37 +234,7 @@ for ii=1:N_sample_max
                     if debug,keyboard,end
                 end
             end
-            %                 if path_found
-            %                     [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-            %                     opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-            %                     % save cost and iteration for plotting (anytime) stuff
-            %                     if ~isempty(cost_vector) && cost<cost_vector(end)
-            %                         cost_vector = [cost_vector, cost];
-            %                         N_cost_vector = [N_cost_vector, ii];
-            %                         plot_biograph(source_node,goal_node,G);
-            %                         figure(10)
-            %                         bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-            %                         %                     hold on
-            %                         save_test_data
-            %                         if debug,keyboard,end
-            %                     end
-            %                 elseif pushed_in_goal || reached(T.Node{end},z_goal)
-            %                     idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-            %                     goal_node = idz_Goal;
-            %                     % the -1 is a dirty fix for the fact
-            %                     % that this node is inserted two
-            %                     % times, once via prim.extend and
-            %                     % one from localRRT*(Chi_aug). Does
-            %                     % not happen always but still it
-            %                     % needs this workaround for those
-            %                     % times.
-            %                     disp('Goal reached (via Eleva)!');
-            %                     path_found = true;
-            %                     %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-            %                     if debug,keyboard,end
-            %                     stop = true;
-            %                     break
-            %                 end
+
         end
         
         if stop
