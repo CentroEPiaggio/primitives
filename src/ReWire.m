@@ -15,11 +15,6 @@ G(sizeG(shorterDim)+1:max(sizeG),:)=0;
 z_new = T.get(idx_new);
 % keyboard
 for i=1:length(idX_near) % for every point btw the nearby vertices
-    % CHECK EVERYTIME THE DIMENSIONS OF THE GRAPH TO BE CONSISTENT BTW THEM
-    sizeG = size(G);
-    [~,shorterDim]=min(sizeG);
-    G(sizeG(shorterDim)+1:max(sizeG),:)=0;
-    
     if (idX_near(i)==idx_min || idX_near(i)==idx_I) % avoid idx_min and tree root
         continue;
     end
