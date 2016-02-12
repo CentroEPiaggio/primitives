@@ -183,7 +183,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         end
                     end
                 else
-                                        keyboard
+%                     keyboard
                     for kk=1:length(intermediate_primitives_list)
                         %%
                         prim_intermediate = Ptree.get(intermediate_primitives_list{kk});
@@ -212,6 +212,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                             idx_min = T.nnodes; % TODO: warning, this should point to the parent of the last added node but it might point directly to the last node in this case
                         end
                         %%
+                        if checkdiscontinuity(T,Edges,Ptree)
+                            keyboard
+                        end
                     end
                 end
                 dimG = size(Graph);
@@ -231,10 +234,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         keyboard
                     end
                     
-%                     if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes)) % this is now triggered by bringing nan dimensions to non-nan. No necessary.
-%                         disp('cosa sta aggiungendo?')
-%                         keyboard
-%                     end
+                    %                     if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes)) % this is now triggered by bringing nan dimensions to non-nan. No necessary.
+                    %                         disp('cosa sta aggiungendo?')
+                    %                         keyboard
+                    %                     end
                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)
@@ -244,11 +247,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 %                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
                 if added_new && T.nnodes>2
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
-%                     z_min = T.get(idx_min);
+                    %                     z_min = T.get(idx_min);
                     idx_new = T.nnodes;
-%                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-%                         keyboard
-%                     end
+                    %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                    %                         keyboard
+                    %                     end
                     [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
                     plot_edges=pedges;
                     plot_nodes=pnodes;
@@ -258,16 +261,16 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 if added_new && rewired % && any(~any(isnan(x_rewire)))
-%                     traj_pos_rewire=x_rewire(1,:);
-%                     traj_vel_rewire=x_rewire(2,:);
-%                     traj_yp_rewire =x_rewire(3,:);
-%                     traj_pos = traj_pos_rewire;
-%                     traj_vel = traj_vel_rewire;
-%                     traj_y = traj_yp_rewire; % TODO: FIX NAMES
-%                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+                    %                     traj_pos_rewire=x_rewire(1,:);
+                    %                     traj_vel_rewire=x_rewire(2,:);
+                    %                     traj_yp_rewire =x_rewire(3,:);
+                    %                     traj_pos = traj_pos_rewire;
+                    %                     traj_vel = traj_vel_rewire;
+                    %                     traj_y = traj_yp_rewire; % TODO: FIX NAMES
+                    %                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
                     % this should fix the discontinuity problem
                     z_new = round(x_rewire(:,1)*100)/100;
-%                     [z_new,x] = truncate_to_similar(z_new,x);
+                    %                     [z_new,x] = truncate_to_similar(z_new,x);
                     if checkdiscontinuity(T,Edges,Ptree)
                         keyboard
                     end

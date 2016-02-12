@@ -126,7 +126,7 @@ for ii=1:N_sample_max
         cprintf('*[0,0.7,1]*','* Check for available primitives to extend the last point in new dimensions *\n');
         idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
         
-        % Iterate over available primitives
+        %% Iterate over available primitives
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
             cprintf('*[0,.7,0.5]*','* Iterate over all available primitives *\n');
             if ~idx_avail_prim(jj)
@@ -138,11 +138,21 @@ for ii=1:N_sample_max
             
             % Extend the z_new point (already in the tree) with its initial_extend
             % values (see PrimitiveFun.extend)
+            T.Node{T.nnodes}
             z_whatwas = z_new
             z_new_temp=prim.extend(z_new)
             z_new_extended = fix_nans(z_new_temp,prim.dimensions)
+            %% Suspected bug
+            if checkdiscontinuity(T,E,Ptree)
+                keyboard
+            end
             
-            T.Node{T.nnodes} = z_new_extended;
+            T.Node{T.nnodes} = z_new_extended
+            
+            if checkdiscontinuity(T,E,Ptree)
+                keyboard
+            end
+            %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
@@ -234,7 +244,7 @@ for ii=1:N_sample_max
                     if debug,keyboard,end
                 end
             end
-
+            
         end
         
         if stop

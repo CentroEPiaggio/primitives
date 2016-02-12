@@ -39,6 +39,11 @@ else
         z_new=fix_nans(z_new,prim.dimensions);
         %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
         current_node = T.get(idx_current);
+%         keyboard
+%         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
+        if length(z_new) < 3
+            keyboard
+        end
         
         if current_node(3) > 1 && z_new(3) == 1
             disp('Strange!!!!')

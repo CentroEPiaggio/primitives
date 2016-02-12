@@ -148,6 +148,8 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                                     cost_new_edge = cost_new_edge_tentative;
 %                                     keyboard
                                     %                                 break;
+                                    cprintf('*[0,0.7,1]*','* ChooseParentMultiple is suggesting to add an intermediate point: z_intermediate_list{:} = *\n');
+                                    z_intermediate_list{:}
                                 end
                             end
                         end
