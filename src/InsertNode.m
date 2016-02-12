@@ -38,25 +38,41 @@ else
         end
         z_new=fix_nans(z_new,prim.dimensions);
         %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
-        current_node = T.get(idx_current);
-%         keyboard
-%         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
+        z_current = T.get(idx_current);
+        %         keyboard
+        %         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
+        % pseudo-code
+        % se il nodo vecchio ha dimensioni diverse da prim.dimensions gia'
+        % inizializzate, allora quelle dimensioni su z_new vanno messe a
+        % x(~prim.dimensions,end). Altrimenti quelle stesse dimensioni vanno messe
+        % come il vecchio nodo.
+        % TODO BUGFIX: this fix probably works good for position variables, not for
+        % speed variables.
+        map_z_new_dimensions_not_initialized = isnan(z_new);
+        map_z_current_dimensions_not_initialized = isnan(z_current);
+        z_n = z_new;
+        if ~isequal(map_z_current_dimensions_not_initialized,map_z_new_dimensions_not_initialized)
+            z_n(map_z_new_dimensions_not_initialized>0) = x(map_z_new_dimensions_not_initialized>0,end);
+        else
+            z_n(map_z_new_dimensions_not_initialized>0) = z_current(map_z_new_dimensions_not_initialized>0,end);
+        end
+        z_new = z_n;
         if length(z_new) < 3
             keyboard
         end
-        
-        if current_node(3) > 1 && z_new(3) == 1
+        %
+        if z_current(3) > 1 && z_new(3) == 1
             disp('Strange!!!!')
             keyboard
         end
-        
-        z_new(~prim.dimensions) = current_node(~prim.dimensions);
-        
+        %
+        %         z_new(~prim.dimensions) = current_node(~prim.dimensions);
+        %
         if any(any(isnan(x)))
             disp('NaNs!!!!')
             keyboard
         end
-        
+        %
         
         %%
         try
@@ -105,16 +121,16 @@ end
 
 %% Plotting tree in the state space
 if verbose && added_node
-%     if isequal(prim.name,'Eleva')
-%         keyboard
-%     end
+    %     if isequal(prim.name,'Eleva')
+    %         keyboard
+    %     end
     
     fig_xv=2; fig_xy = 3; fig_yv = 4;
     figure(fig_xv)
     %                     z_min = z_nearest; % just for the next line, which is a visualization thing
     z_start = T.get(idx_current);
     
-    if xor(isnan(z_start(3)),isnan(z_new(3))) 
+    if xor(isnan(z_start(3)),isnan(z_new(3)))
         keyboard
     end
     
@@ -136,7 +152,7 @@ if verbose && added_node
     %                     keyboard
     %plot_edges = horzcat(plot_edges,edge);
     plot_edges{1,T.nnodes} = edge;
-%     keyboard
+    %     keyboard
     figure(fig_xy)
     node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
     %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
