@@ -7,6 +7,8 @@ yi = prim_data.yi;
 yf = prim_data.yf;
 thi = prim_data.thi;
 thf = prim_data.thf;
+vi = prim_data.vi;
+vf = prim_data.vf;
 
 % Tend = prim_data.Tend; % DONE now it is parameterized
 
@@ -20,8 +22,8 @@ Ts = prim_data.Ts;
 vmax = 1;
 
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
-x0 = [xi;yi;thi];
-xf = [xf;yf;thf];
+x0 = [xi;yi;thi;vi];
+xf = [xf;yf;thf;vf];
 state_bounds = [-Inf Inf;
     -Inf Inf;
     -pi pi];

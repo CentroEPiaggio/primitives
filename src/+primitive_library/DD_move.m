@@ -38,28 +38,29 @@ classdef DD_move < primitive_library.PrimitiveFun
             % data: the data to be added to the plan tree?
             
             %% function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_dd_muovi(xi,xf,vi,vf)
-            
+
             % initialization
             feasible=false;
             cost=Inf;
             % q=[xi,xf,vi,vf];
             xi = z_start(1);
-            vi = z_start(2);
+            yi = z_start(2);
+            thi = z_start(3);
+            vi = z_start(4);
             xf = z_end(1);
-            vf = z_end(2);
-            thi = z_start(1);
-            thf = z_start(2);
+            yf = z_end(2);
+            thf = z_end(3);
+            vf = z_end(4);
             traj_pos_cart=NaN;
             traj_vel_cart=NaN;
             
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
+
+            Ts = 0.01;
             
-%             Tend = 10; % TODO porcata. Il tempo va parametrizzato. % DONE
-            Ts = 0.001;
-            
-            yi = rand;
-            yf = yi*2;
+            %yi = rand; %danilo briccone
+            %yf = yi*2;
             % prepare data for muovi
             % define parameters for primitive muovi
             primitive_dd_muovi_params = struct('name','muovi',    ...
@@ -69,6 +70,8 @@ classdef DD_move < primitive_library.PrimitiveFun
                 'yf',yf,            ...
                 'thi',thi,          ...
                 'thf',thf,          ...
+                'vi',vi,            ...
+                'vf',vf,            ...
                 'Ts',Ts,            ...
                 'xf_vec_len',1, ...
                 'vx0_vec_len',1,  ...
@@ -129,12 +132,12 @@ classdef DD_move < primitive_library.PrimitiveFun
                 %%end
                 % pack return data
                 x = [traj_pos_cart;traj_vel_cart];
-            %%else
-                %%feasible = 0;
-                %%cost = Inf;
-                %%x = NaN;
-                %%time = NaN;
-                %%q = NaN;
+            else
+                feasible = 0;
+                cost = Inf;
+                x = NaN;
+                time = NaN;
+                q = NaN;
             end
         end
     end
