@@ -51,7 +51,9 @@ if debug
     figure
     hold on
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    plot(P(1,:),P(2,:),'or')
+    plot(P(1,1),P(2,1),'*r')
+    plot(P(1,end),P(2,end),'*r')
+    plot(P(1,2:end-1),P(2,2:end-1),'*b')
     plot(c_u(1,:),c_u(2,:),'Linewidth',2)
     axis equal
 end
@@ -67,7 +69,7 @@ y_t = [y_t x0(2)];
 th_t=[];
 th_t = [th_t x0(3)];
 
-K1=10;
+K1=1;
 K2=1;
 
 index = 1;
@@ -87,19 +89,13 @@ for i=1:size(wp,2)
 
         while error>threshold
 
-            v = 0.1; % TODO enhance this
-
-            if v_f ~=0
-                if error < threshold*2
-                    v = v_f; 
-                end
-            end
-            
-            v = v_sat.evaluate(v);
-
             w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
             
             w = w_sat.evaluate(w);
+            
+            v = 0.1* (1-abs(w)); % TODO enhance this
+
+            v = v_sat.evaluate(v);
 
             % integration TODO use cumtrapz
             % x(t) = x0 + int[0,T]{ v cos(th) }
