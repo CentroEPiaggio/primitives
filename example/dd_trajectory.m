@@ -49,6 +49,7 @@ c_u = kron((1-t).^3,pt1) + kron(3*(1-t).^2.*t,pt2) + kron(3*(1-t).*t.^2,pt3) + k
 
 if debug
     figure
+    subplot(1,2,1)
     hold on
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     plot(P(1,1),P(2,1),'*r')
@@ -61,6 +62,7 @@ end
 % trajectory following
 
 threshold = 0.01;
+f_threshold = 10*threshold;
 
 x_t=[];
 x_t = [x_t x0(1)];
@@ -71,6 +73,7 @@ th_t = [th_t x0(3)];
 
 K1=1;
 K2=1;
+b=0.3;
 
 index = 1;
 wp=[];
@@ -80,8 +83,13 @@ for i=1:numel(t)
     end
 end
 
-w_sat = saturation([-1 1]);
-v_sat = saturation([-1 1]);
+w_max=1;
+w_sat = saturation([-w_max w_max]);
+v_max=0.1;
+v_sat = saturation([-v_max v_max]);
+v_vec=[];
+v=v_i;
+w=0;
 
 for i=1:size(wp,2)
 
@@ -89,13 +97,7 @@ for i=1:size(wp,2)
 
         while error>threshold
 
-            w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
-            
-            w = w_sat.evaluate(w);
-            
-            v = 0.1* (1-abs(w)); % TODO enhance this
-
-            v = v_sat.evaluate(v);
+            v_vec = [v_vec v];
 
             % integration TODO use cumtrapz
             % x(t) = x0 + int[0,T]{ v cos(th) }
@@ -109,13 +111,40 @@ for i=1:size(wp,2)
             error = norm(wp(:,i)-[x_t(end) y_t(end)].');
             
             if i<size(wp,2)-1
-                error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].'); %porcata
-            
-                if error_next<error
+                error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
+                if error_next<error %jump to the next wp
                    i=i+1; 
                 end
             end
+            
+            %%% compute controls
+            
+            w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
+            
+            w = w_sat.evaluate(w);
 
+            %%%%%%%%%%%%%%%%%%%%% TODO enhance this
+
+            if i==size(wp,2) %last wp
+                if error < f_threshold
+                    alpha = (error-threshold) / f_threshold;
+                    if v_f==0
+                        v_f=0.01; %numerical stuff
+                    end
+                    v=(alpha)*v_max + (1 - alpha)*v_f;
+                end
+            else % general case, v depending on w
+                if w>0 % fixing right wheel velocity to the max
+                    v = ( v + v_max-b*w ) / 2;
+                else % fixing left wheel velocity to the max
+                    v = ( v + v_max+b*w ) / 2;
+                end
+            end
+
+            v = v_sat.evaluate(v);
+            
+            %%%%%%%%%%%%%%%%%%%%%%
+            
             index = index +1;
             
             if index > 10000
@@ -125,15 +154,32 @@ for i=1:size(wp,2)
         end
 end
 
-if verbose
-    disp(['Planned in ' num2str(index) ' steps.'])
-    toc
-end
-
 if debug
     plot(wp(1,:),wp(2,:),'og')
     plot(x_t,y_t)
     axis equal
 end
-retval=0;
+
+if debug
+    subplot(1,2,2)
+    plot(1:numel(v_vec),v_vec)
+end
+
+pos=[x_t; y_t; th_t];
+%q
+time=[Ts*(1:index)];
+
+if index <= 10000 
+    cost=index*Ts;
+end
+
+retval=0; % TODO set all variables so the algorithm can go on
+
+if verbose
+    disp([' - Planned in ' num2str(index) ' steps.'])
+    disp([' - Cost is ' num2str(cost) ' steps.'])
+    disp([' - Execution time is ' num2str(time(end))])
+    toc
+end
+
 end

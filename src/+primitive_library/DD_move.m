@@ -134,9 +134,9 @@ classdef DD_move < primitive_library.PrimitiveFun
                 x = [traj_pos_cart;traj_vel_cart];
             else
                 feasible = 0;
-                cost = Inf;
+                %cost = Inf;
                 x = NaN;
-                time = NaN;
+                %time = NaN;
                 q = NaN;
             end
         end

@@ -26,19 +26,19 @@ Muovi = DD_move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'D
 z_start=[0 0 0 0];
 z_end=[1 1 0 0];
 
-[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end)
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
 z_start=[0 0 0 0];
 z_end=[0 1 pi 0];
 
-[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end)
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
 z_start=[0 0 0 0];
 z_end=[1 1 pi/2 0];
 
-[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end)
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
 z_start=[0 0 0 0];
 z_end=[1 0 pi+0.01 0];
 
-[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end)
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
