@@ -32,8 +32,8 @@ control_bounds = [-vmax;vmax];
 %[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 [time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 
-time = time(:)';
-traj_pos_cart = traj_pos_cart(:)';
-traj_vel_cart = traj_vel_cart(:)';
+%time = time(:)';
+%traj_pos_cart = traj_pos_cart(:)';
+%traj_vel_cart = traj_vel_cart(:)';
 
 q = [prim_data.xi prim_data.xf prim_data.yi prim_data.yf prim_data.thi prim_data.thf];

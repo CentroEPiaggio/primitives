@@ -57,7 +57,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
 
-            Ts = 0.01;
+            Ts = 0.1;
             
             %yi = rand; %danilo briccone
             %yf = yi*2;
@@ -135,7 +135,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             else
                 feasible = 0;
                 %cost = Inf;
-                x = NaN;
+                x = [traj_pos_cart;traj_vel_cart];
                 %time = NaN;
                 q = NaN;
             end

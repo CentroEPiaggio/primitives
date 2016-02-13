@@ -49,7 +49,7 @@ c_u = kron((1-t).^3,pt1) + kron(3*(1-t).^2.*t,pt2) + kron(3*(1-t).*t.^2,pt3) + k
 
 if debug
     figure
-    subplot(1,2,1)
+    subplot(1,3,1)
     hold on
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     plot(P(1,1),P(2,1),'*r')
@@ -61,15 +61,15 @@ end
 
 % trajectory following
 
-threshold = 0.01;
-f_threshold = 10*threshold;
+threshold = 1e-2;
+f_threshold = 1e-1;;
 
 x_t=[];
-x_t = [x_t x0(1)];
+x_t = [x_t x_i];
 y_t=[];
-y_t = [y_t x0(2)];
+y_t = [y_t y_i];
 th_t=[];
-th_t = [th_t x0(3)];
+th_t = [th_t th_i];
 
 K1=1;
 K2=1;
@@ -87,7 +87,6 @@ w_max=1;
 w_sat = saturation([-w_max w_max]);
 v_max=0.1;
 v_sat = saturation([-v_max v_max]);
-v_vec=[];
 v=v_i;
 w=0;
 
@@ -97,7 +96,7 @@ for i=1:size(wp,2)
 
         while error>threshold
 
-            v_vec = [v_vec v];
+            speed = [speed, [v; w]];
 
             % integration TODO use cumtrapz
             % x(t) = x0 + int[0,T]{ v cos(th) }
@@ -126,10 +125,11 @@ for i=1:size(wp,2)
             %%%%%%%%%%%%%%%%%%%%% TODO enhance this
 
             if i==size(wp,2) %last wp
+                threshold=1e-4;
                 if error < f_threshold
                     alpha = (error-threshold) / f_threshold;
                     if v_f==0
-                        v_f=0.01; %numerical stuff
+                        v_f=1e-5; %numerical stuff
                     end
                     v=(alpha)*v_max + (1 - alpha)*v_f;
                 end
@@ -161,11 +161,13 @@ if debug
 end
 
 if debug
-    subplot(1,2,2)
-    plot(1:numel(v_vec),v_vec)
+    subplot(1,3,2)
+    plot(1:numel(speed(1,:)),speed(1,:))
+    subplot(1,3,3)
+    plot(1:numel(speed(2,:)),speed(2,:))
 end
 
-pos=[x_t; y_t; th_t];
+pos=[x_t(1:end-1); y_t(1:end-1); th_t(1:end-1)];
 %q
 time=[Ts*(1:index)];
 

@@ -42,3 +42,37 @@ z_start=[0 0 0 0];
 z_end=[1 0 pi+0.01 0];
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+%% test irobot
+
+z_start=[0 0 0 0];
+z_end=[1 0 0 0];
+
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+%%
+
+setenv('ROS_MASTER_URI','http://192.168.1.68:11311');
+setenv('ROS_HOSTNAME','192.168.1.179');
+setenv('ROS_IP','192.168.1.179');
+
+rosinit
+
+Ts=0.1;
+
+cmd_msg = rosmessage('ff_fb_control/dd_control');
+
+cmd_pub = rospublisher('/iRobot_0/control_topic',cmd_msg.MessageType); %create a publisher
+pause(1); %ensure publisher is setup
+
+for j=1:numel(x(4,:))
+    cmd_msg.DesiredX=x(1,j);
+    cmd_msg.DesiredY=x(2,j);
+    cmd_msg.DesiredTheta=x(3,j);
+    cmd_msg.DesiredLinearVelocity=x(4,j);
+    cmd_msg.DesiredAngularVelocity=x(5,j);
+    send(cmd_pub, cmd_msg); %sending the message
+    pause(Ts); %ensure
+end
+
+rosshutdown
