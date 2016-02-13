@@ -18,6 +18,7 @@
 % x=fix_nans(x_sampled,[1 1 0 0])
 % we return x=[4 7 2 NaN];
 function x = fix_nans(x_sampled,dimensions)
+% keyboard
 if nargin==1 % obtain non-NaN dimensions
     x = x_sampled(~isnan(x_sampled)>0);
     return
@@ -36,6 +37,7 @@ if length(x_sampled)<length(dimensions) % we have been asked to add nans in prop
 else % we have been asked to remove nans from a vector
     if nargin==2 % non-NaN dimensions passed as argument
         x = x_sampled(dimensions>0);
+        x(~dimensions) = x_sampled(~dimensions); % this ensures that non-nan dimensions outside dimension>0 are kept to their current value
     end
 end
 end
