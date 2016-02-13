@@ -113,7 +113,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             disp('infinite radius, why?');
             keyboard
         end
-        if raggio>0 && ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
+        if raggio>0 %&& ~isempty(idx_near_bubble)%&& ~isempty(idx_near_bubble) %
             centro = z_new(1:2)-raggio;
             diameter = 2*raggio;
             figure(fig_xv)
@@ -127,7 +127,8 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             cprintf('*[0,0.7,1]*','* ChooseParent with the lower cost in the neighborhood *\n');
             cost_from_z_nearest_to_new = cost;
             if isempty(idx_near_bubble) || length(idx_near_bubble) == 1                                 % if there is no near vertex in the bubble (or there is just the nearest) keep the nearest node and proceed to insert it in the tree
-                keyboard
+                cprintf('*[0,0.7,1]*','* Near set is empty, attempting to connect to (eventually scaled) nearest point *\n');
+%                 keyboard
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
             else                                                        % otherwise look for possibly more convenient paths
@@ -284,33 +285,33 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         keyboard
                     end
                 end
-                
                 %                 keyboard % Uncomment here for tuning radius
                 if verbose
                     set(cerchio,'Visible','off')
                 end
             end
-            
-            if feasible
-                if idx_prim ==1
-                    if verbose
-                        disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
-                    end
-                else
-                    if verbose
-                        disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
-                    end
-                end
-            else
-                if verbose
-                    disp('No primitives found')
-                end
-            end
-            
         else % not feasible as no near point has been found inside the search volume
             disp('Near set is empty');
             feasible = false;
         end
+        
+        
+        if added_new
+            if idx_prim ==1
+                if verbose
+                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
+                end
+            else
+                if verbose
+                    disp(['Found primitive ' prim.getName ' with cost: ' num2str(cost)]);
+                end
+            end
+        else
+            if verbose
+                disp('No primitives found')
+            end
+        end
+        
         %         if size(Edges,1) ~= size(Edges,2) || size(Graph,1) ~= size(Graph,2), disp('size issue 1:'),keyboard, end
         disp('### end')
     end
