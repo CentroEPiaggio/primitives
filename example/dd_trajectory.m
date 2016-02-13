@@ -33,7 +33,7 @@ v_f=xf(4);
 control_factor = 0.7;
 
 % the trick of the century: I add a control point after the start, and a 
-% control point before the end, to enforce spline starting and ending
+% control point before the end, to enforce bezier starting and ending
 % orientation
 
 P = [x_i x_i+control_factor*cos(th_i) x_f-control_factor*cos(th_f) x_f; 
