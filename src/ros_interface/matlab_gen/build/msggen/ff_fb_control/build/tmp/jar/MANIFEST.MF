@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Export-Package: ff_fb_control;version="0.0.0";uses:="org.ros.internal.
+ message,std_msgs"
+Bundle-Version: 0.0.0
+Tool: Bnd-2.1.0.20130426-122213
+Bundle-Name: ff_fb_control
+Bnd-LastModified: 1455375292000
+Created-By: 1.7.0_60 (Oracle Corporation)
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.ros.rosjava_messages.ff_fb_control
+Import-Package: org.ros.internal.message,std_msgs;version="[0.5,1)"
+
