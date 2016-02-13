@@ -45,7 +45,7 @@ movie=1;
 %     disp('...done!');
 % end
 
-save([run_filepath 'runna.mat'],'q_reference');
+save([run_filepath 'runna_video.mat'],'q_reference');
 % save([run_filepath 'rsim_tfdata.mat'],'q_reference');
 % save([run_filepath 'params_steering.mat'],'q_reference');
 Tend = q_reference(1,end)*1.1; % 10 percent more time, for the show
@@ -61,7 +61,7 @@ gen_ic(ic);
 % m3 = 100;
 % masses=[m1;m2;m3];
 nq=length(q0);
-runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
+runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna_video.mat -p ' run_filepath 'params_steering.mat -o ' run_filepath 'optimal.mat -v -tf ',num2str(Tend)];
 [status, result] = system(runstr);
 if status ~= 0, error(result); end
 % and the show must go on!
