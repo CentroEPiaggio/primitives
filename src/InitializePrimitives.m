@@ -25,12 +25,14 @@ xmax = 25;
 vmin = -5;
 vmax = +5;
 vmin = -0.01;
-vmin = -1;
+% vmin = -1;
 vmax = +1;
 dimensioni = [1 1 0]; % only sample in x and v cart.
 initial_extend = [0 0 NaN];
+ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
+% insertion in the tree
 % Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend);
-Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue'); % instantiate the primitive Move in Muovi
+Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
@@ -44,6 +46,7 @@ if multiple_primitives
     ymax = 4;% here ymax is the maximum height for the end effector
     dimensioni = [1 1 1]; % only sample in x cart and y pendulum and v cart.
     initial_extend = [NaN NaN ymin]; % here ymin is the minimum height for the end effector
+    ID = ID+1;
     % % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
     % Abbassa = PrimitiveFun([xmin,vmin,ymin;
     % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
@@ -69,7 +72,7 @@ if multiple_primitives
         xmax vmin ymin;
         xmax vmin ymax;
         xmax vmax ymin;
-        xmax vmax ymax],[1 0],cost_table,'Eleva',dimensioni,initial_extend,'green');
+        xmax vmax ymax],[1 0],cost_table,'Eleva',dimensioni,initial_extend,'green',ID);
     Ptree = Ptree.addnode(idx_primitive_next,Eleva);
     
     idx_primitive_next = idx_primitive_next+1;

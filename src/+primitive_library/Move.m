@@ -10,14 +10,14 @@ classdef Move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = Move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color)
+        function obj = Move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
             disp('dentro costruttore di Move')
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the Move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color);
+            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             disp('Move like Jagger!')

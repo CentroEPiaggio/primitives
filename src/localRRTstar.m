@@ -255,14 +255,14 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 end
                 
                 %                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                if added_new && T.nnodes>2
+                if added_new && T.nnodes>2 && ~isempty(idx_near_bubble)
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
                     %                     z_min = T.get(idx_min);
                     idx_new = T.nnodes;
                     %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
                     %                         keyboard
                     %                     end
-                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
                     plot_edges=pedges;
                     plot_nodes=pnodes;
                 end

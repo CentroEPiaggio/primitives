@@ -10,11 +10,12 @@ classdef PrimitiveFun
         dimensions; % tracks what dimensions are used by a primitive
         initial_extend; % initial value used when expanding the primitive (i.e. the hyperplane where the projection happens)
         edge_color; % color of the edges when plotting the tree
+        ID;
     end
     methods
         % constructor
 %         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
-            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,edge_color) % TODO: PrimitiveFun(chi,q,f)
+            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,edge_color,ID) % TODO: PrimitiveFun(chi,q,f)
 %             disp('Dentro costruttore di PrimitiveFun');
             if nargin >= 7 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
@@ -29,8 +30,9 @@ classdef PrimitiveFun
             else
                 error('Error in initialization of primitives!');
             end
-            if nargin == 8
+            if nargin == 9
                 obj.edge_color = edge_color;
+                obj.ID = ID;
             end
         end
         function string = getName(obj)

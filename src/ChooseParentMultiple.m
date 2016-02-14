@@ -92,69 +92,73 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     feasible = false;
                     return
                 end
-                % BUGFIX: Fixing incongruences in the trajectory with the final point by adding intermediate trajectories made with
-                % other primitives
-                z_temp = round(x_chooseparent(1:length(z_new),end)*100)/100;
-                dim_differences = abs(z_temp-z_new);
-                map_differences = dim_differences>0;
-                prim_extend = Ptree.Node{idx_parent_primitive};
-                if ~isequal(prim_extend.name,prim.name)
-                    if isequal(reshape(prim_extend.dimensions(1:length(map_differences)),length(map_differences),1),map_differences(:))
-                        % ok, use this primitive to extend the pattern
-                        [feasible_extend,cost_new_edge_extend,q_extend,x_chooseparent_extend,time_chooseparent_extend] = prim_extend.steering(z_temp,z_new); % uniform interface! Yeay!
-                        if feasible_extend
-                            if idx_parent_primitive == 1 % trying to fix the connection problem between different kind of primitives
-                                traj_pos_chooseparent_extend = x_chooseparent_extend(1,:);
-                                traj_vel_chooseparent_extend = x_chooseparent_extend(2,:);
-                                if ~isnan(z_temp(3)) % HARDFIX
-                                    traj_y_chooseparent_extend   = z_temp(3,:)*ones(size(traj_vel_chooseparent_extend));
-                                else
-                                    traj_y_chooseparent_extend   = ones(size(traj_vel_chooseparent_extend)); % HARDFIX: default y is 1
-                                end
-                                %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
-                                if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'],1))
-                                    feasible_extend = false;
-                                end
-                            else % Eleva primitive
-                                %             traj_pos = %x(1,:);
-                                traj_vel_chooseparent_extend = z_temp(2)*ones(size(x_chooseparent_extend));%x(2,:);
-                                traj_pos_chooseparent_extend = z_temp(1)+cumtrapz(time_chooseparent_extend,traj_vel_chooseparent_extend);
-                                traj_y_chooseparent_extend = x_chooseparent_extend;
-                                if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_pos_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)'],1))
-                                    feasible_extend = false;
-                                end
-                            end
-                            if feasible_extend
-                                x_chooseparent_extend = [traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)';]; % assign arc-path
-                                
-                                x_chooseparent_tentative = [x_chooseparent, x_chooseparent_extend];
-                                time_chooseparent_tentative = [time_chooseparent(:)' time_chooseparent(end)+time_chooseparent_extend(:)'];
-                                cost_new_edge_tentative = cost_new_edge + cost_new_edge_extend;
-                                if (~isequal(z_near(1:2),x_chooseparent_tentative(1:2,1)) || ~isequaln(round(x_chooseparent_tentative(1:length(z_new),end)*100)/100,z_new))
-                                    % keep_going
-                                else
-                                    % pack data to return from chooseparent
-                                    added_intermediate_node = true;
-                                    intermediate_primitives_list = {idx_prim, idx_parent_primitive};
-                                    x_list = {x_chooseparent, x_chooseparent_extend};
-                                    q_list = {q_chooseparent, q_extend};
-                                    time_list = {time_chooseparent, time_chooseparent_extend};
-                                    cost_list = {cost_new_edge, cost_new_edge_extend};
-                                    z_intermediate_list = {x_chooseparent(:,end), z_new};
-                                    % pack data to finish chooseparent
-                                    % calculations
-                                    x_chooseparent = x_chooseparent_tentative;
-                                    time_chooseparent = time_chooseparent_tentative;
-                                    cost_new_edge = cost_new_edge_tentative;
-%                                     keyboard
-                                    %                                 break;
-                                    cprintf('*[0,0.7,1]*','* ChooseParentMultiple is suggesting to add an intermediate point: z_intermediate_list{:} = *\n');
-                                    z_intermediate_list{:}
-                                end
-                            end
-                        end
-                    end
-                end
+                %%
+%                 keyboard
+                % figure,plot(time_chooseparent,x_chooseparent,time_chooseparent(1)*ones(3,1),z_near,'ro',time_chooseparent(end)*ones(3,1),z_new,'ro')
+                [added_intermediate_node,intermediate_primitives_list,x_list,time_list,cost_list,q_list,z_intermediate_list] = intermediate_node(time_chooseparent,x_chooseparent,z_near,z_new,prim,Ptree,idx_parent_primitive);
+%                 % BUGFIX: Fixing incongruences in the trajectory with the final point by adding intermediate trajectories made with
+%                 % other primitives
+%                 z_temp = round(x_chooseparent(1:length(z_new),end)*100)/100;
+%                 dim_differences = abs(z_temp-z_new);
+%                 map_differences = dim_differences>0;
+%                 prim_extend = Ptree.Node{idx_parent_primitive};
+%                 if ~isequal(prim_extend.name,prim.name)
+%                     if isequal(reshape(prim_extend.dimensions(1:length(map_differences)),length(map_differences),1),map_differences(:))
+%                         % ok, use this primitive to extend the pattern
+%                         [feasible_extend,cost_new_edge_extend,q_extend,x_chooseparent_extend,time_chooseparent_extend] = prim_extend.steering(z_temp,z_new); % uniform interface! Yeay!
+%                         if feasible_extend
+%                             if idx_parent_primitive == 1 % trying to fix the connection problem between different kind of primitives
+%                                 traj_pos_chooseparent_extend = x_chooseparent_extend(1,:);
+%                                 traj_vel_chooseparent_extend = x_chooseparent_extend(2,:);
+%                                 if ~isnan(z_temp(3)) % HARDFIX
+%                                     traj_y_chooseparent_extend   = z_temp(3,:)*ones(size(traj_vel_chooseparent_extend));
+%                                 else
+%                                     traj_y_chooseparent_extend   = ones(size(traj_vel_chooseparent_extend)); % HARDFIX: default y is 1
+%                                 end
+%                                 %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+%                                 if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'],1))
+%                                     feasible_extend = false;
+%                                 end
+%                             else % Eleva primitive
+%                                 %             traj_pos = %x(1,:);
+%                                 traj_vel_chooseparent_extend = z_temp(2)*ones(size(x_chooseparent_extend));%x(2,:);
+%                                 traj_pos_chooseparent_extend = z_temp(1)+cumtrapz(time_chooseparent_extend,traj_vel_chooseparent_extend);
+%                                 traj_y_chooseparent_extend = x_chooseparent_extend;
+%                                 if ~all(prim_extend.chi.P.contains([traj_pos_chooseparent_extend(:)'; traj_pos_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)'],1))
+%                                     feasible_extend = false;
+%                                 end
+%                             end
+%                             if feasible_extend
+%                                 x_chooseparent_extend = [traj_pos_chooseparent_extend(:)'; traj_vel_chooseparent_extend(:)'; traj_y_chooseparent_extend(:)';]; % assign arc-path
+%                                 
+%                                 x_chooseparent_tentative = [x_chooseparent, x_chooseparent_extend];
+%                                 time_chooseparent_tentative = [time_chooseparent(:)' time_chooseparent(end)+time_chooseparent_extend(:)'];
+%                                 cost_new_edge_tentative = cost_new_edge + cost_new_edge_extend;
+%                                 if (~isequal(z_near(1:2),x_chooseparent_tentative(1:2,1)) || ~isequaln(round(x_chooseparent_tentative(1:length(z_new),end)*100)/100,z_new))
+%                                     % keep_going
+%                                 else
+%                                     % pack data to return from chooseparent
+%                                     added_intermediate_node = true;
+%                                     intermediate_primitives_list = {idx_prim, idx_parent_primitive};
+%                                     x_list = {x_chooseparent, x_chooseparent_extend};
+%                                     q_list = {q_chooseparent, q_extend};
+%                                     time_list = {time_chooseparent, time_chooseparent_extend};
+%                                     cost_list = {cost_new_edge, cost_new_edge_extend};
+%                                     z_intermediate_list = {x_chooseparent(:,end), z_new};
+%                                     % pack data to finish chooseparent
+%                                     % calculations
+%                                     x_chooseparent = x_chooseparent_tentative;
+%                                     time_chooseparent = time_chooseparent_tentative;
+%                                     cost_new_edge = cost_new_edge_tentative;
+%                                     %                                     keyboard
+%                                     %                                 break;
+%                                     cprintf('*[0,0.7,1]*','* ChooseParentMultiple is suggesting to add an intermediate point: z_intermediate_list{:} = *\n');
+%                                     z_intermediate_list{:}
+%                                 end
+%                             end
+%                         end
+%                     end
+%                 end
                 if ~feasible_extend
                     feasible = false;
                 end
@@ -175,7 +179,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 if ((c_prime < cost_z_new) && (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
                     if feasible_extend
                         disp('Found a new trajectory by adding an intermediate node!')
-%                         keyboard
+                        keyboard
                     end
                     idx_min = idX_near(i);
                     c_min = c_prime;
