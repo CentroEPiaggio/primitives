@@ -43,10 +43,17 @@ z_end=[1 0 pi+0.01 0];
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
-%% test irobot
+%% test irobot dritto
 
 z_start=[0 0 0 0];
 z_end=[1 0 0 0];
+
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+%% test irobot curva
+
+z_start=[0 0 0 0];
+z_end=[1 1 1.57 0];
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
