@@ -53,9 +53,68 @@ z_end=[1 0 0 0];
 %% test irobot curva
 
 z_start=[0 0 0 0];
-z_end=[1 1 1.57 0];
+z_end=[1 1 1.57 0.1];
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+%% test irobot raccordo
+
+z_start=[0 0 0 0];
+z_end=[1 1 1.57 0.1];
+
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+kn = [x(1,1);x(2,1)];
+x_total = x(1,:);
+y_total = x(2,:);
+th_total = x(3,:);
+v_total = x(4,:);
+w_total = x(5,:);
+
+% z_start=z_end; NO! la end vera (da integrazione)
+z_start = x(1:4,end);
+z_end=z_start;
+z_end(2)=z_end(2)+1;
+
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+kn = [kn, [x(1,1);x(2,1)]];
+x_total = [x_total x(1,:)];
+y_total = [y_total x(2,:)];
+th_total = [th_total x(3,:)];
+v_total = [v_total x(4,:)];
+w_total = [w_total x(5,:)];
+
+z_start = x(1:4,end);
+z_end=z_start;
+z_end(1)=z_end(1)-1;
+z_end(2)=z_end(2)+1;
+z_end(3)=z_end(3)+1.57;
+z_end(4)=0;
+
+[feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
+
+kn = [kn, [x(1,1);x(2,1)], [x(1,end);x(2,end)]];
+x_total = [x_total x(1,:)];
+y_total = [y_total x(2,:)];
+th_total = [th_total x(3,:)];
+v_total = [v_total x(4,:)];
+w_total = [w_total x(5,:)];
+
+% raccordone
+
+subplot(1,3,1)
+hold on
+plot(kn(1,:),kn(2,:),'sr')
+plot(x_total,y_total)
+axis equal
+subplot(1,3,2)
+plot(1:numel(v_total),v_total)
+subplot(1,3,3)
+plot(1:numel(w_total),w_total)
+
+x = [x_total;y_total;th_total;v_total;w_total];
+
 
 %%
 

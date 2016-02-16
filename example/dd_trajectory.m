@@ -1,6 +1,6 @@
 function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-debug = 1;
-verbose = 1;
+debug = 0;
+verbose = 0;
 
 if verbose
     tic
@@ -27,6 +27,10 @@ x_f=xf(1);
 y_f=xf(2);
 th_f=xf(3);
 v_f=xf(4);
+
+if v_f==0
+    v_f=1e-5; %numerical stuff
+end
 
 % Using Bezier curves
 
@@ -61,8 +65,8 @@ end
 
 % trajectory following
 
-threshold = 1e-2;
-f_threshold = 1e-1;;
+threshold = 1e-2; %this is to check the error between the current and desired position
+f_threshold = 1e-1; %this is to start execute the last maneuvers before ending the trajectory (e.g. converge to v_f)
 
 x_t=[];
 x_t = [x_t x_i];
@@ -90,15 +94,23 @@ v_sat = saturation([-v_max v_max]);
 v=v_i;
 w=0;
 
+pos_ok = false;
+vel_ok = true;
+
+retval=1;
+
 for i=1:size(wp,2)
-
         error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+        pos_ok = error<threshold;
+        if i==size(wp,2)
+            vel_ok=false;
+        end
 
-        while error>threshold
+        while ~pos_ok || ~vel_ok
 
             speed = [speed, [v; w]];
 
-            % integration TODO use cumtrapz
+            % integration
             % x(t) = x0 + int[0,T]{ v cos(th) }
             % y(t) = y0 + int[0,T]{ v sin(th) }
             % th(t) = th0 + int[0,T]{ w }
@@ -107,37 +119,65 @@ for i=1:size(wp,2)
             y_t = [y_t y_t(index) + Ts*v*sin(th_t(index))];
             th_t = [th_t th_t(index) + Ts*w];
 
-            error = norm(wp(:,i)-[x_t(end) y_t(end)].');
-            
-            if i<size(wp,2)-1
-                error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
-                if error_next<error %jump to the next wp
-                   i=i+1; 
+            new_error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+
+            if i==size(wp,2)
+                if new_error > error % integration brings me after the point, making the algorithm believe I am far from it (MEGATRICK)
+                   pos_ok=true; 
                 end
             end
             
-            %%% compute controls
-            
-            w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
-            
-            w = w_sat.evaluate(w);
+            error=new_error;
 
-            %%%%%%%%%%%%%%%%%%%%% TODO enhance this
-
-            if i==size(wp,2) %last wp
-                threshold=1e-4;
-                if error < f_threshold
-                    alpha = (error-threshold) / f_threshold;
-                    if v_f==0
-                        v_f=1e-5; %numerical stuff
-                    end
-                    v=(alpha)*v_max + (1 - alpha)*v_f;
+            if i<size(wp,2)-1 %not one before last wp
+                error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
+                if error_next<error %jump to the next wp if I am near enough (avoid turnback)
+                   i=i+1;
+                   error = error_next;
                 end
-            else % general case, v depending on w
+                pos_ok = error<threshold;
+            else
+                if i==size(wp,2) % last wp
+                    threshold=1e-3; %I want to be more precise than before
+                    if error<threshold
+                        pos_ok=true; %the final position has been achieved
+                    end
+                else
+                    pos_ok = error<threshold;
+                end
+            end
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%
+            %%% COMPUTE CONTROLS %%%
+            %%%%%%%%%%%%%%%%%%%%%%%%
+            
+            % - w
+            
+            if ~pos_ok %if my position is >= the last one i keep going straight, this is to achieve the v_f
+                w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
+
+                w = w_sat.evaluate(w);
+            else
+                w=0;
+            end
+
+            % - v
+
+            if i<size(wp,2) %not last wp
+                % general case, v depending on w
                 if w>0 % fixing right wheel velocity to the max
                     v = ( v + v_max-b*w ) / 2;
                 else % fixing left wheel velocity to the max
                     v = ( v + v_max+b*w ) / 2;
+                end
+            else
+                %last wp
+                if error < f_threshold %If I am close enough I want to converge to v_f
+                    alpha = abs(error-threshold) / f_threshold;
+                    v=(alpha)*v_max + (1 - alpha)*v_f;
+                    if norm(v-v_f)<1e-3;
+                        vel_ok = true;
+                    end
                 end
             end
 
@@ -148,10 +188,21 @@ for i=1:size(wp,2)
             index = index +1;
             
             if index > 10000
-                disp(' !! Excedeed maximum number of itereations !! ')
+                if verbose
+                    cprintf('*[1,0,0]*','!! Excedeed maximum number of itereations !!\n');
+                end
+                retval=0;
                 break
             end
         end
+        
+        if retval==0
+            if verbose
+                cprintf('*[1,0,0]*','!! Error !!\n');
+            end
+            break;
+        end
+        
 end
 
 if debug
@@ -182,6 +233,15 @@ if verbose
     disp([' - Cost is ' num2str(cost) ' steps.'])
     disp([' - Execution time is ' num2str(time(end))])
     toc
+end
+
+if debug
+    pos_ok
+    vel_ok
+    retval
+    i
+    error
+    pos(:,end)
 end
 
 end

@@ -1,3 +1,6 @@
+
+%%%%%%%%%%%%%%%%%%    DEPRECATED    %%%%%%%%%%%%%%%%%%%%%%
+
 function [time,pos,speed,acc,jerk,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 debug = 1;
 verbose = 1;
