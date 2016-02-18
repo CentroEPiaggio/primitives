@@ -136,34 +136,35 @@ for ii=1:N_sample_max
             
             prim = Ptree.Node{jj};
             
-            %% Suspected bug
-            % Extend the z_new point (already in the tree) with its initial_extend
-            % values (see PrimitiveFun.extend)
-            T.Node{T.nnodes}
-            z_whatwas = z_new
-            z_new_temp=prim.extend(z_new)
-            map_higher_dimensions = xor(Ptree.Node{1}.dimensions,prim.dimensions)
-            parent_node = T.get(T.Parent(T.nnodes))
-            z_new_temp(map_higher_dimensions) = parent_node(map_higher_dimensions) % WARNING: this fix works only when higher dimensions have single-integrator dynamics! A more general condition should be implemented here!
-            z_new_extended = fix_nans(z_new_temp,prim.dimensions)
-
-            if checkdiscontinuity(T,E,Ptree)
-                keyboard
-            end
-            
-            TTT = T;
-            TTT.Node{idx_last_added} = z_new_extended
-            
-            if checkdiscontinuity(TTT,E,Ptree)
-                keyboard
-            end
-            
-            T.Node{T.nnodes} = z_new_extended
-            
-            if checkdiscontinuity(T,E,Ptree)
-                keyboard
-            end
-            
+             %% Suspected bug
+%             % BUGFIX DISCONT: comment this section
+%             % Extend the z_new point (already in the tree) with its initial_extend
+%             % values (see PrimitiveFun.extend)
+%             T.Node{T.nnodes}
+%             z_whatwas = z_new
+%             z_new_temp=prim.extend(z_new)
+%             map_higher_dimensions = xor(Ptree.Node{1}.dimensions,prim.dimensions)
+%             parent_node = T.get(T.Parent(T.nnodes))
+%             z_new_temp(map_higher_dimensions) = parent_node(map_higher_dimensions) % WARNING: this fix works only when higher dimensions have single-integrator dynamics! A more general condition should be implemented here!
+%             z_new_extended = fix_nans(z_new_temp,prim.dimensions)
+% 
+%             if checkdiscontinuity(T,E,Ptree)
+%                 keyboard
+%             end
+%             
+%             TTT = T;
+%             TTT.Node{idx_last_added} = z_new_extended
+%             
+%             if checkdiscontinuity(TTT,E,Ptree)
+%                 keyboard
+%             end
+%             
+%             T.Node{T.nnodes} = z_new_extended
+%             
+%             if checkdiscontinuity(T,E,Ptree)
+%                 keyboard
+%             end
+%             
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
@@ -206,6 +207,7 @@ for ii=1:N_sample_max
                 pushed_in_goal=1;
             else
                 z_aug = prim.chi.sample;
+                z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
                 pushed_in_goal=0;
             end
             

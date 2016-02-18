@@ -112,7 +112,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 cprintf('*[1 0.5 0]*','ReConnect cost: %f < %f ??? ',cost_tentative,cost_up_to_z_near_without_rewiring);
                 if cost_tentative < cost_up_to_z_near_without_rewiring
                     cprintf('*[0 1 0]*','YES!!!\n');
-                    keyboard
+%                     keyboard
                 else
                     cprintf('*[1 0 0]*','NO!!!\n');
                 end

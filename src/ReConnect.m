@@ -7,7 +7,7 @@ idx_last_added = idx_new;
 % if isequal(prim_list.name,'Eleva')
 %     keyboard
 % end
-keyboard
+% keyboard
 z_near = T.get(idx_near);
 % z_near = fix_nans(z_near,prim_list.dimensions); % WARNING: removed
 
