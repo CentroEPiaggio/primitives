@@ -46,7 +46,7 @@ start_region = z_init;
 goal_region = z_goal;
 %%
     obs.P.plot('color','black','alpha',1);
-for ii=1:100:length(rt_t)
+for ii=1:100:length(rt_t) % PARAM: change 100 to 10 to make a video at a reasonable speed
     figure(fnum)
     clf
     % plot obstacles

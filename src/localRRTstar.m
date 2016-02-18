@@ -1,10 +1,12 @@
-function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol)
+function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol)
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
 feasible = false;
 rewired = false;
 added_new = false;
+idx_last_added = NaN;
+
 z_new=z_rand;
 
 added_intermediate_node = false;
@@ -173,7 +175,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                             if isempty(idx_min)
                                 keyboard
                             end
-                            [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+                            [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
                         else
                             disp('Trajectory outside admissible space.')
                         end
@@ -183,7 +185,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                             if isempty(idx_min)
                                 keyboard
                             end
-                            [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+                            [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
                         else
                             disp('Trajectory outside admissible space.')
                         end
@@ -201,7 +203,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                                 if isempty(idx_min)
                                     keyboard
                                 end
-                                [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
+                                [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
                             else
                                 disp('Trajectory outside admissible space.')
                             end
@@ -212,7 +214,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                                 if isempty(idx_min)
                                     keyboard
                                 end
-                                [added_new,T,Graph,Edges,plot_nodes,plot_edges] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
+                                [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new_intermediate, T, Graph, Edges, prim_intermediate, q_list{kk}, cost_list{kk}, x_list{kk}, time_list{kk}, verbose, plot_nodes, plot_edges);
                             else
                                 disp('Trajectory outside admissible space.')
                             end
@@ -262,9 +264,13 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
                     %                         keyboard
                     %                     end
-                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
                     plot_edges=pedges;
                     plot_nodes=pnodes;
+                    
+                    if ~isnan(idx_last_added_rewire)
+                        idx_last_added = idx_last_added_rewire;
+                    end
                 end
                 
                 if checkdiscontinuity(T,Edges,Ptree)

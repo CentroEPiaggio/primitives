@@ -73,7 +73,7 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     idx_parent_primitive = [];
-    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
+    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
     %     test_plot_opt
     if added_new && reached(T.Node{end},z_goal,tol) % first time a path is found
         keyboard
@@ -151,11 +151,19 @@ for ii=1:N_sample_max
                 keyboard
             end
             
+            TTT = T;
+            TTT.Node{idx_last_added} = z_new_extended
+            
+            if checkdiscontinuity(TTT,E,Ptree)
+                keyboard
+            end
+            
             T.Node{T.nnodes} = z_new_extended
             
             if checkdiscontinuity(T,E,Ptree)
                 keyboard
             end
+            
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
@@ -215,7 +223,7 @@ for ii=1:N_sample_max
             
             idx_parent_primitive = 1;
             
-            [T,G,E,z_new_aug,plot_nodes,plot_edges] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
+            [T,G,E,z_new_aug,plot_nodes,plot_edges,idx_last_added] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
             if added_new && reached(T.Node{end},z_goal,tol)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;

@@ -1,15 +1,15 @@
 %RECONNECT
 % [T,G,E] = ReConnect(idx_new,idx_near,T,G,E,prim,q,cost)
-function [T,G,E,plot_nodes,plot_edges] = ReConnect(idx_new,idx_near,T,G,E,Ptree,prim_list,q_list,cost_list, x_list, time_list, z_list, plot_nodes,plot_edges,fig_points,verbose)
+function [T,G,E,plot_nodes,plot_edges, added_new, idx_last_added] = ReConnect(idx_new,idx_near,T,G,E,Ptree,prim_list,q_list,cost_list, x_list, time_list, z_list, plot_nodes,plot_edges,fig_points,verbose)
 cprintf('*[0,0,0]*','>>> Enter ReConnect\n');
+added_new = false;
+idx_last_added = idx_new;
 % if isequal(prim_list.name,'Eleva')
 %     keyboard
 % end
 keyboard
 z_near = T.get(idx_near);
 % z_near = fix_nans(z_near,prim_list.dimensions); % WARNING: removed
-
-
 
 idx_start_temp = idx_new;
 

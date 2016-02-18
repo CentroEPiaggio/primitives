@@ -2,7 +2,8 @@
 % z_current to z_new
 % [T,G,E] = InsertNode(idx_current, z_new,  T, G, E, prim, q,cost)
 function [added_node,T,G,E,... % inputs for algorithm stuff
-    plot_nodes,plot_edges] ...% inputs for plotting visual stuff
+    plot_nodes,plot_edges, ... % inputs for plotting visual stuff
+    idx_last_added] ... % return index of last added node
     = InsertNode(idx_current, z_new,  T,     G,     E, prim, q,     cost, x, time, ... % inputs for algorithm stuff
     verbose, plot_nodes,plot_edges) % inputs for plotting visual stuff
 disp('Entered inside InsertNode')
@@ -11,6 +12,7 @@ if idx_current==0 % first node
     % add inial state to the tree
     T = T.addnode(0,z_new);
     added_node = true;
+    idx_last_added = T.nnodes;
     return
 else
     % %% debug init
@@ -162,3 +164,5 @@ if verbose && added_node
     %                     plot_edges = horzcat(plot_edges,edge);
     plot_edges{2,T.nnodes} = edge;
 end
+
+idx_last_added = T.nnodes;

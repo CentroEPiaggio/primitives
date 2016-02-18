@@ -1,7 +1,9 @@
-function [rewired, T, G, E , x_rewire ,pn,pe] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points,verbose)
+function [rewired, T, G, E , x_rewire ,pn,pe, added_new, idx_last_added] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points,verbose)
 % keyboard
 %REWIRE Summary of this function goes here
 rewired = false;
+added_new = false;
+idx_last_added = idx_new;
 traj_pos = NaN;
 traj_vel = NaN;
 x_rewire = NaN;
@@ -137,7 +139,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     %                     tmp=line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','yellow','linewidth',2,'linestyle','-.');
 %                     oldparents = T.Parent;
                     
-                    [T,G,E,pn,pe] = ReConnect(idx_new,idX_near(i),T,G,E,Ptree, intermediate_primitives_list, q_list, cost_list, x_list, time_list, z_list, pn,pe,fig_points,verbose);
+                    [T,G,E,pn,pe,added_new] = ReConnect(idx_new,idX_near(i),T,G,E,Ptree, intermediate_primitives_list, q_list, cost_list, x_list, time_list, z_list, pn,pe,fig_points,verbose);
 %                     [oldparents,T.Parent]
                     %                     keyboard
                     %                     delete(tmp);
