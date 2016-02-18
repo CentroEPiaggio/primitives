@@ -84,7 +84,8 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
         %         [z_new,x] = truncate_to_similar(z_new,x);
         cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
         disp(['before collisionfree with primitive ' prim.name])
-        [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
+%         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
+        feasible=CollisionFree(x,Ptree,Obstacles);
         disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard

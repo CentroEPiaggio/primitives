@@ -1,52 +1,60 @@
-function [feasible,cost,q,x,time] = CollisionFree(prim,Obstacles,q,x,time,z_begin,costo)
+function [feasible] = CollisionFree(x,Ptree,Obstacles)
 % keyboard
 % collision checker loop
-% checks for feasibility of the returned steering function and, if
+% checks for feasibility of the returned steering function [TODO: FIX THIS PART and, if
 % not feasible, looks for an intermediate point that might be able
 % to satisfy feasibility in the sense of no collisions along the
-% path
+% path]
 % NOTE: the function ObstacleFree does more or less the same thing. Don't
 % remember why, but in the end use just one of it.
 feasible = true; % NOTE: default is true because it is intended that we always check for feasibility of the arguments traj_pos and traj_vel before calling this function.
-cost = costo;
+% cost = costo;
 % keyboard
 %
-traj_pos = x(1,:);
-traj_vel = x(2,:);
-traj_y = x(3,:);
+% traj_pos = x(1,:);
+% traj_vel = x(2,:);
+% traj_y = x(3,:);
 
 kk=1;
 obstaclehit=true;
 for ii=1:Obstacles.nnodes
-    if ii==1
-        checkon = [traj_pos(:)'; traj_vel(:)'];
-        %         % obstacle vs trajectory visualization
-        %         fig=figure(35);
-        %         Obstacles.Node{1}.P.plot('color','black','alpha',0.5);
-        %         hold on
-        %         plot(traj_pos,traj_vel,'r','linewidth',2);
-        %         axis auto
-        %         keyboard
-        %         close(fig)
-    elseif ii==2
-%         checkon = [traj_pos(:)'; traj_y(:)'];
-        checkon = [traj_pos(:)'; traj_vel(:)'; traj_y(:)'];
-        %         % obstacle vs trajectory visualization
-        %         fig=figure(35);
-        %         Obstacles.Node{1}.P.plot('color','blue','alpha',0.5);
-        %         hold on
-        %         plot(traj_pos,traj_y,'r','linewidth',2);
-        %         axis auto
-        % %         keyboard
-        %         close(fig)
-    else
-        error('remember to extend it')
+    try
+        checkon = x(Ptree.Node{ii}.dimensions>0,:);
+    catch ME
+        keyboard
+        error(ME.message);
     end
+    
+    %     if ii==1
+    %         checkon = x(Ptree.Node{ii}.dimensions>0);%[traj_pos(:)'; traj_vel(:)'];
+    %         %         % obstacle vs trajectory visualization
+    %         %         fig=figure(35);
+    %         %         Obstacles.Node{1}.P.plot('color','black','alpha',0.5);
+    %         %         hold on
+    %         %         plot(traj_pos,traj_vel,'r','linewidth',2);
+    %         %         axis auto
+    %         %         keyboard
+    %         %         close(fig)
+    %     elseif ii==2
+    % %         checkon = [traj_pos(:)'; traj_y(:)'];
+    %         checkon = [traj_pos(:)'; traj_vel(:)'; traj_y(:)'];
+    %         %         % obstacle vs trajectory visualization
+    %         %         fig=figure(35);
+    %         %         Obstacles.Node{1}.P.plot('color','blue','alpha',0.5);
+    %         %         hold on
+    %         %         plot(traj_pos,traj_y,'r','linewidth',2);
+    %         %         axis auto
+    %         % %         keyboard
+    %         %         close(fig)
+    %     else
+    %         error('remember to extend it')
+    %     end
+    % keyboard
     obstaclehit=obstaclehit & any(Obstacles.Node{ii}.P.contains(checkon,1));
     if obstaclehit
         disp('in collision')
         feasible = false;
-        cost = Inf;
+        %         cost = Inf;
         %         keyboard
         return
     end
@@ -54,7 +62,7 @@ end
 % no obstacle encountered
 disp('obstaclefree')
 feasible = true;
-cost = costo;
+% cost = costo;
 % keyboard
 return
 %% FIX THIS LOOP
