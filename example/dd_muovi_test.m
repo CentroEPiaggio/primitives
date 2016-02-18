@@ -61,6 +61,7 @@ z_end=[1 1 1.57 0.1];
 
 z_start=[0 0 0 0];
 z_end=[1 1 1.57 0.1];
+%z_end=[1 1 1.57 0]; % stopping every time
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
@@ -70,11 +71,12 @@ y_total = x(2,:);
 th_total = x(3,:);
 v_total = x(4,:);
 w_total = x(5,:);
+total_time = time(end);
 
 % z_start=z_end; NO! la end vera (da integrazione)
 z_start = x(1:4,end);
-z_end=z_start;
-z_end(2)=z_end(2)+1;
+z_end=[1 2 1.57 0.1];
+%z_end=[1 2 1.57 0]; % stopping every time
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
@@ -84,13 +86,11 @@ y_total = [y_total x(2,:)];
 th_total = [th_total x(3,:)];
 v_total = [v_total x(4,:)];
 w_total = [w_total x(5,:)];
+total_time = total_time+time(end);
 
 z_start = x(1:4,end);
 z_end=z_start;
-z_end(1)=z_end(1)-1;
-z_end(2)=z_end(2)+1;
-z_end(3)=z_end(3)+1.57;
-z_end(4)=0;
+z_end=[0 3 3.14 0];
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
@@ -100,10 +100,12 @@ y_total = [y_total x(2,:)];
 th_total = [th_total x(3,:)];
 v_total = [v_total x(4,:)];
 w_total = [w_total x(5,:)];
+total_time = total_time+time(end);
 
 % raccordone
 
 subplot(1,3,1)
+title(['Time: ' num2str(total_time)])
 hold on
 plot(kn(1,:),kn(2,:),'sr')
 plot(x_total,y_total)
