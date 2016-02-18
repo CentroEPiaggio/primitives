@@ -1,0 +1,39 @@
+* STESSA RETE
+* USER PWD aspire aspire
+
+ACCENDO PORTATILE
+attacco seriale
+se roomba spento pigio bottone
+chiudo portatile, lo metto la'
+ssh aspire@192.168.1.68
+* per far andare irobotcreate edito .bashrc e mettere un file nella home (di dove uso matlab)
+** vedi hangouts ale
+export ROS_MASTER_URI=http://192.168.1.68:11311/ (IP ASPIRE)
+export ROS_HOSTNAME=192.168.1.179 (MIO IP)
+export ROS_IP=192.168.1.179 (MIO IP)
+** vedi mail ale
+
+* programmi da far partire  sul roomba
+** roscore
+** irobotcreate2 (roslaunch irobo..)
+*** rosrun ff_fb_control ff_fb_control
+   parte in safe
+** rostopic list (irobot)
+** rostopic pub /irobot_0/cmd_vel geometry_msgs/Twist ...
+
+* github
+** src/rosinterface
+** example/dd_muovi_test
+** su bitbucket ff_fb_control: PUSHARE E PULLARE DAL ROBOT
+** e
+
+* per il braccio:
+** ros_arm_control
+***  arm_control_ros / scripts / matlab_ros_bridge.m 
+     Vettore di 5 giunti in ingresso e godi
+*** rosrun arm_control_ros tabba
+**** std::size_t bytes_wrote = my_serial->write(test_string);
+     std::string result = my_serial->read(test_string.length()); // RIMUOVERE QUESTA RIGA
+**** my_serial = new serial::Serial("/dev/ttyACM0", 9600, serial::Timeout::simpleTimeout(1000)); // occhio alla porta
+
+** rosinit / rosshutdown ogni volta che lanci matlab
