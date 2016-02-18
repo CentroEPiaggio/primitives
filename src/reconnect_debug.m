@@ -16,7 +16,7 @@
 
 nodestart = 40;
 intermediatenode = 41;
-nodeend = 9;
+nodeend = 32;
 figure,plot(E{nodestart,intermediatenode}.time,E{nodestart,intermediatenode}.x,E{intermediatenode,nodeend}.time+E{nodestart,intermediatenode}.time(end),E{intermediatenode,nodeend}.x)
 hold on
 plot(E{nodestart,intermediatenode}.time(1)*ones(3,1), T.get(nodestart),'ro')
