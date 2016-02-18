@@ -101,7 +101,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     c_prime = sum([cost_list{:}]); % sum cost of passing between all intermediate nodes
                 else
                     c_prime = cost_rewire;
-                    intermediate_primitives_list = {prim};
+                    intermediate_primitives_list = {prim.ID};
                     x_list = {x_rewire};
                     time_list = {time_rewire};
                     cost_list = {cost_rewire};
