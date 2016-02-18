@@ -56,7 +56,7 @@ if debug
     subplot(1,3,1)
     hold on
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    plot(P(1,1),P(2,1),'*r')
+    plot(P(1,1),P(2,1),'*r'), title('Trajectory with waypoints')
     plot(P(1,end),P(2,end),'*r')
     plot(P(1,2:end-1),P(2,2:end-1),'*b')
     plot(c_u(1,:),c_u(2,:),'Linewidth',2)
@@ -213,9 +213,9 @@ end
 
 if debug
     subplot(1,3,2)
-    plot(1:numel(speed(1,:)),speed(1,:))
+    plot((0:numel(speed(1,:))-1)*Ts,speed(1,:)), title('Linear Velocity')
     subplot(1,3,3)
-    plot(1:numel(speed(2,:)),speed(2,:))
+    plot((0:numel(speed(2,:))-1)*Ts,speed(2,:)), title('Angular Velocity')
 end
 
 pos=[x_t(1:end-1); y_t(1:end-1); th_t(1:end-1)];

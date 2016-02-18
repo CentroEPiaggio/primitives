@@ -9,6 +9,8 @@ import primitive_library.*;
 
 cost_table = rand(10,3);
 
+Ts=0.1;
+
 xmin = 0;
 xmax = 10;
 y_min = -1;
@@ -61,7 +63,7 @@ z_end=[1 1 1.57 0.1];
 
 z_start=[0 0 0 0];
 z_end=[1 1 1.57 0.1];
-%z_end=[1 1 1.57 0]; % stopping every time
+z_end=[1 1 1.57 0]; % stopping every time
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
@@ -76,7 +78,7 @@ total_time = time(end);
 % z_start=z_end; NO! la end vera (da integrazione)
 z_start = x(1:4,end);
 z_end=[1 2 1.57 0.1];
-%z_end=[1 2 1.57 0]; % stopping every time
+z_end=[1 2 1.57 0]; % stopping every time
 
 [feasible,cost,q,x,time] = Muovi.steering(z_start,z_end);
 
@@ -104,16 +106,16 @@ total_time = total_time+time(end);
 
 % raccordone
 
+figure
 subplot(1,3,1)
-title(['Time: ' num2str(total_time)])
 hold on
-plot(kn(1,:),kn(2,:),'sr')
+plot(kn(1,:),kn(2,:),'sr'),title(['Trajectory, time: ' num2str(total_time)])
 plot(x_total,y_total)
 axis equal
 subplot(1,3,2)
-plot(1:numel(v_total),v_total)
+plot((0:numel(v_total)-1)*Ts,v_total), title('Linear Velocity')
 subplot(1,3,3)
-plot(1:numel(w_total),w_total)
+plot((0:numel(w_total)-1)*Ts,w_total), title('Angular Velocity')
 
 x = [x_total;y_total;th_total;v_total;w_total];
 
@@ -125,8 +127,6 @@ setenv('ROS_HOSTNAME','192.168.1.179');
 setenv('ROS_IP','192.168.1.179');
 
 rosinit
-
-Ts=0.1;
 
 cmd_msg = rosmessage('ff_fb_control/dd_control');
 
