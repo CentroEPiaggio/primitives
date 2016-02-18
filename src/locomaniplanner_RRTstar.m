@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_goal_freq = 10;
+push_bias_freq = 5;
 
 multiple_primitives = 1;
 
@@ -33,6 +33,12 @@ InitializePrimitives; % builds Ptree, which is a list with all available primiti
 
 InitObstacles; % initialize obstacles structure
 
+% These points are added to bias the sampling towards points we want the
+% solution to pass by.
+z_intermediate = [15;0;1];
+bias_points = {z_goal, z_intermediate};
+bias_ii = 1;
+
 InitView; % open figures
 
 % algorithm parameters
@@ -53,8 +59,9 @@ for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
     %% sampling
-    if mod(ii,push_goal_freq)==0 %&& ~path_found
-        z_rand = z_goal(1:2); % every once in a while push in a known number
+    if mod(ii,push_bias_freq)==0 %&& ~path_found
+        z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
+        z_rand = z_bias(1:2); % every once in a while push in a known number
         disp('Pushing in goal')
         pushed_in_goal=1;
     else
@@ -172,8 +179,8 @@ for ii=1:N_sample_max
                 end
             end
             
-            if mod(ii,push_goal_freq)==0 %&& ~path_found
-                z_aug = z_goal(1:3); % every once in a while push in a known number
+            if mod(ii,push_bias_freq)==0 %&& ~path_found
+                z_aug = z_bias(1:3); % every once in a while push in a known number
                 disp('Pushing in aug goal')
                 pushed_in_goal=1;
             else
