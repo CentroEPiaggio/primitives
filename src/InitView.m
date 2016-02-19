@@ -25,7 +25,9 @@ if verbose
         figure(fig_xy)
         Chi1.P.plot('color','lightblue','alpha',0.5); hold on;
         obstacle_wall.P.plot('color','black','alpha',0.5);
-        plot3(z_intermediate(1),z_intermediate(2),z_intermediate(3),'*','color','yellow','linewidth',10)
+        for ii=1:length(bias_points)
+            plot3(bias_points{ii}(1),bias_points{ii}(2),bias_points{ii}(3),'*','color','yellow','linewidth',10)
+        end
     end
     
 end
