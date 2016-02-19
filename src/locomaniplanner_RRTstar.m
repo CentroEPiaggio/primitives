@@ -74,8 +74,11 @@ for ii=1:N_sample_max
     
     if verbose
         disp(['z_rand: ' num2str(z_rand(:)')])
+        fig_xv=2; fig_xy = 3; % parametrize
         figure(fig_chi0)
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
+        figure(fig_xy)
+        plot3(z_rand(1),z_rand(2),1,'rx','linewidth',2)
     end
     
     %% Run sampling algorithm on the Chi0 space
@@ -196,6 +199,8 @@ for ii=1:N_sample_max
             
             if verbose
                 disp(['z_aug: ' num2str(z_aug(:)')])
+                figure(fig_chi0)
+                plot(z_rand(1),z_rand(2),'rx','linewidth',2)
                 figure(fig_xy);
                 plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
                 cprintf('red','Sto per provare con la eleva\n')
