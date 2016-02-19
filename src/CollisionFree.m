@@ -15,6 +15,8 @@ feasible = true; % NOTE: default is true because it is intended that we always c
 % traj_vel = x(2,:);
 % traj_y = x(3,:);
 
+cprintf('*[0,0.7,1]*','* Collision detection:');
+
 kk=1;
 obstaclehit=true;
 for ii=1:Obstacles.nnodes
@@ -24,46 +26,16 @@ for ii=1:Obstacles.nnodes
         keyboard
         error(ME.message);
     end
-    
-    %     if ii==1
-    %         checkon = x(Ptree.Node{ii}.dimensions>0);%[traj_pos(:)'; traj_vel(:)'];
-    %         %         % obstacle vs trajectory visualization
-    %         %         fig=figure(35);
-    %         %         Obstacles.Node{1}.P.plot('color','black','alpha',0.5);
-    %         %         hold on
-    %         %         plot(traj_pos,traj_vel,'r','linewidth',2);
-    %         %         axis auto
-    %         %         keyboard
-    %         %         close(fig)
-    %     elseif ii==2
-    % %         checkon = [traj_pos(:)'; traj_y(:)'];
-    %         checkon = [traj_pos(:)'; traj_vel(:)'; traj_y(:)'];
-    %         %         % obstacle vs trajectory visualization
-    %         %         fig=figure(35);
-    %         %         Obstacles.Node{1}.P.plot('color','blue','alpha',0.5);
-    %         %         hold on
-    %         %         plot(traj_pos,traj_y,'r','linewidth',2);
-    %         %         axis auto
-    %         % %         keyboard
-    %         %         close(fig)
-    %     else
-    %         error('remember to extend it')
-    %     end
-    % keyboard
     obstaclehit=obstaclehit & any(Obstacles.Node{ii}.P.contains(checkon,1));
     if obstaclehit
-        disp('in collision')
+        cprintf('*[1,0,0]*',' NOGO, collision detected *\n');
         feasible = false;
-        %         cost = Inf;
-        %         keyboard
         return
     end
 end
 % no obstacle encountered
-disp('obstaclefree')
+cprintf('*[0,1,0]*',' GO, no collision *\n');
 feasible = true;
-% cost = costo;
-% keyboard
 return
 %% FIX THIS LOOP
 z_start = z_begin;
