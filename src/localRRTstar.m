@@ -239,20 +239,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 else
                     cprintf('*[1,0,0]*','! Node Not Added !\n');
                 end
-                if checkdiscontinuity(T,Edges,Ptree)
-                    keyboard
-                end
-                if added_new
-                    if checkdiscontinuity(T,Edges,Ptree)
-                        keyboard
-                    end
-                    
-                    %                     if ~isequaln(fix_nans(z_new,prim.dimensions),T.get(T.nnodes)) % this is now triggered by bringing nan dimensions to non-nan. No necessary.
-                    %                         disp('cosa sta aggiungendo?')
-                    %                         keyboard
-                    %                     end
-                end
-                
+              
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
