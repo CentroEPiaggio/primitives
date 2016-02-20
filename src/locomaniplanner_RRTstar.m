@@ -5,7 +5,7 @@ push_bias_freq = 5;
 multiple_primitives = 1;
 
 % Algorithm's parameters
-gam = 10; % constant for radius of search of near nodes in near.m
+gam = 1000; % constant for radius of search of near nodes in near.m
 tol=0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
@@ -22,6 +22,7 @@ import primitive_library.*;
 % NaN? We'll see.
 z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
 z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
+% z_init = [15;0;1];
 z_goal = [20;   0;3]; % goal state:    [position,speed,end-effector height].
 % z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
 % z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
@@ -35,8 +36,10 @@ InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
 % solution to pass by.
-z_intermediate = [15;0;1];
-bias_points = {z_goal, z_intermediate};
+z_intermediate_1 = [10;0;1];
+z_intermediate_2 = [15;0;1];
+% bias_points = {z_goal, z_intermediate_2};
+bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
 
 InitView; % open figures
@@ -54,7 +57,7 @@ path_found = false;
 goal_node = [];
 source_node = 1;
 opt_path_edges = {};
-
+global raggio_conta; raggio_conta=1; figure(13); plot(0,0);hold on;
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
