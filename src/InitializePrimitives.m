@@ -20,19 +20,21 @@ cost_table = rand(10,3);
 
 % Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
 
-xmin = -2; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
-xmax = 25;
-vmin = -5;
-vmax = +5;
-vmin = -0.01;
-% vmin = -1;
-vmax = +1;
-dimensioni = [1 1 0]; % only sample in x and v cart.
-initial_extend = [0 0 NaN];
+xmin = 0; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
+xmax = 10; % meters
+ymin = 0;
+ymax = 10; % meters
+vmin = 0; % linear speed
+vmax = 1; % TODO: check out this value
+thetamin = 0;
+thetamax = 360;
+
+dimensioni = [1 1 1 1]; % only sample in x and v cart.
+initial_extend = [0 0 0 0];
 ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
 % insertion in the tree
-% Muovi = PrimitiveFun([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,default_extend);
-Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
+% Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
+Muovi = DD_move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,'blue',ID);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;

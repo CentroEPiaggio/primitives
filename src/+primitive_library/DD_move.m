@@ -42,7 +42,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             % initialization
             feasible=false;
             cost=Inf;
-            % q=[xi,xf,vi,vf];
+            % state is like this: [x,y,theta,v]
             xi = z_start(1);
             yi = z_start(2);
             thi = z_start(3);

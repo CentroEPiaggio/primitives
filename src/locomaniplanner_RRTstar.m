@@ -31,7 +31,7 @@ z_goal = [20;   0;3]; % goal state:    [position,speed,end-effector height].
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
-
+return
 InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
