@@ -15,31 +15,27 @@ movie=1; % to save video of stuff. Movie has been modified into a
 % post-processing option. See run_plan.m and anima.m.
 
 % load libraries
-run utils/startup_lmp.m;
-import primitive_library.*;
+load_libraries
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
-z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
-z_init = [0  ;0  ;1]; % initial state: [position,speed,end-effector height].
-% z_init = [15;0;1];
-z_goal = [20;   0;3]; % goal state:    [position,speed,end-effector height].
-% z_goal = [20;   0;1;NaN]; % goal state:    [position,speed,end-effector height].
-% z_goal = [20;   0;NaN;NaN]; % goal state:    [position,speed,end-effector height].
+z_init = [0  ; 0 ; 0 ; 0]; % initial state: [x,y,theta,v].
+z_goal = [9;   9; 0; 0]; % goal state:    [position,speed,end-effector height].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
-return
+
 InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
 % solution to pass by.
-z_intermediate_1 = [10;0;1];
-z_intermediate_2 = [15;0;1];
+%z_intermediate_1 = [0;0;0;];
+% z_intermediate_2 = [15;0;1];
+bias_points = {z_goal};
 % bias_points = {z_goal, z_intermediate_2};
-bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
+% bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
 
 InitView; % open figures
@@ -64,7 +60,7 @@ for ii=1:N_sample_max
     %% sampling
     if mod(ii,push_bias_freq)==0 %&& ~path_found
         z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
-        z_rand = z_bias(1:2); % every once in a while push in a known number
+        z_rand = z_bias(Ptree.Node{1}.dimensions>0); % every once in a while push in a known number
         disp('Pushing in goal')
         pushed_in_goal=1;
     else

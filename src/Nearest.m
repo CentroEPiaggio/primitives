@@ -26,6 +26,9 @@ for i=1:length(chi0.dimensions)
     end
 end
 points_mat_non_nans = points_mat(non_nans,:);
+if length(non_nans)~=length(z_rand)
+    keyboard
+end
 z_rand = z_rand(non_nans);
 % now points_mat_z_rand_dimension cointains only the points that live
 % in the same space of z_rand (i.e. have the same non-NaN dimensions)

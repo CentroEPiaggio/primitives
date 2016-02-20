@@ -1,6 +1,6 @@
 function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-debug = 0;
-verbose = 0;
+debug = 1;
+verbose = 1;
 
 if verbose
     tic

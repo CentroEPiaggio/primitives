@@ -7,11 +7,12 @@ if verbose
     fig_yv = 4;
     % fig_trajectories = 3; % figure handle to plot the sampled points and their trajectories
     figure(fig_chi0)
-    Chi0.P.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
+    Chi0_viz = Polyhedron([xmin, ymin; xmin, ymax; xmax, ymin; xmax ymax])
+    Chi0_viz.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
     plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
     plot(z_goal(1),z_goal(2),'ko','linewidth',4) % plot initial point
-    xlabel('distance [m]'); ylabel('speed [m/s]'); % TODO: parametrize inside the primitive
-    obstacle_speed_limit.P.plot('color','black','alpha',0.5);
+    xlabel('x [m]'); ylabel('y [m/s]'); % TODO: parametrize inside the primitive
+    obstacle_wall.P.plot('color','black','alpha',0.5);
     
     figure(fig_xy)
     plot3(z_init(1),z_init(2),1,'go','linewidth',4) % plot initial point % HARDFIX 1 in z_init(3)

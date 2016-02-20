@@ -34,7 +34,24 @@ initial_extend = [0 0 0 0];
 ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
 % insertion in the tree
 % Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
-Muovi = DD_move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,'blue',ID);
+DD_move_vertices = [xmin ymin vmin thetamin;
+    xmin ymin vmin thetamax;
+    xmin ymin vmax thetamin;
+    xmin ymin vmax thetamax;
+    xmin ymax vmin thetamin;
+    xmin ymax vmin thetamax;
+    xmin ymax vmax thetamin;
+    xmin ymax vmax thetamax;
+    xmax ymin vmin thetamin;
+    xmax ymin vmin thetamax;
+    xmax ymin vmax thetamin;
+    xmax ymin vmax thetamax;
+    xmax ymax vmin thetamin;
+    xmax ymax vmin thetamax;
+    xmax ymax vmax thetamin;
+    xmax ymax vmax thetamax];
+
+Muovi = DD_move(DD_move_vertices,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,'blue',ID);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
