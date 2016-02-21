@@ -9,7 +9,7 @@ function [feasible] = CollisionFree(x,Ptree,Obstacles)
 % remember why, but in the end use just one of it.
 feasible = true; % NOTE: default is true because it is intended that we always check for feasibility of the arguments traj_pos and traj_vel before calling this function.
 % cost = costo;
-% keyboard
+keyboard
 %
 % traj_pos = x(1,:);
 % traj_vel = x(2,:);
@@ -21,7 +21,8 @@ kk=1;
 obstaclehit=true;
 for ii=1:Obstacles.nnodes
     try
-        checkon = x(Ptree.Node{ii}.dimensions>0,:);
+%         checkon = x(Ptree.Node{ii}.dimensions>0,:);
+        checkon = x(Obstacles.Node{ii}.dimensions>0,:);
     catch ME
         keyboard
         error(ME.message);

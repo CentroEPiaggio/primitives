@@ -5,7 +5,7 @@ classdef Obstacle % this could hinerit Polyhedron but for now it doesn't
         dimensions; % dimensions where the trajectories should be checked for collisions (e.g. if the trajectory lies in [x,y,theta,v] for the differential drive vehicle, we might want to test for obstacles only in the [x,y] dimensions.)
     end
     methods
-        function obj = Imagespace(V,dimensions)
+        function obj = Obstacle(V,dimensions)
             if nargin >= 1 % specify vertices of polyhedron
                 obj.P = Polyhedron(V);
                 obj.P.computeHRep;
