@@ -57,7 +57,7 @@ if debug
     hold on
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     plot(P(1,1),P(2,1),'*r'), title('Trajectory with waypoints')
-    plot(P(1,end),P(2,end),'*r')
+    plot(P(1,end),P(2,end),'+r')
     plot(P(1,2:end-1),P(2,2:end-1),'*b')
     plot(c_u(1,:),c_u(2,:),'Linewidth',2)
     axis equal
@@ -209,6 +209,7 @@ if debug
     plot(wp(1,:),wp(2,:),'og')
     plot(x_t,y_t)
     axis equal
+    legend('start point','end point','control points','nominal trajectory','way points','computed reference trajectory','location','best')
 end
 
 if debug
@@ -242,6 +243,7 @@ if debug
     i
     error
     pos(:,end)
+    keyboard
 end
 
 end
