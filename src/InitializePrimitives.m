@@ -25,31 +25,33 @@ xmax = 10; % meters
 ymin = 0;
 ymax = 10; % meters
 vmin = 0; % linear speed
+vmin = -0.5; % linear speed % FIXME: check if this has to be negative too for the coffee application.
 vmax = 1; % TODO: check out this value
-thetamin = 0;
-thetamax = 360;
+thetamin = -2*pi;
+thetamax = 2*pi;
 
 dimensioni = [1 1 1 1]; % only sample in x and v cart.
 initial_extend = [0 0 0 0];
 ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
 % insertion in the tree
 % Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
-DD_move_vertices = [xmin ymin vmin thetamin;
-    xmin ymin vmin thetamax;
-    xmin ymin vmax thetamin;
-    xmin ymin vmax thetamax;
-    xmin ymax vmin thetamin;
-    xmin ymax vmin thetamax;
-    xmin ymax vmax thetamin;
-    xmin ymax vmax thetamax;
-    xmax ymin vmin thetamin;
-    xmax ymin vmin thetamax;
-    xmax ymin vmax thetamin;
-    xmax ymin vmax thetamax;
-    xmax ymax vmin thetamin;
-    xmax ymax vmin thetamax;
-    xmax ymax vmax thetamin;
-    xmax ymax vmax thetamax];
+
+DD_move_vertices = [xmin ymin thetamin vmin;
+    xmin ymin thetamax vmin;
+    xmin ymin thetamin vmax;
+    xmin ymin thetamax vmax;
+    xmin ymax thetamin vmin;
+    xmin ymax thetamax vmin;
+    xmin ymax thetamin vmax;
+    xmin ymax thetamax vmax;
+    xmax ymin thetamin vmin;
+    xmax ymin thetamax vmin;
+    xmax ymin thetamin vmax;
+    xmax ymin thetamax vmax;
+    xmax ymax thetamin vmin;
+    xmax ymax thetamax vmin;
+    xmax ymax thetamin vmax;
+    xmax ymax thetamax vmax];
 
 Muovi = DD_move(DD_move_vertices,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,'blue',ID);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
