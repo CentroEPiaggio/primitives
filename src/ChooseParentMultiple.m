@@ -35,7 +35,7 @@ q_list = {};
 time_list = {};
 cost_list = {};
 z_intermediate_list = {};
-
+keyboard
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         z_near=T.get(idX_near(i));

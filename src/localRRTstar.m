@@ -58,27 +58,28 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     dim_z_new = prim.dimensions;
     if feasible
         % collision checking
-        if idx_prim == 1
-            traj_pos = x(1,:);
-            traj_vel = x(2,:);
-            if ~isnan(z_nearest(3)) % HARDFIX
-                traj_y   = z_nearest(3,:)*ones(1,size(traj_vel,2));
-            else
-                traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
-            end
-        else % Eleva primitive
-            traj_vel = z_nearest(2)*ones(1,size(x,2));%x(2,:);
-            traj_pos = z_nearest(1)+cumtrapz(time,traj_vel);
-            if size(x,1)>2
-                traj_y = x(3,:);
-            elseif size(x,1)==1
-                traj_y = x;
-            else
-                disp('omg')
-                keyboard
-            end
-        end
-        x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
+%         if idx_prim == 1
+%             traj_pos = x(1,:);
+%             traj_vel = x(2,:);
+%             if ~isnan(z_nearest(3)) % HARDFIX
+%                 traj_y   = z_nearest(3,:)*ones(1,size(traj_vel,2));
+%             else
+%                 traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
+%             end
+%         else % Eleva primitive
+%             traj_vel = z_nearest(2)*ones(1,size(x,2));%x(2,:);
+%             traj_pos = z_nearest(1)+cumtrapz(time,traj_vel);
+%             if size(x,1)>2
+%                 traj_y = x(3,:);
+%             elseif size(x,1)==1
+%                 traj_y = x;
+%             else
+%                 disp('omg')
+%                 keyboard
+%             end
+%         end
+%         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
+        
         %         keyboard
         %         disp('shit is happening already')
         %         [z_new,x] = truncate_to_similar(z_new,x);
@@ -169,9 +170,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
-                    %                     keyboard
+                                        keyboard
                     if idx_prim==1
-                        if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'],1))
+                        % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
+                        if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                             if isempty(idx_min)
                                 keyboard

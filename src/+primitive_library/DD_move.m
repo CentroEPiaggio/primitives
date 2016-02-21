@@ -38,7 +38,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             % data: the data to be added to the plan tree?
             
             %% function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_dd_muovi(xi,xf,vi,vf)
-            
+            debug = false;
             % initialization
             feasible=false;
             cost=Inf;
@@ -83,7 +83,10 @@ classdef DD_move < primitive_library.PrimitiveFun
             [time,x,u,q,retval,cost]=gen_primitives_dd_muovi_local(primitive_dd_muovi_params);
             
             if retval==1
-                keyboard
+                if debug
+                    figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro'),grid on,legend('x','y','th','v')
+                    keyboard
+                end
                 Tend = time(end);
                 %                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
                 if any(isnan(time)) || any(any(isnan(u)))
