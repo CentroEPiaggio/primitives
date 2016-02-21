@@ -1,6 +1,9 @@
-function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-debug = 1;
+% function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
+function [time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
+debug = 0;
 verbose = 1;
+x = [];
+u = [];
 
 if verbose
     tic
@@ -36,12 +39,12 @@ end
 
 control_factor = 0.7;
 
-% the trick of the century: I add a control point after the start, and a 
+% the trick of the century: I add a control point after the start, and a
 % control point before the end, to enforce bezier starting and ending
 % orientation
 
-P = [x_i x_i+control_factor*cos(th_i) x_f-control_factor*cos(th_f) x_f; 
-     y_i y_i+control_factor*sin(th_i) y_f-control_factor*sin(th_f) y_f];
+P = [x_i x_i+control_factor*cos(th_i) x_f-control_factor*cos(th_f) x_f;
+    y_i y_i+control_factor*sin(th_i) y_f-control_factor*sin(th_f) y_f];
 
 pt1 = P(:,1);
 pt2 = P(:,2);
@@ -49,7 +52,7 @@ pt3 = P(:,3);
 pt4 = P(:,4);
 
 t = linspace(0,1,101);
-c_u = kron((1-t).^3,pt1) + kron(3*(1-t).^2.*t,pt2) + kron(3*(1-t).*t.^2,pt3) + kron(t.^3,pt4);
+c_u = kron((1-t).^3,pt1) + kron(3*(1-t).^2.*t,pt2) + kron(3*(1-t).*t.^2,pt3) + kron(t.^3,pt4); % nominal trajectory
 
 if debug
     figure
@@ -59,7 +62,7 @@ if debug
     plot(P(1,1),P(2,1),'*r'), title('Trajectory with waypoints')
     plot(P(1,end),P(2,end),'+r')
     plot(P(1,2:end-1),P(2,2:end-1),'*b')
-    plot(c_u(1,:),c_u(2,:),'Linewidth',2)
+    plot(c_u(1,:),c_u(2,:),'Linewidth',2) % nominal trajectory
     axis equal
 end
 
@@ -100,109 +103,109 @@ vel_ok = true;
 retval=1;
 
 for i=1:size(wp,2)
-        error = norm(wp(:,i)-[x_t(end) y_t(end)].');
-        pos_ok = error<threshold;
+    error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+    pos_ok = error<threshold;
+    if i==size(wp,2)
+        vel_ok=false;
+    end
+    
+    while ~pos_ok || ~vel_ok
+        
+        speed = [speed, [v; w]];
+        
+        % integration
+        % x(t) = x0 + int[0,T]{ v cos(th) }
+        % y(t) = y0 + int[0,T]{ v sin(th) }
+        % th(t) = th0 + int[0,T]{ w }
+        
+        x_t = [x_t x_t(index) + Ts*v*cos(th_t(index))];
+        y_t = [y_t y_t(index) + Ts*v*sin(th_t(index))];
+        th_t = [th_t th_t(index) + Ts*w];
+        
+        new_error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+        
         if i==size(wp,2)
-            vel_ok=false;
-        end
-
-        while ~pos_ok || ~vel_ok
-
-            speed = [speed, [v; w]];
-
-            % integration
-            % x(t) = x0 + int[0,T]{ v cos(th) }
-            % y(t) = y0 + int[0,T]{ v sin(th) }
-            % th(t) = th0 + int[0,T]{ w }
-
-            x_t = [x_t x_t(index) + Ts*v*cos(th_t(index))];
-            y_t = [y_t y_t(index) + Ts*v*sin(th_t(index))];
-            th_t = [th_t th_t(index) + Ts*w];
-
-            new_error = norm(wp(:,i)-[x_t(end) y_t(end)].');
-
-            if i==size(wp,2)
-                if new_error > error % integration brings me after the point, making the algorithm believe I am far from it (MEGATRICK)
-                   pos_ok=true; 
-                end
+            if new_error > error % integration brings me after the point, making the algorithm believe I am far from it (MEGATRICK)
+                pos_ok=true;
             end
-            
-            error=new_error;
-
-            if i<size(wp,2)-1 %not one before last wp
-                error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
-                if error_next<error %jump to the next wp if I am near enough (avoid turnback)
-                   i=i+1;
-                   error = error_next;
+        end
+        
+        error=new_error;
+        
+        if i<size(wp,2)-1 %not one before last wp
+            error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
+            if error_next<error %jump to the next wp if I am near enough (avoid turnback)
+                i=i+1;
+                error = error_next;
+            end
+            pos_ok = error<threshold;
+        else
+            if i==size(wp,2) % last wp
+                threshold=1e-3; %I want to be more precise than before
+                if error<threshold
+                    pos_ok=true; %the final position has been achieved
                 end
+            else
                 pos_ok = error<threshold;
-            else
-                if i==size(wp,2) % last wp
-                    threshold=1e-3; %I want to be more precise than before
-                    if error<threshold
-                        pos_ok=true; %the final position has been achieved
-                    end
-                else
-                    pos_ok = error<threshold;
-                end
-            end
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%
-            %%% COMPUTE CONTROLS %%%
-            %%%%%%%%%%%%%%%%%%%%%%%%
-            
-            % - w
-            
-            if ~pos_ok %if my position is >= the last one i keep going straight, this is to achieve the v_f
-                w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
-
-                w = w_sat.evaluate(w);
-            else
-                w=0;
-            end
-
-            % - v
-
-            if i<size(wp,2) %not last wp
-                % general case, v depending on w
-                if w>0 % fixing right wheel velocity to the max
-                    v = ( v + v_max-b*w ) / 2;
-                else % fixing left wheel velocity to the max
-                    v = ( v + v_max+b*w ) / 2;
-                end
-            else
-                %last wp
-                if error < f_threshold %If I am close enough I want to converge to v_f
-                    alpha = abs(error-threshold) / f_threshold;
-                    v=(alpha)*v_max + (1 - alpha)*v_f;
-                    if norm(v-v_f)<1e-3;
-                        vel_ok = true;
-                    end
-                end
-            end
-
-            v = v_sat.evaluate(v);
-            
-            %%%%%%%%%%%%%%%%%%%%%%
-            
-            index = index +1;
-            
-            if index > 10000
-                if verbose
-                    cprintf('*[1,0,0]*','!! Excedeed maximum number of itereations !!\n');
-                end
-                retval=0;
-                break
             end
         end
         
-        if retval==0
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        %%% COMPUTE CONTROLS %%%
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        
+        % - w
+        
+        if ~pos_ok %if my position is >= the last one i keep going straight, this is to achieve the v_f
+            w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
+            
+            w = w_sat.evaluate(w);
+        else
+            w=0;
+        end
+        
+        % - v
+        
+        if i<size(wp,2) %not last wp
+            % general case, v depending on w
+            if w>0 % fixing right wheel velocity to the max
+                v = ( v + v_max-b*w ) / 2;
+            else % fixing left wheel velocity to the max
+                v = ( v + v_max+b*w ) / 2;
+            end
+        else
+            %last wp
+            if error < f_threshold %If I am close enough I want to converge to v_f
+                alpha = abs(error-threshold) / f_threshold;
+                v=(alpha)*v_max + (1 - alpha)*v_f;
+                if norm(v-v_f)<1e-3;
+                    vel_ok = true;
+                end
+            end
+        end
+        
+        v = v_sat.evaluate(v);
+        
+        %%%%%%%%%%%%%%%%%%%%%%
+        
+        index = index +1;
+        
+        if index > 10000
             if verbose
-                cprintf('*[1,0,0]*','!! Error !!\n');
+                cprintf('*[1,0,0]*','!! Excedeed maximum number of itereations !!\n');
             end
-            break;
+            retval=0;
+            break
         end
-        
+    end
+    
+    if retval==0
+        if verbose
+            cprintf('*[1,0,0]*','!! Error !!\n');
+        end
+        break;
+    end
+    
 end
 
 if debug
@@ -223,11 +226,11 @@ pos=[x_t(1:end-1); y_t(1:end-1); th_t(1:end-1)];
 %q
 time=[Ts*(1:index)];
 
-if index <= 10000 
+if index <= 10000
     cost=index*Ts;
 end
 
-retval=0; % TODO set all variables so the algorithm can go on
+% retval=0; % TODO set all variables so the algorithm can go on
 
 if verbose
     disp([' - Planned in ' num2str(index) ' steps.'])
@@ -243,7 +246,18 @@ if debug
     i
     error
     pos(:,end)
-    keyboard
 end
 
+if retval
+    % the values we want to return are the trajectories inside the image
+    % space (on which we can perform collision checking).
+    speed(:,end+1) = speed(:,end);
+    x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:)];
+    u = [speed]; % we'll see what to put in here
+    if debug
+        figure
+        plot(time,x),grid on,legend('x','y','th','v') % TODO: acausal filtering might be used to smooth these trajectories, which are not continuous in their time derivatives.
+        keyboard
+    end
+end
 end

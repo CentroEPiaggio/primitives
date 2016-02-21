@@ -38,7 +38,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             % data: the data to be added to the plan tree?
             
             %% function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_dd_muovi(xi,xf,vi,vf)
-
+            
             % initialization
             feasible=false;
             cost=Inf;
@@ -51,12 +51,12 @@ classdef DD_move < primitive_library.PrimitiveFun
             yf = z_end(2);
             thf = z_end(3);
             vf = z_end(4);
-            traj_pos_cart=NaN;
-            traj_vel_cart=NaN;
+            x=NaN;
+            u=NaN;
             
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
-
+            
             Ts = 0.1;
             
             %yi = rand; %danilo briccone
@@ -80,63 +80,46 @@ classdef DD_move < primitive_library.PrimitiveFun
                 ); %                 'Tend',Tend,        ...
             %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
             
-            [time,traj_pos_cart,traj_vel_cart,q,retval,cost]=gen_primitives_dd_muovi_local(primitive_dd_muovi_params);
-
+            [time,x,u,q,retval,cost]=gen_primitives_dd_muovi_local(primitive_dd_muovi_params);
+            
             if retval==1
+                keyboard
                 Tend = time(end);
-%                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
-                if any(isnan(time)) || any(isnan(traj_vel_cart))
+                %                 traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % correctly returns the value of traj_pos_cart once traj_vel_cart has changed
+                if any(isnan(time)) || any(any(isnan(u)))
                     feasible=0;
                     cost=Inf;
                     return
                 end
                 if nargout > 2 % if requested...
-%                     traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
-%                     traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
-                    q = [xi traj_pos_cart(end) vi traj_vel_cart(end)];
+                    %                     traj_pos_cart = xi+cumtrapz(time,traj_vel_cart); % ...returns both the position trajectory...
+                    %                     traj_vel_cart = traj_vel_cart;                % ...and the velocity trajectory
+                    q = [xi x(end) vi u(end)];
                 end
                 
-                traj_yp_cart = zeros(size(traj_vel_cart));
+                % WARNING: we might not need to simulate this piece of
+                % code, so it's fine to comment out the next lines.
+                %                 traj_yp_cart = zeros(size(u));
+                %
+                %                 % generate initial condition file for simulation
+                %                 q0 = [xi(:);deg2rad(90);2];
+                %
+                %                 qp0 = [vi(:);0;0];
+                %                 qref0 = q0;
+                %                 ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
+                %                 gen_ic(ic);
+                %                 % simulate
+                %                 q_reference = [time(:)';
+                %                     u(:)';
+                %                     traj_yp_cart(:)'];
+                %
+                %                 save('../example/runna.mat','q_reference');
+                %                 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
                 
-                % generate initial condition file for simulation
-                q0 = [xi(:);deg2rad(90);2];
+                feasible = 1;
                 
-                qp0 = [vi(:);0;0];
-                qref0 = q0;
-                ic = struct('q0',q0, 'qp0',qp0, 'qref0',qref0);
-                gen_ic(ic);
-                % simulate
-                q_reference = [time(:)';
-                    traj_vel_cart(:)';
-                    traj_yp_cart(:)'];
-                
-                save('../example/runna.mat','q_reference');
-                runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
-                %%[status, result] = system(runstr);
-                %%if status ~= 0, error(result); end
-                % check if feasible
-                %%load('../src/modello.mat');
-% keyboard                 % stop here to see simulated trajectories
-                %%if rt_zmpflag(end)==0
-                    feasible = 1;
-%                     cost = rt_cost(end);
-                    %cost = Tend; % for time-optimal problem
-                    % cost remains the same returned
-                %%    cprintf('*[0,1,0]*','! OK ZMP check !\n');
-                %%else
-                %%    feasible = 0;
-                %%    cost = Inf;
-%                     disp('Failed ZMP check');
-                %%    cprintf('*[1,0,0]*','! Failed ZMP check !\n');
-                %%    keyboard % stop here to check simulated trajectories for wrong reference trajectories
-                %%end
-                % pack return data
-                x = [traj_pos_cart;traj_vel_cart];
             else
                 feasible = 0;
-                %cost = Inf;
-                x = [traj_pos_cart;traj_vel_cart];
-                %time = NaN;
                 q = NaN;
             end
         end

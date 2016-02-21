@@ -1,5 +1,5 @@
 % returns: trajectory derivative (e.g. speed)
-function [time,traj_pos_cart,traj_vel_cart,q,retval,cost]=gen_primitives_dd_muovi_local(prim_data)
+function [time,x,u,q,retval,cost]=gen_primitives_dd_muovi_local(prim_data)
 %% Extract data from struct
 xi = prim_data.xi;
 xf = prim_data.xf;
@@ -30,7 +30,8 @@ state_bounds = [-Inf Inf;
 control_bounds = [-vmax;vmax];
 
 %[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds);
-[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
+% [time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
+[time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 
 %time = time(:)';
 %traj_pos_cart = traj_pos_cart(:)';
