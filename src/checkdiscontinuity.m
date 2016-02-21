@@ -6,14 +6,8 @@ for jj=2:T.nnodes
     sorgente = T.get(idx_sorgente);
     destinazione = T.get(idx_destinazione);
     x=E{idx_sorgente,idx_destinazione}.x;
-    %% check with primitive type DIRTY FIX
-    if strcmp(E{idx_sorgente,idx_destinazione}.primitive,'Muovi')
-        prim = Ptree.Node{1};
-    elseif strcmp(E{idx_sorgente,idx_destinazione}.primitive,'Eleva')
-        prim = Ptree.Node{2};
-    else
-        keyboard
-    end
+
+    prim = Ptree.Node{E{idx_sorgente,idx_destinazione}.primitive_ID};
     %%
     %         if round(x(prim.dimensions>0,1)*100)/100 ~= round(sorgente(prim.dimensions>0)*100)/100
     if ~isequaln(round(x(prim.dimensions==0,1)*100)/100,round(sorgente(prim.dimensions==0)*100)/100)
