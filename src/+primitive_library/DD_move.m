@@ -11,7 +11,7 @@ classdef DD_move < primitive_library.PrimitiveFun
     end
     methods
         function obj = DD_move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
-            disp('dentro costruttore di DD_move')
+            cprintf('*[.6,0.1,1]*','dentro costruttore di DD_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
@@ -20,7 +20,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
-            disp('Differential Drive Move')
+            cprintf('*[.6,0.1,1]*','Steering --> DD_move\n');
             disp(['From z_start: ' num2str(z_start(:)') ' to z_end: ' num2str(z_end(:)')])
             %             z_start
             %             z_end
