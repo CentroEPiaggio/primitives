@@ -1,5 +1,6 @@
 classdef ARM_move < primitive_library.PrimitiveFun
     properties
+        A_g_0 = eye(4); A_g_0(1:3,4) = [3;3;0.3]; % TODO: this has to be parameterized
         %         Control u; % generic control law
         %         Trig xi; % trigger conditions
         %         Duration t; % duration of execution of the primitive
@@ -10,7 +11,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = DD_move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
+        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
             cprintf('*[.6,0.1,1]*','dentro costruttore di ARM_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
@@ -29,26 +30,23 @@ classdef ARM_move < primitive_library.PrimitiveFun
             % z_start: the initial task value
             % z_end: the final task value
             
-            
-            %% function [feasible,cost,q,traj_pos_cart,traj_vel_cart]=steering_dd_muovi(xi,xf,vi,vf)
             debug = false;
             % initialization
             feasible=false;
             cost=Inf;
-            % state is like this: [x,y,theta,v]
+            % state is like this: [x,y,theta,v,tau]
             xi = z_start(1);
             yi = z_start(2);
             thi = z_start(3);
             vi = z_start(4);
+            taui = z_start(5);
             xf = z_end(1);
             yf = z_end(2);
             thf = z_end(3);
             vf = z_end(4);
+            tauf = z_end(5);
             x=NaN;
             u=NaN;
-            
-            run_filepath = '../example/';
-            prim_filepath = [run_filepath 'prim/'];
             
             Ts = 0.1;
             
@@ -56,7 +54,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
             %yf = yi*2;
             % prepare data for muovi
             % define parameters for primitive muovi
-            primitive_dd_muovi_params = struct('name','muovi',    ...
+            primitive_arm_muovi_params = struct('name','muovi',    ...
                 'xi',xi,            ...
                 'xf',xf,            ...
                 'yi',yi,            ...
@@ -65,15 +63,15 @@ classdef ARM_move < primitive_library.PrimitiveFun
                 'thf',thf,          ...
                 'vi',vi,            ...
                 'vf',vf,            ...
-                'Ts',Ts,            ...
-                'xf_vec_len',1, ...
-                'vx0_vec_len',1,  ...
-                'vxf_vec_len',1, ...
-                'filepath',prim_filepath ...
+                'taui',taui,            ...
+                'tauf',tauf,            ...
+                'A_g_0',A_g_0,      ...
+                'Ts',Ts            ...
                 ); %                 'Tend',Tend,        ...
-            %     [time,traj_x_cart]=gen_primitives_muovi(primitive_muovi_params);
             
-            [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_dd_muovi_params);
+            [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_arm_muovi_params);
+            
+            keyboard
             
             if retval==1
                 if debug
