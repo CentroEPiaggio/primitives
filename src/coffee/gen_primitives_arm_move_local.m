@@ -9,6 +9,8 @@ thi = prim_data.thi;
 thf = prim_data.thf;
 vi = prim_data.vi;
 vf = prim_data.vf;
+taui = prim_data.taui;
+tauf = prim_data.tauf;
 
 % Tend = prim_data.Tend; % DONE now it is parameterized
 
@@ -19,21 +21,21 @@ vf = prim_data.vf;
 
 Ts = prim_data.Ts;
 
-goal_position_s = prim_data.goal_position_s; % FIXME: this has to be expressed in inertial frame
+A_g_0 = prim_data.A_g_0; % FIXME: this has to be expressed in inertial frame
 
 vmax = 1;
 
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
-x0 = [xi;yi;thi;vi];
-xf = [xf;yf;thf;vf];
-state_bounds = [-Inf Inf;
+x0 = [xi;yi;thi;vi;taui];
+xf = [xf;yf;thf;vf;tauf];
+state_bounds = [-Inf Inf; % TODO: add joint state limits
     -Inf Inf;
     -pi pi];
 control_bounds = [-vmax;vmax];
 
 %[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 % [time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
-[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,goal_position_s);
+[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,A_g_0);
 
 %time = time(:)';
 %traj_pos_cart = traj_pos_cart(:)';

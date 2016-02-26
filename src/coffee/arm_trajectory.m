@@ -1,5 +1,5 @@
 % function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-function [time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,goal_position_s,distance_from_goal)
+function [time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,A_g_0,distance_from_goal)
 debug = 0;
 verbose = 1;
 % arm parameters
@@ -41,7 +41,7 @@ distance_from_goal = L_arm*(1-tau_f);
 
 q_roomba_0 = [x_i; y_i; th_i; v_i; 0];
 
-[flag,time,traj_q,traj_qp,A_g_0]=arm_trajectory_generator(Ts,q_roomba_0,goal_position_s,distance_from_goal);
+[flag,time,traj_q,traj_qp]=arm_trajectory_generator(Ts,q_roomba_0,A_g_0,distance_from_goal);
 
 return
 

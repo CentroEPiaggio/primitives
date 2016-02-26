@@ -9,7 +9,7 @@
 % NOTATION: A_1_0: transformation matrix from frame 0 to frame 1, e.g.
 % A_b^0 is base frame expressed in inertial coordinates
 
-function [flag,time,traj_q,traj_qp,A_g_0]=arm_trajectory_generator(Ts,q_roomba_0,goal_position_s,distance_from_goal)
+function [flag,time,traj_q,traj_qp]=arm_trajectory_generator(Ts,q_roomba_0,A_g_0,distance_from_goal)
 debug = 1;
 verbose = 1;
 % Initialization
@@ -28,11 +28,17 @@ CoM_coordinates_0 = q_roomba_0(1:3);
 shoulder_displacement = [0.1,-0.1,0.1];
 [~,A_s_b] = DK_s_b(shoulder_displacement);
 A_s_0 = A_b_0*A_s_b;
+% % R_g_s: goal position in shoulder frame of reference
+% [~,A_g_s] = DK_g_0(goal_position_s);
+% p_g_s = [goal_position_s(1:3)];
+% % find an arm position at a specified distance from the goal
+% A_g_0 = A_s_0*A_g_s;
 % R_g_s: goal position in shoulder frame of reference
-[~,A_g_s] = DK_g_0(goal_position_s);
+A_g_s = A_s_0\A_g_0;
+goal_position_s = A_g_s(1:3,4);
 p_g_s = [goal_position_s(1:3)];
-% find an arm position at a specified distance from the goal
-A_g_0 = A_s_0*A_g_s;
+
+
 
 goal_position_0 = A_g_0(1:3,4);
 
