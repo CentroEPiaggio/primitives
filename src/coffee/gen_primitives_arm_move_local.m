@@ -19,6 +19,8 @@ vf = prim_data.vf;
 
 Ts = prim_data.Ts;
 
+goal_position_s = prim_data.goal_position_s; % FIXME: this has to be expressed in inertial frame
+
 vmax = 1;
 
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
@@ -31,7 +33,7 @@ control_bounds = [-vmax;vmax];
 
 %[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 % [time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
-[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds);
+[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,goal_position_s);
 
 %time = time(:)';
 %traj_pos_cart = traj_pos_cart(:)';
