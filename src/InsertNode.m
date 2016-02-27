@@ -70,10 +70,14 @@ else
         %
         %         z_new(~prim.dimensions) = current_node(~prim.dimensions);
         %
-        if any(any(isnan(x)))
-            disp('NaNs!!!!')
-            keyboard
-        end
+        
+        
+%         if any(any(isnan(x)))
+%             disp('NaNs!!!!')
+%             keyboard
+%         end
+        
+
         %
         
         %%
