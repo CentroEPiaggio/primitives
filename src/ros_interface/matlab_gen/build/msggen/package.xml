@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+    
+   <name>rosjava_build</name>
+    
+   <version>1.0</version>
+    
+    
+   <build_depend>rosjava_build_tools</build_depend>
+    
+   <build_depend>rosjava_bootstrap</build_depend>
+    
+    <!-- Add the packages you want to build on the following lines -->
+    <!-- e.g. <build_depend>std_msgs</build_depend> -->
+
+   <build_depend>arm_control_ros</build_depend>
+   <build_depend>draw_graph_rviz</build_depend>
+   <build_depend>ff_fb_control</build_depend>
+   <build_depend>gmlreader</build_depend>
+   <build_depend>irobot_worlds</build_depend>
+   <build_depend>irobotcreate2</build_depend>
+   <build_depend>irobotcreate2_description</build_depend>
+   <build_depend>lcr_description</build_depend>
+   <build_depend>lcr_gui</build_depend>
+   <build_depend>lemon_ros</build_depend>
+   <build_depend>low_level_control</build_depend>
+   <build_depend>map_database</build_depend>
+   <build_depend>map_voronoi</build_depend>
+   <build_depend>planner2d</build_depend>
+   <build_depend>recharge_docking</build_depend>
+</package>
