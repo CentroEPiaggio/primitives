@@ -10,14 +10,14 @@ classdef DD_move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = DD_move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
+        function obj = DD_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID)
             cprintf('*[.6,0.1,1]*','dentro costruttore di DD_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
+            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID);
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             cprintf('*[.6,0.1,1]*','Steering --> DD_move\n');

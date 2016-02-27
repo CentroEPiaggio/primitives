@@ -12,14 +12,14 @@ classdef ARM_move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID)
+        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID)
             cprintf('*[.6,0.1,1]*','dentro costruttore di ARM_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
+            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID);
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);
@@ -126,6 +126,10 @@ classdef ARM_move < primitive_library.PrimitiveFun
         % trimmed trajectories are constant arm joint angles
         function trimmed_trajectory = trim_trajectory(obj,z_start,time,x)
             verbose = 0;
+            if isnan(z_start(obj.dimensions>0)) % if this primitive has not been activated yet, just don't use it
+                trimmed_trajectory = nan(size(time));
+                return
+            end
             % arm parameters
             L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
             
