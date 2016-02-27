@@ -33,7 +33,8 @@ InitObstacles; % initialize obstacles structure
 % solution to pass by.
 %z_intermediate_1 = [0;0;0;];
 % z_intermediate_2 = [15;0;1];
-bias_points = {z_goal};
+z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+bias_points = {z_intermediate_1,z_goal};
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
@@ -144,7 +145,7 @@ for ii=1:N_sample_max
             end
             
             prim = Ptree.Node{jj};
-            
+            keyboard
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
@@ -180,9 +181,11 @@ for ii=1:N_sample_max
                     if debug,keyboard,end
                 end
             end
-            
+            % RESTART FROM HERE: see if it's better to have z_aug only as
+            % the extra-dimensions, to augment it with the point on the
+            % base space, or a mix of the two.
             if mod(ii,push_bias_freq)==0 %&& ~path_found
-                z_aug = z_bias(1:3); % every once in a while push in a known number
+                z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
                 disp('Pushing in aug goal')
                 pushed_in_goal=1;
             else
@@ -201,7 +204,7 @@ for ii=1:N_sample_max
                 figure(fig_chi0)
                 plot(z_rand(1),z_rand(2),'rx','linewidth',2)
                 figure(fig_xy);
-                plot3(z_aug(1),z_aug(2),z_aug(5),'rx','linewidth',2)
+                plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
                 cprintf('red','Sto per provare con la %s\n',prim.name)
             end
             

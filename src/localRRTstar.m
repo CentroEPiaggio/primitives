@@ -23,7 +23,12 @@ prim = Ptree.get(idx_prim);
 
 cprintf('*[0,0.7,1]*','* looking for nearest sample *\n');
 % find nearest point in the tree
-[idx_nearest,z_nearest] = Nearest(z_rand,T,Ptree.Node{idx_prim});
+if ~isempty(idx_parent_primitive)
+    parent_prim = Ptree.Node{idx_parent_primitive};
+else
+    parent_prim = [];
+end
+[idx_nearest,z_nearest] = Nearest(z_rand,T,prim,parent_prim);
 % make sure that we are not attaching to the goal_node...
 if ~isempty(goal_node)
     idx_nearest(idx_nearest==goal_node) = [];

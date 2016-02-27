@@ -11,17 +11,28 @@
 % function [idx_nearest,z_nearest,dim_nearest] =
 % nearest(z_rand,T,dimensions_z_rand,dimensions_chi0) % no need of
 % dim_nearest, we can just keep the NaNs.
-function [idx_nearest,z_nearest] = Nearest(z_rand,T,chi0)
+function [idx_nearest,z_nearest] = Nearest(z_rand,T,prim,parent_prim)
 %% find the nearest point, in the current Chi
 % convert nodes in trees from cells to matrix keyboard
 % keyboard
 points_mat = cell2mat(T.Node');
 
-% by definition, the closer nearest point has to be inside the same image space. 
+% by definition, the closer nearest point has to be inside the same image space.
 % I.e. no distance defined outside the primitive space.
+%  non_nans=[];
+%  for i=1:length(prim.dimensions)
+%      if prim.dimensions(i)>0
+%          non_nans = [non_nans i];
+%      end
+%  end
+if ~isempty(parent_prim)
+    non_nans_dimensions = (prim.dimensions_imagespace>0) & (parent_prim.dimensions_imagespace>0);
+else
+    non_nans_dimensions = (prim.dimensions_imagespace>0);
+end
 non_nans=[];
-for i=1:length(chi0.dimensions)
-    if chi0.dimensions(i)>0
+for i=1:length(prim.dimensions)
+    if non_nans_dimensions(i)>0
         non_nans = [non_nans i];
     end
 end
