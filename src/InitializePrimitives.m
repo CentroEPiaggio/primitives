@@ -85,7 +85,7 @@ if multiple_primitives
         xmax_grasping ymin_grasping taumax;
         xmax_grasping ymax_grasping taumax];
     
-    Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'Eleva',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID);
+    Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID);
     Ptree = Ptree.addnode(idx_primitive_next,Manipulate);
     
     idx_primitive_next = idx_primitive_next+1;
