@@ -110,11 +110,11 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             else                                                        % otherwise look for possibly more convenient paths
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
                     parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
-                    q_list,cost_list,z_intermediate_list] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
+                    q_list,cost_list,z_intermediate_list,feasible_chooseparent] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
                 %                 if ~parent_found
-                if isinf(cost_new) % no feasible neighbor found
+                if isinf(cost_new) || ~feasible_chooseparent % no feasible neighbor found
                     feasible=false;
-                    disp('ChooseParent has not found any viable parent.')
+                    cprintf('*[1,0.5,1]*','* !!!!!!!!!!!!!!!!!! ChooseParent has not found any viable parent. !!!!!!!!!!!!!!!!!! *\n');
                 end
                 %                 keyboard % TODO INSERT trim_trajectory
                 if feasible && ~any(any(isnan(x_chooseparent)))
