@@ -126,12 +126,11 @@ else
     end
 end
 
-%% Plotting tree in the state space
+%% Plotting tree in the state space % TODO: this has to be a method specific to each problem.
 if verbose && added_node
     %     if isequal(prim.name,'Eleva')
     %         keyboard
     %     end
-    
     fig_xv=2; fig_xy = 3; fig_yv = 4;
     figure(fig_xv)
     %                     z_min = z_nearest; % just for the next line, which is a visualization thing
@@ -143,14 +142,14 @@ if verbose && added_node
     
     z_start_visual = z_start;
     z_new_visual = z_new;
-    if length(z_new_visual) == 2
-        z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+%     if length(z_new_visual) == 2
+%         z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+%     end
+    if isnan(z_start_visual(5))
+        z_start_visual(5) = 0; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
     end
-    if isnan(z_start_visual(3))
-        z_start_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
-    end
-    if isnan(z_new_visual(3))
-        z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+    if isnan(z_new_visual(5))
+        z_new_visual(5) = 0; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
     end
     node = plot(z_new_visual(1),z_new_visual(2),'bo','linewidth',2);
     plot_nodes = horzcat(plot_nodes,node);

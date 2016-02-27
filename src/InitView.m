@@ -15,10 +15,11 @@ if verbose
     obstacle_wall.P.plot('color','black','alpha',0.5);
     
     figure(fig_xy)
-    plot3(z_init(1),z_init(2),1,'go','linewidth',4) % plot initial point % HARDFIX 1 in z_init(3)
+    plot3(z_init(1),z_init(2),0,'go','linewidth',4) % plot initial point % HARDFIX 0 in z to represent tau
     hold on
+    grid on
     plot3(z_goal(1),z_goal(2),z_goal(3),'ko','linewidth',4) % plot initial point
-    xlabel('distance [m]'); ylabel('speed [m/s]'); zlabel('pole height'); % TODO: parametrize inside the primitive
+    xlabel('x axis [m]'); ylabel('y axis [m/s]'); zlabel('tau [1]'); % TODO: parametrize inside the primitive
     % plot obstacles
     figure(fig_chi0)
 %     obstacle_speed_limit.P.plot('color','black','alpha',1);

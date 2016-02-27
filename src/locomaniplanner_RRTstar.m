@@ -77,7 +77,7 @@ for ii=1:N_sample_max
         figure(fig_chi0)
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
         figure(fig_xy)
-        plot3(z_rand(1),z_rand(2),1,'rx','linewidth',2)
+        plot3(z_rand(1),z_rand(2),0,'rx','linewidth',2) % TODO: this has to be parametrized
     end
     
     %% Run sampling algorithm on the Chi0 space
@@ -201,8 +201,8 @@ for ii=1:N_sample_max
                 figure(fig_chi0)
                 plot(z_rand(1),z_rand(2),'rx','linewidth',2)
                 figure(fig_xy);
-                plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
-                cprintf('red','Sto per provare con la eleva\n')
+                plot3(z_aug(1),z_aug(2),z_aug(5),'rx','linewidth',2)
+                cprintf('red','Sto per provare con la %s\n',prim.name)
             end
             
             idx_parent_primitive = 1;
