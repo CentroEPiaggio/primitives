@@ -1,6 +1,6 @@
 % function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 function [time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-debug = 0;
+debug = 1;
 verbose = 1;
 x = [];
 u = [];
@@ -69,6 +69,7 @@ end
 % trajectory following
 
 threshold = 1e-2; %this is to check the error between the current and desired position
+threshold = 1e-1;
 f_threshold = 1e-1; %this is to start execute the last maneuvers before ending the trajectory (e.g. converge to v_f)
 
 x_t=[];
@@ -141,7 +142,7 @@ for i=1:size(wp,2)
             pos_ok = error<threshold;
         else
             if i==size(wp,2) % last wp
-                threshold=1e-3; %I want to be more precise than before
+%                 threshold=1e-3; %I want to be more precise than before
                 if error<threshold
                     pos_ok=true; %the final position has been achieved
                 end
@@ -178,7 +179,7 @@ for i=1:size(wp,2)
             if error < f_threshold %If I am close enough I want to converge to v_f
                 alpha = abs(error-threshold) / f_threshold;
                 v=(alpha)*v_max + (1 - alpha)*v_f;
-                if norm(v-v_f)<1e-3;
+                if norm(v-v_f)<1e-1%1e-3;
                     vel_ok = true;
                 end
             end
@@ -194,6 +195,10 @@ for i=1:size(wp,2)
             if verbose
                 cprintf('*[1,0,0]*','!! Excedeed maximum number of itereations !!\n');
             end
+            if debug
+                plot(x_t,y_t,'r','linewidth',2)
+                keyboard
+            end
             retval=0;
             break
         end
@@ -208,14 +213,13 @@ for i=1:size(wp,2)
     
 end
 
+
+
 if debug
     plot(wp(1,:),wp(2,:),'og')
     plot(x_t,y_t)
     axis equal
     legend('start point','end point','control points','nominal trajectory','way points','computed reference trajectory','location','best')
-end
-
-if debug
     subplot(1,3,2)
     plot((0:numel(speed(1,:))-1)*Ts,speed(1,:)), title('Linear Velocity')
     subplot(1,3,3)
@@ -260,4 +264,6 @@ if retval
         keyboard
     end
 end
+
+
 end
