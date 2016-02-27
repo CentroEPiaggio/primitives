@@ -10,7 +10,7 @@ for jj=2:T.nnodes
     prim = Ptree.Node{E{idx_sorgente,idx_destinazione}.primitive_ID};
     %%
     try
-        test_condition_source = ~isequaln(round(x(prim.dimensions==0,1)*100)/100,round(sorgente(prim.dimensions==0)*100)/100);
+        test_condition_source = ~isequaln(round(x(prim.dimensions>0,1)*100)/100,round(sorgente(prim.dimensions>0)*100)/100);
     catch ME
         disp(ME.message);
         keyboard
