@@ -116,8 +116,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
-                keyboard % TODO INSERT trim_trajectory
+                %                 keyboard % TODO INSERT trim_trajectory
                 if feasible && ~any(any(isnan(x_chooseparent)))
+                    [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
+                    x = x_complete;
                     traj_pos = x_chooseparent(1,:);
                     traj_vel = x_chooseparent(2,:);
                     traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
