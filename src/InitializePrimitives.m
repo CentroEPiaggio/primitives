@@ -36,7 +36,8 @@ ID = 1; % WARNING: this has to coincide with the index of the primitive in the p
 % insertion in the tree
 % Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
 
-DD_move_vertices = [xmin ymin thetamin vmin;
+dimensioni_nuvoletta = [1 1 1 1 0]; % only sample in x cart and y pendulum and v cart.
+DD_move_vertices_nuvoletta = [xmin ymin thetamin vmin;
     xmin ymin thetamax vmin;
     xmin ymin thetamin vmax;
     xmin ymin thetamax vmax;
@@ -53,7 +54,7 @@ DD_move_vertices = [xmin ymin thetamin vmin;
     xmax ymax thetamin vmax;
     xmax ymax thetamax vmax];
 
-Muovi = DD_move(DD_move_vertices,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,'blue',ID);
+Muovi = DD_move(DD_move_vertices_nuvoletta,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,dimensioni_nuvoletta,'blue',ID);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
@@ -70,16 +71,21 @@ if multiple_primitives
     taumin = 0; % here ymin is the minimum height for the end effector
     taumax = 1;% here ymax is the maximum height for the end effector
     dimensioni = [0 0 0 0 1]; % only sample in x cart and y pendulum and v cart.
+    
     initial_extend = [NaN NaN NaN NaN taumin]; % here ymin is the minimum height for the end effector
     ID = ID+1;
-    Manipulate = ARM_move([xmin_grasping,ymin_grasping,taumin;
+    
+    dimensioni_nuvoletta = [1 1 0 0 1]; % only sample in x cart and y pendulum and v cart.
+    ARM_move_vertices_nuvoletta = [xmin_grasping,ymin_grasping,taumin;
         xmin_grasping ymax_grasping taumin;
         xmin_grasping ymin_grasping taumax;
         xmin_grasping ymax_grasping taumax;
         xmax_grasping ymin_grasping taumin;
         xmax_grasping ymax_grasping taumin;
         xmax_grasping ymin_grasping taumax;
-        xmax_grasping ymax_grasping taumax],[1 0],cost_table,'Eleva',dimensioni,initial_extend,'green',ID);
+        xmax_grasping ymax_grasping taumax];
+    
+    Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'Eleva',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID);
     Ptree = Ptree.addnode(idx_primitive_next,Manipulate);
     
     idx_primitive_next = idx_primitive_next+1;
