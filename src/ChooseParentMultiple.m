@@ -1,6 +1,6 @@
 %CHOOSEPARENT determines the best parent in the cost sense
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
-function [idx_min,q,cost_new_edge,x,time,z_new,parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,q_list,cost_list,z_intermediate_list] ...
+function [idx_min,q,cost_new_edge,x,time,z_new,parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,q_list,cost_list,z_intermediate_list, feasible] ...
     = ChooseParentMultiple(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive)
 debug = 0;
 
@@ -12,6 +12,7 @@ disp('Entered inside ChooseParent')
 % G(sizeG(shorterDim)+1:max(sizeG),:)=0;
 disp('Inside ChooseParent')
 parent_found = false;
+feasible = false;
 %CHOOSEPARENT determines the best parent in the cost sense
 idx_I = 1; % initial node is node 1
 
