@@ -1,6 +1,6 @@
 % function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 function [time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
-debug = 1;
+debug = 0;
 verbose = 1;
 x = [];
 u = [];

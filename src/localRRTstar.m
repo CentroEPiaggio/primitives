@@ -1,4 +1,6 @@
 function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol)
+debug = 1;
+
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
 % initialization values
@@ -112,20 +114,33 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
                     q_list,cost_list,z_intermediate_list,feasible_chooseparent] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
                 %                 if ~parent_found
-                if isinf(cost_new) || ~feasible_chooseparent % no feasible neighbor found
-                    feasible=false;
-                    cprintf('*[1,0.5,1]*','* !!!!!!!!!!!!!!!!!! ChooseParent has not found any viable parent. !!!!!!!!!!!!!!!!!! *\n');
-                end
-                %                 keyboard % TODO INSERT trim_trajectory
-                if feasible && ~any(any(isnan(x_chooseparent)))
+                if ~feasible_chooseparent
+                    idx_min = idx_nearest;
+                    cost_new = cost_from_z_nearest_to_new;
+                    [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
+                    x = x_complete;
+                else
                     [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
                     x = x_complete;
-                    traj_pos = x_chooseparent(1,:);
-                    traj_vel = x_chooseparent(2,:);
-                    traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
-                    x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
-                    z_new_temp = z_new;
                     z_new = round(z_new*100)/100;
+                end
+                if isinf(cost_new) % no feasible neighbor found
+                    feasible=false;
+                    cprintf('*[1,0.5,1]*','* !!!!!!!!!!!!!!!!!! ChooseParent has not found any viable parent and nearest is not reachable. !!!!!!!!!!!!!!!!!! *\n');
+                    if debug
+                        keyboard
+                    end
+                end
+                %                 keyboard % TODO INSERT trim_trajectory
+                if feasible && ~any(any(isnan(x)))
+%                     [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
+%                     x = x_complete;
+%                     traj_pos = x_chooseparent(1,:);
+%                     traj_vel = x_chooseparent(2,:);
+%                     traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
+%                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+%                     z_new_temp = z_new;
+%                     z_new = round(z_new*100)/100;
                     if ~isequaln(round(x(1:length(z_new),end)*100)/100,z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
