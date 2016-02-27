@@ -160,10 +160,10 @@ if verbose && added_node
     plot_edges{1,T.nnodes} = edge;
     %     keyboard
     figure(fig_xy)
-    node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(3),'go','linewidth',2);
+    node = plot3(z_new_visual(1),z_new_visual(2),z_new_visual(5),'go','linewidth',2);
     %                         node = plot(z_new(1),z_new(3),'go','linewidth',2);
     plot_nodes = horzcat(plot_nodes,node);
-    edge = line([z_start_visual(1) z_new_visual(1)],[z_start_visual(2) z_new_visual(2)],[z_start_visual(3) z_new_visual(3)],'color',prim.edge_color,'linewidth',2);
+    edge = line([z_start_visual(1) z_new_visual(1)],[z_start_visual(2) z_new_visual(2)],[z_start_visual(5) z_new_visual(5)],'color',prim.edge_color,'linewidth',2);
     %                         edge = line([z_min(1) z_new(1)],[z_min(3) z_new(3)],'color','green','linewidth',2);
     %                     plot_edges = horzcat(plot_edges,edge);
     plot_edges{2,T.nnodes} = edge;
