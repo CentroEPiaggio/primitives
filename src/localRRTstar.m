@@ -105,8 +105,8 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 cprintf('*[0,0.7,1]*','* Near set is empty, attempting to connect to (eventually scaled) nearest point *\n');
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
-                keyboard % TODO INSERT trim_trajectory
-                [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID)
+                [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
+                x = x_complete;
             else                                                        % otherwise look for possibly more convenient paths
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
                     parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
@@ -141,7 +141,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
-                    keyboard
                     %                     if idx_prim==1
                     % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
                     if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
