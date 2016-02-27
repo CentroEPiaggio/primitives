@@ -11,7 +11,7 @@ if verbose
     Chi0_viz.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
     plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
     plot(z_goal(1),z_goal(2),'ko','linewidth',4) % plot initial point
-    xlabel('x [m]'); ylabel('y [m/s]'); % TODO: parametrize inside the primitive
+    xlabel('x [m]'); ylabel('y [m]'); % TODO: parametrize inside the primitive
     obstacle_wall.P.plot('color','black','alpha',0.5);
     
     figure(fig_xy)
@@ -19,7 +19,7 @@ if verbose
     hold on
     grid on
     plot3(z_goal(1),z_goal(2),z_goal(3),'ko','linewidth',4) % plot initial point
-    xlabel('x axis [m]'); ylabel('y axis [m/s]'); zlabel('tau [1]'); % TODO: parametrize inside the primitive
+    xlabel('x axis [m]'); ylabel('y axis [m]'); zlabel('tau [1]'); % TODO: parametrize inside the primitive
     % plot obstacles
     figure(fig_chi0)
 %     obstacle_speed_limit.P.plot('color','black','alpha',1);
