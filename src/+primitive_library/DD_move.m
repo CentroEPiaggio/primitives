@@ -126,5 +126,29 @@ classdef DD_move < primitive_library.PrimitiveFun
                 q = NaN;
             end
         end
+        % trimmed trajectories are with constant linear speed and null
+        % angular speed
+        function trimmed_trajectory = trim_trajectory(obj,z_start,time,x)
+            verbose = 0;
+            x_i = z_start(1);
+            y_i = z_start(2);
+            theta_i = z_start(3);
+            v_i = z_start(4);
+            w_i = 0;
+
+            q_roomba = zeros(4,length(time));
+            q_roomba(4,:) = kron(v_i,ones(size(time)));
+            q_roomba(1:3,:) = kron([x_i; y_i; theta_i],ones(size(time))) + ([v_i*cos(theta_i); v_i*sin(theta_i); w_i])*time; % roomba is traveling at constant speed
+            
+            trimmed_trajectory = q_roomba;
+            
+            if verbose
+                figure
+                plot(time,q_roomba)
+                grid on
+                xlabel('time')
+                legend('x','y','theta','v')
+            end
+        end
     end
 end

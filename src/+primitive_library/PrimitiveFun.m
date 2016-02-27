@@ -89,6 +89,8 @@ classdef PrimitiveFun
         % this function is the steering function for the primitive:
         % it has to be implemented in every
         steering(obj,z_start,z_end)
+        % this function expresses the behavior of the primitive when it is
+        % trimmed (i.e., how the space state evolves under null input
+        trim_trajectory(obj,z_start,time,x)
     end
-    
 end

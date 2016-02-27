@@ -1,6 +1,7 @@
 classdef ARM_move < primitive_library.PrimitiveFun
     properties
         A_g_0;    % TODO: this has to be parameterized
+        shoulder_displacement; % TODO: this has to be parameterized
         %         Control u; % generic control law
         %         Trig xi; % trigger conditions
         %         Duration t; % duration of execution of the primitive
@@ -21,8 +22,9 @@ classdef ARM_move < primitive_library.PrimitiveFun
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
             
             % initialize goal position in inertial frame of reference
-            A_g_0 = eye(4);
-            A_g_0(1:3,4) = [3;3;0.3];
+            obj.A_g_0 = eye(4);
+            obj.A_g_0(1:3,4) = [3;3;0.3];
+            obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             cprintf('*[.6,0.1,1]*','Steering --> ARM_move\n');
@@ -119,6 +121,51 @@ classdef ARM_move < primitive_library.PrimitiveFun
             else
                 feasible = 0;
                 q = NaN;
+            end
+        end
+        % trimmed trajectories are constant arm joint angles
+        function trimmed_trajectory = trim_trajectory(obj,z_start,time,x)
+            verbose = 0;
+            % arm parameters
+            L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
+            
+            % FIXME: q_arm_trimmered has to come from somewhere else
+            q_arm_trimmered = [0;0;0;0;0]; % this primitive, when trimmered, keeps the joints still.
+            
+            %%
+            inertial_for_coordinates = blkdiag(eye(3),0);
+            q_roomba = x(1:3,:);
+            CoM_coordinates = zeros(3,length(time));
+            A_b_0 = zeros(4,4,length(time));
+            [~,A_s_b] = DK_s_b(obj.shoulder_displacement);
+            A_s_0 = zeros(4,4,length(time));
+            p_g_0 = [obj.A_g_0(:,4)]; % goal position in inertial reference frame
+            tau = zeros(1,length(time));
+            for ii=1:length(time)
+                CoM_coordinates(:,ii) = q_roomba(1:3,ii);
+                [~,A_b_0(:,:,ii)] = DK_b_0(CoM_coordinates(:,ii));
+                A_s_0(:,:,ii) = A_b_0(:,:,ii)*A_s_b;
+                goal_position_s = A_s_0(:,:,ii)\p_g_0; % goal position in shoulder reference frame
+                
+                [~,~,~,A_e_s] = DK_arm(q_arm_trimmered);
+                
+                A_e_0 = A_s_0(:,:,ii)*A_e_s;
+                
+                p_e_0 = A_e_0(:,4);
+                
+                dist_euclid_goal_ee = norm(p_g_0 - p_e_0); % euclidean distance
+                distance = 1-dist_euclid_goal_ee/L_arm;
+                tau(ii) = max(0,min(1,distance)); % tau belongs to [0,1]
+            end
+            
+            trimmed_trajectory = tau;
+
+            if verbose
+                figure
+                plot(time,trimmed_trajectory)
+                grid on
+                xlabel('time [s]')
+                legend('tau')
             end
         end
     end
