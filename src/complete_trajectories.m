@@ -26,10 +26,11 @@ end
 x_complete = zeros(size(x,1),length(time));
 
 for ii=1:Ptree.nnodes
+    prim = Ptree.get(ii);
     if ii==primitive_ID % this is the primitive that is active in this moment
+        x_complete(prim.dimensions>0,:) = x;
         continue
     end
-    prim = Ptree.get(ii);
     x_complete(prim.dimensions>0,:) = prim.trim_trajectory(z_start,time,x);
 end
 end
