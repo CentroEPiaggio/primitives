@@ -63,10 +63,10 @@ else
             keyboard
         end
         %
-        if z_current(3) > 1 && z_new(3) == 1
-            disp('Strange!!!!')
-            keyboard
-        end
+%         if z_current(3) > 1 && z_new(3) == 1 % this condition was used on the pendulum
+%             disp('Strange!!!!')
+%             keyboard
+%         end
         %
         %         z_new(~prim.dimensions) = current_node(~prim.dimensions);
         %
