@@ -30,8 +30,8 @@ vmax = 1; % TODO: check out this value
 thetamin = -2*pi;
 thetamax = 2*pi;
 
-dimensioni = [1 1 1 1]; % only sample in x and v cart.
-initial_extend = [0 0 0 0];
+dimensioni = [1 1 1 1 0]; % only sample in x and v cart.
+initial_extend = [0 0 0 0 NaN];
 ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
 % insertion in the tree
 % Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
@@ -63,38 +63,24 @@ if multiple_primitives
     % % xmax = +1;
     % % vmin = -5;
     % % vmax = +5;
-    ymin = 1; % here ymin is the minimum height for the end effector
-    ymax = 4;% here ymax is the maximum height for the end effector
-    dimensioni = [1 1 1]; % only sample in x cart and y pendulum and v cart.
-    initial_extend = [NaN NaN ymin]; % here ymin is the minimum height for the end effector
+    xmin_grasping = 6;
+    xmax_grasping = 7;
+    ymin_grasping = 6;
+    ymax_grasping = 7;
+    taumin = 0; % here ymin is the minimum height for the end effector
+    taumax = 1;% here ymax is the maximum height for the end effector
+    dimensioni = [0 0 0 0 1]; % only sample in x cart and y pendulum and v cart.
+    initial_extend = [NaN NaN NaN NaN taumin]; % here ymin is the minimum height for the end effector
     ID = ID+1;
-    % % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
-    % Abbassa = PrimitiveFun([xmin,vmin,ymin;
-    % Abbassa = PrimitiveFun([xmin,ymin; (xmin+xmax)/2,ymax; xmax,ymin],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
-    % Abbassa = PrimitiveFun([xmin,vmin,ymin;
-    %     xmin vmin ymax;
-    %     xmin vmax ymin;
-    %     xmin vmax ymax;
-    %     xmax vmin ymin;
-    %     xmax vmin ymax;
-    %     xmax vmax ymin;
-    %     xmax vmax ymax],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
-    %     xmin vmin ymax;
-    %     xmin vmax ymin;
-    %     xmin vmax ymax;
-    %     xmax vmin ymin;
-    %     xmax vmin ymax;
-    %     xmax vmax ymin;
-    %     xmax vmax ymax],[1 0],cost_table,'Abbassa',dimensioni,default_extend);
-    Eleva = Elevate([xmin,vmin,ymin;
-        xmin vmin ymax;
-        xmin vmax ymin;
-        xmin vmax ymax;
-        xmax vmin ymin;
-        xmax vmin ymax;
-        xmax vmax ymin;
-        xmax vmax ymax],[1 0],cost_table,'Eleva',dimensioni,initial_extend,'green',ID);
-    Ptree = Ptree.addnode(idx_primitive_next,Eleva);
+    Manipulate = ARM_move([xmin_grasping,ymin_grasping,taumin;
+        xmin_grasping ymax_grasping taumin;
+        xmin_grasping ymin_grasping taumax;
+        xmin_grasping ymax_grasping taumax;
+        xmax_grasping ymin_grasping taumin;
+        xmax_grasping ymax_grasping taumin;
+        xmax_grasping ymin_grasping taumax;
+        xmax_grasping ymax_grasping taumax],[1 0],cost_table,'Eleva',dimensioni,initial_extend,'green',ID);
+    Ptree = Ptree.addnode(idx_primitive_next,Manipulate);
     
     idx_primitive_next = idx_primitive_next+1;
     

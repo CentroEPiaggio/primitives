@@ -2,7 +2,7 @@
 clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
-multiple_primitives = 0; % testing locomotion primitive only for coffee
+multiple_primitives = 1; % testing locomotion primitive only for coffee
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m
@@ -19,8 +19,8 @@ load_libraries
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
-z_init = [0  ; 0 ; 0 ; 0]; % initial state: [x,y,theta,v].
-z_goal = [9;   9; 0; 0]; % goal state:    [position,speed,end-effector height].
+z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
+z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node

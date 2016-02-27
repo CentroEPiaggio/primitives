@@ -171,7 +171,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
                                         keyboard
-                    if idx_prim==1
+%                     if idx_prim==1
                         % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
                         if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
@@ -182,17 +182,17 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         else
                             disp('Trajectory outside admissible space.')
                         end
-                    else % idx_prim > 1
-                        if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-                            z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
-                            if isempty(idx_min)
-                                keyboard
-                            end
-                            [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
-                        else
-                            disp('Trajectory outside admissible space.')
-                        end
-                    end
+%                     else % idx_prim > 1
+%                         if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+%                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+%                             if isempty(idx_min)
+%                                 keyboard
+%                             end
+%                             [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+%                         else
+%                             disp('Trajectory outside admissible space.')
+%                         end
+%                     end
                 else
                     %                     keyboard
                     for kk=1:length(intermediate_primitives_list)

@@ -1,6 +1,6 @@
 classdef ARM_move < primitive_library.PrimitiveFun
     properties
-        A_g_0 = eye(4); A_g_0(1:3,4) = [3;3;0.3]; % TODO: this has to be parameterized
+        A_g_0;    % TODO: this has to be parameterized
         %         Control u; % generic control law
         %         Trig xi; % trigger conditions
         %         Duration t; % duration of execution of the primitive
@@ -19,6 +19,10 @@ classdef ARM_move < primitive_library.PrimitiveFun
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,edge_color,ID);
+            
+            % initialize goal position in inertial frame of reference
+            A_g_0 = eye(4);
+            A_g_0(1:3,4) = [3;3;0.3];
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             cprintf('*[.6,0.1,1]*','Steering --> ARM_move\n');
