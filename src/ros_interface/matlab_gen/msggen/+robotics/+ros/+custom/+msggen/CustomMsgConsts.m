@@ -16,7 +16,7 @@ classdef CustomMsgConsts
             
             persistent msgList
             if isempty(msgList)
-                msgList = cell(17, 1);
+                msgList = cell(1, 1);
                 msgList{1} = 'ff_fb_control/dd_control';
             end
             
