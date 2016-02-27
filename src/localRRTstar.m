@@ -103,9 +103,10 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             cost_from_z_nearest_to_new = cost;
             if isempty(idx_near_bubble) || length(idx_near_bubble) == 1                                 % if there is no near vertex in the bubble (or there is just the nearest) keep the nearest node and proceed to insert it in the tree
                 cprintf('*[0,0.7,1]*','* Near set is empty, attempting to connect to (eventually scaled) nearest point *\n');
-%                 keyboard
                 idx_min = idx_nearest;
                 cost_new = cost_from_z_nearest_to_new;
+                keyboard % TODO INSERT trim_trajectory
+                [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID)
             else                                                        % otherwise look for possibly more convenient paths
                 [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
                     parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
@@ -115,6 +116,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     feasible=false;
                     disp('ChooseParent has not found any viable parent.')
                 end
+                keyboard % TODO INSERT trim_trajectory
                 if feasible && ~any(any(isnan(x_chooseparent)))
                     traj_pos = x_chooseparent(1,:);
                     traj_vel = x_chooseparent(2,:);
@@ -139,29 +141,29 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             if feasible
                 cprintf('*[0,0.7,1]*','* Proceed to InsertNode *\n');
                 if ~added_intermediate_node
-                                        keyboard
-%                     if idx_prim==1
-                        % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
-                        if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
-                            z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
-                            if isempty(idx_min)
-                                keyboard
-                            end
-                            [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
-                        else
-                            disp('Trajectory outside admissible space.')
+                    keyboard
+                    %                     if idx_prim==1
+                    % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
+                    if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
+                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                        if isempty(idx_min)
+                            keyboard
                         end
-%                     else % idx_prim > 1
-%                         if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
-%                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
-%                             if isempty(idx_min)
-%                                 keyboard
-%                             end
-%                             [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
-%                         else
-%                             disp('Trajectory outside admissible space.')
-%                         end
-%                     end
+                        [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+                    else
+                        disp('Trajectory outside admissible space.')
+                    end
+                    %                     else % idx_prim > 1
+                    %                         if all(prim.chi.P.contains([traj_pos(:)'; traj_vel(:)'; traj_y(:)'],1))
+                    %                             z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                    %                             if isempty(idx_min)
+                    %                                 keyboard
+                    %                             end
+                    %                             [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+                    %                         else
+                    %                             disp('Trajectory outside admissible space.')
+                    %                         end
+                    %                     end
                 else
                     %                     keyboard
                     for kk=1:length(intermediate_primitives_list)
@@ -210,7 +212,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 else
                     cprintf('*[1,0,0]*','! Node Not Added !\n');
                 end
-              
+                
                 if checkdiscontinuity(T,Edges,Ptree)
                     keyboard
                 end
@@ -259,7 +261,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
             disp('Near set is empty');
             feasible = false;
         end
-        
         
         if added_new
             if idx_prim ==1
