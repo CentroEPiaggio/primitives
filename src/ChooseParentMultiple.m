@@ -2,6 +2,8 @@
 % function idx_min = ChooseParent(idX_near, idx_nearest, T, G, x_new, cost_x_new)
 function [idx_min,q,cost_new_edge,x,time,z_new,parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,q_list,cost_list,z_intermediate_list] ...
     = ChooseParentMultiple(idX_near, idx_nearest, T, G, E, z_new, cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive)
+debug = 0;
+
 disp('Entered inside ChooseParent')
 % make the sparse matrix square
 % G = full(Graph)
@@ -35,7 +37,9 @@ q_list = {};
 time_list = {};
 cost_list = {};
 z_intermediate_list = {};
-keyboard
+if debug
+    keyboard
+en
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         z_near=T.get(idX_near(i));
