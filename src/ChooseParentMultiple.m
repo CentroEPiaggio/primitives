@@ -39,14 +39,17 @@ keyboard
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
         z_near=T.get(idX_near(i));
-        % select primitive HARDFIX
-        if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
-            prim = Ptree.Node{2}; % Elevate
-            idx_prim = 2;
-        else
-            prim = Ptree.Node{1}; % Move
-            idx_prim = 1;
-        end
+        %         % select primitive HARDFIX
+        %         if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
+        %             prim = Ptree.Node{2}; % Elevate
+        %             idx_prim = 2;
+        %         else
+        %             prim = Ptree.Node{1}; % Move
+        %             idx_prim = 1;
+        %         end
+        
+        % select primitive
+        prim = Ptree.Node{idx_prim};
         %         keyboard
         % calculate feasibility and cost
         %         [feasible,cost_new_edge,q,traj_pos_chooseparent,traj_vel_chooseparent] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
@@ -54,29 +57,34 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         %         keyboard
         [feasible,cost_new_edge,q_chooseparent,x_chooseparent,time_chooseparent] = prim.steering(z_near,z_new); % uniform interface! Yeay!
         if feasible
-            if idx_prim == 1 % trying to fix the connection problem between different kind of primitives
-                traj_pos_chooseparent = x_chooseparent(1,:);
-                traj_vel_chooseparent = x_chooseparent(2,:);
-                if ~isnan(z_near(3)) % HARDFIX
-                    traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
-                else
-                    traj_y_chooseparent   = ones(size(traj_vel_chooseparent)); % HARDFIX: default y is 1
-                end
-                %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
-                if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1))
-                    feasible = false;
-                end
-            else % Eleva primitive
-                %             traj_pos = %x(1,:);
-                traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
-                traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
-                traj_y_chooseparent = x_chooseparent;
-                if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)'],1))
-                    feasible = false;
-                    %                     keyboard % TODO: make sure this conditions is not due to errors
-                end
+            [x_complete] = complete_trajectories(z_near,time_chooseparent,x_chooseparent,Ptree,prim.ID);
+            x_chooseparent = x_complete;
+            if ~all(prim.chi.P.contains(x_chooseparent(prim.dimensions>0,:),1))
+                feasible = false;
             end
-            x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
+            %             if idx_prim == 1 % trying to fix the connection problem between different kind of primitives
+            %                 traj_pos_chooseparent = x_chooseparent(1,:);
+            %                 traj_vel_chooseparent = x_chooseparent(2,:);
+            %                 if ~isnan(z_near(3)) % HARDFIX
+            %                     traj_y_chooseparent   = z_near(3,:)*ones(size(traj_vel_chooseparent));
+            %                 else
+            %                     traj_y_chooseparent   = ones(size(traj_vel_chooseparent)); % HARDFIX: default y is 1
+            %                 end
+            %                 %                 x_chooseparent = [traj_pos_chooseparent traj_vel_chooseparent];
+            %                 if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1))
+            %                     feasible = false;
+            %                 end
+            %             else % Eleva primitive
+            %                 %             traj_pos = %x(1,:);
+            %                 traj_vel_chooseparent = z_near(2)*ones(size(x_chooseparent));%x(2,:);
+            %                 traj_pos_chooseparent = z_near(1)+cumtrapz(time_chooseparent,traj_vel_chooseparent);
+            %                 traj_y_chooseparent = x_chooseparent;
+            %                 if ~all(prim.chi.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)'],1))
+            %                     feasible = false;
+            %                     %                     keyboard % TODO: make sure this conditions is not due to errors
+            %                 end
+            %             end
+            %             x_chooseparent = [traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'; traj_y_chooseparent(:)';]; % assign arc-path
             %             if isequal(prim.name,'Eleva')
             %             keyboard
             %             end
@@ -85,14 +93,15 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             end
             if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
                 disp('WTF ChooseParent is doing?')
-                %                 keyboard
+                %                                 keyboard
                 if isempty(idx_parent_primitive)
                     disp('WTF ChooseParent is doing? Maybe Move is doing wrong? Logging this points for further analysis.')
-                    %                     keyboard
-                    fid=fopen('log_move_wrong.txt','at');
+                    %                                         keyboard
+                    fid=fopen('log_coffe_wrong_trajectories.txt','at');
                     fprintf(fid,'%.2f,%.2f,%.2f,%.2f\n',z_near(1), z_near(2), z_new(1), z_new(2));
                     fclose(fid);
                     feasible = false;
+                    cost_new_edge = Inf;
                     return
                 end
                 %%
@@ -239,6 +248,10 @@ if any(any(~isnan(x_chooseparent)))
     %     disp('fix this')
     %     keyboard
     z_new = round(x_chooseparent(prim.dimensions>0,end)*100)/100; % HACK to ensure continuity in the trajectories stored in the tree
+end
+
+if ~feasible
+    cost_new_edge = Inf;
 end
 
 end
