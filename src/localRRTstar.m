@@ -58,42 +58,13 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
     dim_z_new = prim.dimensions;
     if feasible
         % collision checking
-%         if idx_prim == 1
-%             traj_pos = x(1,:);
-%             traj_vel = x(2,:);
-%             if ~isnan(z_nearest(3)) % HARDFIX
-%                 traj_y   = z_nearest(3,:)*ones(1,size(traj_vel,2));
-%             else
-%                 traj_y   = ones(1,size(traj_vel,2)); % HARDFIX: default y is 1
-%             end
-%         else % Eleva primitive
-%             traj_vel = z_nearest(2)*ones(1,size(x,2));%x(2,:);
-%             traj_pos = z_nearest(1)+cumtrapz(time,traj_vel);
-%             if size(x,1)>2
-%                 traj_y = x(3,:);
-%             elseif size(x,1)==1
-%                 traj_y = x;
-%             else
-%                 disp('omg')
-%                 keyboard
-%             end
-%         end
-%         x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path % row vectors
-        
-        %         keyboard
-        %         disp('shit is happening already')
-        %         [z_new,x] = truncate_to_similar(z_new,x);
         cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
         disp(['before collisionfree with primitive ' prim.name])
-%         [feasible,cost,q,x,time]=CollisionFree(prim,Obstacles,q,x,time,z_nearest,cost);
         feasible=CollisionFree(x,Ptree,Obstacles);
         disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard
         end
-        %         keyboard
-        %         % this should fix the discontinuity problem
-        %         [z_new,x] = truncate_to_similar(z_new,x);
     end
     if checkdiscontinuity(T,Edges,Ptree)
         keyboard
@@ -159,8 +130,6 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                                 keyboard
                             end
                         end
-                        %                         % this should fix the discontinuity problem
-                        %                         [z_new,x] = truncate_to_similar(z_new,x);
                     end
                 end
             end
