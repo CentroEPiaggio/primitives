@@ -27,8 +27,8 @@ xmax = 5.4 + safety_margin; % meters
 ymin = -0.9 - safety_margin;
 ymax = 2.14 + safety_margin; % meters
 vmin = 0; % linear speed
-vmin = -0.5; % linear speed % FIXME: check if this has to be negative too for the coffee application.
-vmax = 1; % TODO: check out this value
+vmin = -0.1; % linear speed % FIXME: check if this has to be negative too for the coffee application.
+vmax = 0.1; % TODO: check out this value
 thetamin = -2*pi;
 thetamax = 2*pi;
 

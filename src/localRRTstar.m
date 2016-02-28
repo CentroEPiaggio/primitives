@@ -151,7 +151,7 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                         %                         keyboard
                         if pushed_in_goal
                             if reached(x(1:length(z_new),end),z_new,tol)
-                                keyboard
+                                %keyboard
                             end
                         end
                     end

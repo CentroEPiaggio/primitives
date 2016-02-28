@@ -1,7 +1,7 @@
 % function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 function [time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 debug = 0;
-verbose = 1;
+verbose = 0;
 x = [];
 u = [];
 
@@ -71,6 +71,7 @@ end
 threshold = 1e-2; %this is to check the error between the current and desired position
 threshold = 1e-1;
 f_threshold = 1e-1; %this is to start execute the last maneuvers before ending the trajectory (e.g. converge to v_f)
+f_threshold = f_threshold*1.1;
 
 x_t=[];
 x_t = [x_t x_i];
@@ -185,6 +186,11 @@ for i=1:size(wp,2)
             end
         end
         
+%         if v<0 %HACK
+%             retval=0; 
+%             return
+%         end
+
         v = v_sat.evaluate(v);
         
         %%%%%%%%%%%%%%%%%%%%%%
@@ -261,7 +267,7 @@ if retval
     if debug
         figure
         plot(time,x),grid on,legend('x','y','th','v') % TODO: acausal filtering might be used to smooth these trajectories, which are not continuous in their time derivatives.
-        keyboard
+        %keyboard
     end
 end
 

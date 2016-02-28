@@ -6,7 +6,7 @@ multiple_primitives = 0; % testing locomotion primitive only for coffee
 
 % Algorithm's parameters
 gam = 2000; % constant for radius of search of near nodes in near.m
-tol=0.1%0.05; % tolerance for the goal region distance from the goal point
+tol=0.15%0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
 debug=0; % enable breakpoints
@@ -42,7 +42,12 @@ if multiple_primitives
     z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
     bias_points = {z_intermediate_1,z_goal};
 else
-    bias_points = {z_goal};
+    z_b_1 = [1  ; 0 ; 0    ; 0.05 ;   1];
+    z_b_2 = [2  ; 0 ; 0    ; 0.05 ;   1];
+    z_b_3 = [3  ; 0 ; 0    ; 0.05 ;   1];
+    z_b_4 = [4  ; 0 ; 0    ; 0.05 ;   1];
+    z_b_5 = [5  ; 1 ; pi/2 ; 0.05 ;   1];
+    bias_points = {z_b_1, z_b_2, z_b_3, z_b_4, z_b_5, z_goal};
 end
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
@@ -95,7 +100,7 @@ for ii=1:N_sample_max
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
     %     test_plot_opt
     if added_new && reached(T.Node{end},z_goal,tol) % first time a path is found
-        keyboard
+        %keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
