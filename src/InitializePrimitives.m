@@ -20,10 +20,12 @@ cost_table = rand(10,3);
 
 % Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
 
-xmin = 0; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
-xmax = 10; % meters
-ymin = 0;
-ymax = 10; % meters
+safety_margin = 0.18;
+
+xmin = -0.6 - safety_margin; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
+xmax = 5.4 + safety_margin; % meters
+ymin = -0.9 - safety_margin;
+ymax = 2.14 + safety_margin; % meters
 vmin = 0; % linear speed
 vmin = -0.5; % linear speed % FIXME: check if this has to be negative too for the coffee application.
 vmax = 1; % TODO: check out this value

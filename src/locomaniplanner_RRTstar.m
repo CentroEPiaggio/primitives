@@ -2,10 +2,10 @@
 clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
-multiple_primitives = 1; % testing locomotion primitive only for coffee
+multiple_primitives = 0; % testing locomotion primitive only for coffee
 
 % Algorithm's parameters
-gam = 1000; % constant for radius of search of near nodes in near.m
+gam = 2000; % constant for radius of search of near nodes in near.m
 tol=0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
@@ -19,8 +19,13 @@ load_libraries
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
+
+x = 4.8;
+y = 1.51;
+th = pi/2;
+
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
-z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [x  ; y ; th ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -33,8 +38,12 @@ InitObstacles; % initialize obstacles structure
 % solution to pass by.
 %z_intermediate_1 = [0;0;0;];
 % z_intermediate_2 = [15;0;1];
-z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-bias_points = {z_intermediate_1,z_goal};
+if multiple_primitives
+    z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    bias_points = {z_intermediate_1,z_goal};
+else
+    bias_points = {z_goal};
+end
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;

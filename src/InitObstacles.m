@@ -1,11 +1,13 @@
 % define obstacles
 Obstacles = tree;
 
-x_wall_min = 4;
-x_wall_max = x_wall_min + 2;
+safety_margin = 0.18;
+
+x_wall_min = 1.2 - safety_margin;
+x_wall_max = 1.2 + 2.4 + safety_margin;
 % y_wall_min = 2;
-y_wall_min = 4
-y_wall_max = 6;
+y_wall_min = 0.72 - safety_margin;
+y_wall_max = 0.72 + 0.22 + safety_margin;
 
 dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
 obstacle_wall = Obstacle(([ ...

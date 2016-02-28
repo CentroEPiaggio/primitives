@@ -238,8 +238,9 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 
-                %                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                if added_new && T.nnodes>2 && ~isempty(idx_near_bubble)
+                                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+                rewire_enabled=false;
+                if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enabled
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
                     %                     z_min = T.get(idx_min);
                     idx_new = T.nnodes;
