@@ -6,7 +6,7 @@ multiple_primitives = 0; % testing locomotion primitive only for coffee
 
 % Algorithm's parameters
 gam = 2000; % constant for radius of search of near nodes in near.m
-tol=0.05; % tolerance for the goal region distance from the goal point
+tol=0.1%0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
 debug=0; % enable breakpoints
