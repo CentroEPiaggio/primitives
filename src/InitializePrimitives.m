@@ -68,6 +68,8 @@ if multiple_primitives
     xmax_grasping = 7;
     ymin_grasping = 6;
     ymax_grasping = 7;
+    x_target = mean([xmin_grasping,xmax_grasping]);
+    y_target = mean([ymin_grasping,ymax_grasping]);
     taumin = 0; % here ymin is the minimum height for the end effector
     taumax = 1;% here ymax is the maximum height for the end effector
     dimensioni = [0 0 0 0 1]; % only sample in x cart and y pendulum and v cart.
