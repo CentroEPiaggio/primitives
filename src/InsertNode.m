@@ -111,15 +111,16 @@ else
         previous = T.get(T.Parent(idx_last_added_node));
         thisone = T.Node{idx_last_added_node};
         if ~isequaln(round(E{idx_current,idx_last_added_node}.x(3,end)*100)/100, round(T.Node{idx_last_added_node}(3)*100)/100) && ~isequaln(previous(3),thisone(3))
-            disp('look at this shitface!')
+            disp('look at this problem!')
             E{idx_current,idx_last_added_node}.x(3,end), T.Node{idx_last_added_node}(3)
             keyboard
         end
-        
-        if previous(3)>1 & thisone(3)==1
-            disp('brought to ground floor... but how?')
-            keyboard
-        end
+
+%        This check is No more needed
+%         if previous(3)>1 & thisone(3)==1
+%             disp('brought to ground floor... but how?')
+%             keyboard
+%         end
     else
         cprintf('error','InsertNode: cost is 0 or Inf.\n');
         keyboard
