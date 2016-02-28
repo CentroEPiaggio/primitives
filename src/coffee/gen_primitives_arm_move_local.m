@@ -6,9 +6,9 @@ xf = prim_data.xf;
 yi = prim_data.yi;
 yf = prim_data.yf;
 thi = prim_data.thi;
-thf = prim_data.thf;
+% thf = prim_data.thf;
 vi = prim_data.vi;
-vf = prim_data.vf;
+% vf = prim_data.vf;
 taui = prim_data.taui;
 tauf = prim_data.tauf;
 
@@ -27,7 +27,8 @@ vmax = 1;
 
 % [time,traj_vel_cart] = trajectory_ks(xi,xf,xpi,xpf,Tend,Ts,amax);
 x0 = [xi;yi;thi;vi;taui];
-xf = [xf;yf;thf;vf;tauf];
+% xf = [xf;yf;thf;vf;tauf];
+xf = [xf;yf;tauf];
 state_bounds = [-Inf Inf; % TODO: add joint state limits
     -Inf Inf;
     -pi pi];
@@ -41,4 +42,4 @@ control_bounds = [-vmax;vmax];
 %traj_pos_cart = traj_pos_cart(:)';
 %traj_vel_cart = traj_vel_cart(:)';
 
-q = [prim_data.xi prim_data.xf prim_data.yi prim_data.yf prim_data.thi prim_data.thf];
+q = [prim_data.xi prim_data.xf prim_data.yi prim_data.yf prim_data.thi];

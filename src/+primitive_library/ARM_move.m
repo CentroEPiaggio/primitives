@@ -23,7 +23,13 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);
-            obj.A_g_0(1:3,4) = [3;3;0.3];
+            xmin_grasping = 6;
+            xmax_grasping = 7; % HARDCODED
+            ymin_grasping = 6;
+            ymax_grasping = 7;
+            x_target = mean([xmin_grasping,xmax_grasping]);
+            y_target = mean([ymin_grasping,ymax_grasping]);
+            obj.A_g_0(1:3,4) = [x_target;y_target;0.3];
             obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
@@ -36,7 +42,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
             % z_start: the initial task value
             % z_end: the final task value
             
-            debug = false;
+            debug = true;
             % initialization
             feasible=false;
             cost=Inf;
@@ -48,9 +54,10 @@ classdef ARM_move < primitive_library.PrimitiveFun
             taui = z_start(5);
             xf = z_end(1);
             yf = z_end(2);
-            thf = z_end(3);
-            vf = z_end(4);
-            tauf = z_end(5);
+            %             thf = z_end(3);
+            %             vf = z_end(4);
+            %             tauf = z_end(5);
+            tauf = z_end(3);
             x=NaN;
             u=NaN;
             
@@ -65,19 +72,24 @@ classdef ARM_move < primitive_library.PrimitiveFun
                 'xf',xf,            ...
                 'yi',yi,            ...
                 'yf',yf,            ...
-                'thi',thi,          ...
-                'thf',thf,          ...
-                'vi',vi,            ...
-                'vf',vf,            ...
+                'thi',thi,          ... % 'thf',thf,          ...
+                'vi',vi,            ... % 'vf',vf,            ...
                 'taui',taui,            ...
                 'tauf',tauf,            ...
-                'A_g_0',A_g_0,      ...
+                'A_g_0',obj.A_g_0,      ...
                 'Ts',Ts            ...
                 ); %                 'Tend',Tend,        ...
             
+            if debug
+                keyboard
+            end
             [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_arm_muovi_params);
             
-            keyboard
+            feasible = ~retval; % sick convention, retval is 1 on failure.
+            if feasible
+                cost = time(end);
+            end
+            return
             
             if retval==1
                 if debug
@@ -163,7 +175,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
             end
             
             trimmed_trajectory = tau;
-
+            
             if verbose
                 figure
                 plot(time,trimmed_trajectory)

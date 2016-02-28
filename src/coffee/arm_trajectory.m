@@ -33,9 +33,12 @@ tau_i=x0(5);
 
 x_f=xf(1);
 y_f=xf(2);
-th_f=xf(3);
-v_f=xf(4);
-tau_f=xf(5);
+% th_f=xf(3);
+th_f=th_i;
+% v_f=xf(4);
+v_f=v_i;
+% tau_f=xf(5);
+tau_f=xf(3);
 
 distance_from_goal = L_arm*(1-tau_f);
 
@@ -43,6 +46,7 @@ q_roomba_0 = [x_i; y_i; th_i; v_i; 0];
 
 [flag,time,traj_q,traj_qp]=arm_trajectory_generator(Ts,q_roomba_0,A_g_0,distance_from_goal);
 
+retval = flag;
 return
 
 % Using Bezier curves
@@ -261,9 +265,11 @@ end
 if retval
     % the values we want to return are the trajectories inside the image
     % space (on which we can perform collision checking).
+    % the cost is the minimum time
     speed(:,end+1) = speed(:,end);
     x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:)];
     u = [speed]; % we'll see what to put in here
+    cost = time(end);
     if debug
         figure
         plot(time,x),grid on,legend('x','y','th','v') % TODO: acausal filtering might be used to smooth these trajectories, which are not continuous in their time derivatives.

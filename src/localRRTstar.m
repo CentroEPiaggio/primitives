@@ -44,25 +44,33 @@ if isempty(idx_nearest) % ... if the goal noad is the only nearest node, then go
 end
 % rescale z_rand within a ball of radius \eta centered in z_nearest
 cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
-eta = 1.2; % TUNABLE PARAMETER
+eta = {1.2;0.1}; % TUNABLE PARAMETER. TODO: replace this with prim.eta inside the primitive's initialization
 if idx_prim>1
     %     error('remember to fix this eta radius bubble stuff!');
     cprintf('*[0,0.7,1]*','* remember to fix this eta radius bubble stuff! *\n');
 end
 % keyboard
-if norm(z_rand-z_nearest(prim.dimensions>0)) > eta
-    alfa = eta/norm(z_rand-z_nearest(prim.dimensions>0)); % TODO check dimensions over other primitives!
-    z_rand = (1-alfa)*z_nearest(prim.dimensions>0)+(alfa)*z_rand;
-    z_rand = round(z_rand*100)/100;
-    z_new = z_rand;
+z_nearest_extended = prim.extend(z_nearest);
+try
+    if norm(z_rand-z_nearest_extended(prim.dimensions_imagespace>0)) > eta{prim.ID}
+        alfa = eta{prim.ID}/norm(z_rand-z_nearest_extended(prim.dimensions_imagespace>0)); % TODO check dimensions over other primitives!
+        z_rand = (1-alfa)*z_nearest_extended(prim.dimensions_imagespace>0)+(alfa)*z_rand;
+        z_rand = round(z_rand*100)/100;
+        z_new = z_rand;
+    end
+catch ME
+    disp(ME.message);
+    keyboard
 end
-
 % check if both points are in the image space of the primitive. This should
 % be a redundant check and could be removed later on.
-if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimensions>0)],1) )
+if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespace>0)],1) )
     cprintf('*[0,0.7,1]*','* Steering between nearest and random sample *\n');
     [feasible,cost,q,x,time] = prim.steering(z_nearest,z_rand); % uniform interface! Yeay!
     dim_z_new = prim.dimensions;
+    if prim.ID == 2
+        keyboard
+    end
     if feasible
         % collision checking
         cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
@@ -138,14 +146,14 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                 end
                 %                 keyboard % TODO INSERT trim_trajectory
                 if feasible && ~any(any(isnan(x)))
-%                     [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
-%                     x = x_complete;
-%                     traj_pos = x_chooseparent(1,:);
-%                     traj_vel = x_chooseparent(2,:);
-%                     traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
-%                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
-%                     z_new_temp = z_new;
-%                     z_new = round(z_new*100)/100;
+                    %                     [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
+                    %                     x = x_complete;
+                    %                     traj_pos = x_chooseparent(1,:);
+                    %                     traj_vel = x_chooseparent(2,:);
+                    %                     traj_y = x_chooseparent(3,:); % TODO: FIX NAMES
+                    %                     x = [traj_pos(:)'; traj_vel(:)'; traj_y(:)']; % assign arc-path
+                    %                     z_new_temp = z_new;
+                    %                     z_new = round(z_new*100)/100;
                     if ~isequaln(round(x(1:length(z_new),end)*100)/100,z_new)%x(1:2,end) ~= z_new(1:2)
                         disp('ChooseParent slightly changed the goal point!')
                         %                         keyboard
@@ -238,15 +246,20 @@ if all( prim.chi.P.contains([z_rand(prim.dimensions>0), z_nearest(prim.dimension
                     keyboard
                 end
                 
-                %                 cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                if added_new && T.nnodes>2 && ~isempty(idx_near_bubble)
+                                cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+                                rewire_enable = false;
+                if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enable
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
                     %                     z_min = T.get(idx_min);
                     idx_new = T.nnodes;
                     %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
                     %                         keyboard
                     %                     end
-                    [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                    try
+                        [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                    catch ME
+                        disp(ME.message);
+                    end
                     plot_edges=pedges;
                     plot_nodes=pnodes;
                     

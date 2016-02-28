@@ -14,6 +14,9 @@ debug = 1;
 verbose = 1;
 % Initialization
 flag = 1; % initialize with failed state
+time = [];
+traj_q = [];
+traj_qp = [];
 % Tuning parameters for the
 max_joint_speed = 1;
 max_joint_acceleration = 1;
@@ -38,13 +41,23 @@ A_g_s = A_s_0\A_g_0;
 goal_position_s = A_g_s(1:3,4);
 p_g_s = [goal_position_s(1:3)];
 
-
+L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
+if norm(goal_position_s)>L_arm
+    disp('Over the hills and far away');
+    if debug
+        keyboard
+    end
+end
 
 goal_position_0 = A_g_0(1:3,4);
 
-approach_angle = 0;
+
 p_s_0 = A_s_0(1:3,4);
 p_g_0 = A_g_0(1:3,4);
+
+% versore = p_g_s/norm(p_g_s);
+
+approach_angle = 0; % constrain this to +- 45 degrees. It is done in IK_arm_simple
 
 % End-effector position in shoulder frame of reference
 lam = distance_from_goal/(norm(p_g_s(1:2)));
@@ -56,12 +69,15 @@ p_e_desired_0 = A_s_0*[p_e_desired_s;1];
 
 % find joint coordinates with inverse kinematics
 test_point = p_e_desired_s(1:3);
-[theta_arm,flag] = IK_arm(test_point(1),test_point(2),test_point(3),approach_angle); % DEGREES!!!
+[theta_arm,flag] = IK_arm_simple(test_point(1),test_point(2),test_point(3),approach_angle); % DEGREES!!!
 
 %
 if flag == 1
     if verbose
         disp('------- Error in IK! -------')
+    end
+    if debug
+        keyboard
     end
     return
 else
