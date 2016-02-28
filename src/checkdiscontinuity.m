@@ -20,7 +20,7 @@ for jj=2:T.nnodes
         discontinuo = true;
     end
     try
-        test_condition_destination = ~isequaln(round(x(:,end)*100)/100,round(destinazione(prim.dimensions>0)*100)/100);
+        test_condition_destination = ~isequaln(round(x(prim.dimensions>0,end)*100)/100,round(destinazione(prim.dimensions>0)*100)/100);
     catch ME
         disp(ME.message);
         keyboard
