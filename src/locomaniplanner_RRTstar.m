@@ -2,7 +2,7 @@
 clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
-multiple_primitives = 1; % testing locomotion primitive only for coffee
+multiple_primitives = 0; % testing locomotion primitive only for coffee
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m
@@ -33,8 +33,13 @@ InitObstacles; % initialize obstacles structure
 % solution to pass by.
 %z_intermediate_1 = [0;0;0;];
 % z_intermediate_2 = [15;0;1];
-z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-bias_points = {z_intermediate_1,z_goal};
+% z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+if multiple_primitives
+    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    bias_points = {z_intermediate_2,z_goal};
+else
+    bias_points = {z_goal};
+end
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
@@ -145,7 +150,7 @@ for ii=1:N_sample_max
             end
             
             prim = Ptree.Node{jj};
-            keyboard
+
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
@@ -184,13 +189,16 @@ for ii=1:N_sample_max
             % RESTART FROM HERE: see if it's better to have z_aug only as
             % the extra-dimensions, to augment it with the point on the
             % base space, or a mix of the two.
+            % for the moment being, we just keep it as a sample in the
+            % primitive's image space, i.e., the size of the sample is
+            % given by the dimension of the image space
             if mod(ii,push_bias_freq)==0 %&& ~path_found
                 z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
                 disp('Pushing in aug goal')
                 pushed_in_goal=1;
             else
                 z_aug = prim.chi.sample;
-                z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
+%                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
                 pushed_in_goal=0;
             end
             
