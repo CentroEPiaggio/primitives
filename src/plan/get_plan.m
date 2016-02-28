@@ -20,4 +20,9 @@ grid on
 plot(t(1)*[1 1],z_init(1:2),'ro')
 plot(t(end)*[1 1],z_goal(1:2),'ro')
 
+w = gradient(x(3,:),t);
+plot(t,w)
+
 % remind: x is [x,y,theta,v,w]
+
+xlabel('time [s]');
