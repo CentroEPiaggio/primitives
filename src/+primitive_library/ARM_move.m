@@ -23,12 +23,8 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);
-            xmin_grasping = 6;
-            xmax_grasping = 7; % HARDCODED
-            ymin_grasping = 6;
-            ymax_grasping = 7;
-            x_target = mean([xmin_grasping,xmax_grasping]);
-            y_target = mean([ymin_grasping,ymax_grasping]);
+            x_target = 1; % HARDCODED
+            y_target = 1;
             obj.A_g_0(1:3,4) = [x_target;y_target;0.3];
             obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
         end
