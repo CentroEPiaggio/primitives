@@ -12,5 +12,11 @@ cd ../example/
 addpath(pwd)
 cd ../src
 addpath(pwd) % add current dir to path
-addpath('cprnd/'); % add uniform sampler library to path
+cd cprnd
+addpath(pwd); % add uniform sampler library to path
 
+cd ../coffee
+addpath(pwd);
+cd arm_utils;
+addpath(pwd);
+cd ../../
