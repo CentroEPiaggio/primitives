@@ -6,8 +6,12 @@ if debug
 end
 
 	a = [0,0.09,0.11,0.11];     %%Parameter A (Convention D-H)
-	flag=0;                     %if solution found return flag=0 otherwise flag=1
-	orientazione_terna=approach;% Orientation of Approach of the End-effector in the Plane X1-Z0 
+	flag=0;                     %if solution found return flag=0 otherwise flag=1\
+    vector_3d = [x;y;z];
+    vector_planar_projection = [x;y;0];
+    vector_elevation = acos(dot(vector_3d,vector_planar_projection)/(norm(vector_3d)*norm(vector_planar_projection)));
+    
+	orientazione_terna=rad2deg(vector_elevation);% Orientation of Approach of the End-effector in the Plane X1-Z0 
 
 % compute the angle of the first joint
     theta1=radtodeg(atan2(y,x));

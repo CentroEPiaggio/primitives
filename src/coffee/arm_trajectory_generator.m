@@ -47,6 +47,7 @@ if norm(goal_position_s)>L_arm
     if debug
         keyboard
     end
+    return
 end
 
 goal_position_0 = A_g_0(1:3,4);
@@ -56,8 +57,8 @@ p_s_0 = A_s_0(1:3,4);
 p_g_0 = A_g_0(1:3,4);
 
 % versore = p_g_s/norm(p_g_s);
-
-approach_angle = 0; % constrain this to +- 45 degrees. It is done in IK_arm_simple
+keyboard
+approach_angle = []; % constrain this to +- 45 degrees. It is done in IK_arm_simple
 
 % End-effector position in shoulder frame of reference
 lam = distance_from_goal/(norm(p_g_s(1:2)));
