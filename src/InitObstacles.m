@@ -3,10 +3,16 @@ Obstacles = tree;
 
 safety_margin = 0.18;
 
-x_wall_min = 1.2 - safety_margin;
-x_wall_max = 1.2 + 2.4 + safety_margin;
+% x_wall_min = 1.2 - safety_margin;
+% x_wall_max = 1.2 + 2.4 + safety_margin;
+% % y_wall_min = 2;
+% y_wall_min = 0.72 - safety_margin;
+% y_wall_max = 0.72 + 0.22 + safety_margin;
+
+x_wall_min = 1 - safety_margin;
+x_wall_max = 1 + 0.2 + safety_margin;
 % y_wall_min = 2;
-y_wall_min = 0.72 - safety_margin;
+y_wall_min = 0 - safety_margin;
 y_wall_max = 0.72 + 0.22 + safety_margin;
 
 dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions

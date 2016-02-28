@@ -162,6 +162,13 @@ for i=1:size(wp,2)
             w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
             
             w = w_sat.evaluate(w);
+            
+            %u1 = -1 * (x_t(index)-wp(1,i));
+            %u2 = -1 * (y_t(index)-wp(2,i));
+
+            %w = (u2*cos(th_t(index)) - u1*sin(th_t(index)))/0.1;
+            
+            w = w_sat.evaluate(w);
         else
             w=0;
         end
@@ -203,7 +210,7 @@ for i=1:size(wp,2)
             end
             if debug
                 plot(x_t,y_t,'r','linewidth',2)
-                keyboard
+                %keyboard
             end
             retval=0;
             break
@@ -262,7 +269,7 @@ if retval
     % the values we want to return are the trajectories inside the image
     % space (on which we can perform collision checking).
     speed(:,end+1) = speed(:,end);
-    x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:)];
+    x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:); speed(2,:)];
     u = [speed]; % we'll see what to put in here
     if debug
         figure

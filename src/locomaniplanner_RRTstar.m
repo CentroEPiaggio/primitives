@@ -20,9 +20,12 @@ load_libraries
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
 
-x = 4.8;
-y = 1.51;
-th = pi/2;
+%x = 4.8;
+%y = 1.51;
+
+x=2.4;
+y=0;
+th = 0;
 
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [x  ; y ; th ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
@@ -47,7 +50,8 @@ else
     z_b_3 = [3  ; 0 ; 0    ; 0.05 ;   1];
     z_b_4 = [4  ; 0 ; 0    ; 0.05 ;   1];
     z_b_5 = [5  ; 1 ; pi/2 ; 0.05 ;   1];
-    bias_points = {z_b_1, z_b_2, z_b_3, z_b_4, z_b_5, z_goal};
+    %bias_points = {z_b_1, z_b_2, z_b_3, z_b_4, z_b_5, z_goal};
+    bias_points = {[1 ;-0.4; -pi/4; 0; 1],z_goal};
 end
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
