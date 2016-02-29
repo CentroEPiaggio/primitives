@@ -23,7 +23,7 @@ end
 points_mat = cell2mat(T.Node');
 
 z_test = fix_nans(z_rand,prim.dimensions_imagespace);
-if z_test(5) == 0 || z_test(5) == 1
+if z_test(5) == 1 %z_test(5) == 0 || z_test(5) == 1
 %     keyboard
 end
     
