@@ -3,9 +3,11 @@ Obstacles = tree;
 
 x_wall_min = 4;
 x_wall_max = x_wall_min + 2;
+x_wall_min = 1;
+x_wall_max = x_wall_min + 0.5;
 % y_wall_min = 2;
-y_wall_min = 4
-y_wall_max = 6;
+y_wall_min = 1.5;
+y_wall_max = 1.8;
 
 dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
 obstacle_wall = Obstacle(([ ...

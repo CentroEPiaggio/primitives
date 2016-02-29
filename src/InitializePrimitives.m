@@ -22,13 +22,15 @@ cost_table = rand(10,3);
 
 xmin = 0; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
 xmax = 10; % meters
+xmax = 2;
 ymin = 0;
 ymax = 10; % meters
+ymax = 2;
 vmin = 0; % linear speed
 vmin = -0.5; % linear speed % FIXME: check if this has to be negative too for the coffee application.
 vmax = 1; % TODO: check out this value
-thetamin = -2*pi;
-thetamax = 2*pi;
+thetamin = -pi;
+thetamax = pi;
 
 dimensioni = [1 1 1 1 0]; % only sample in x and v cart.
 initial_extend = [0 0 0 0 NaN];
