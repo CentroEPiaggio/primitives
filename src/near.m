@@ -12,6 +12,7 @@
 %                   be able to call Tree.get(idx_near_bubble) to fetch
 %                   that node).
 function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV,gam)
+debug = 0;
 cprintf('*[0,0,0]*','>>> Enter Near\n');
 idX_near=NaN;
 radius = 0;
@@ -62,6 +63,9 @@ z_new
 % radius
 if ~isempty(points_mat)
     %     keyboard
+    if debug
+        keyboard
+    end
     idX_near_temp = rangesearch(points_mat(z_new_dimensions>0,:)',z_new', radius);
     idX_near_temp = cell2mat(idX_near_temp);
     if isempty(idX_near_temp)

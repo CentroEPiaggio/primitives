@@ -151,6 +151,10 @@ for ii=1:N_sample_max
             
             prim = Ptree.Node{jj};
 
+            %% take the last added point, extend it, and add it to the tree
+            keyboard
+            [T,G,E] = InsertExtendedNode(T,G,E,T) % RESTART FROM HERE!!!
+            prim.extend(z_new)
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard

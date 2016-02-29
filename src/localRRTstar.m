@@ -67,15 +67,20 @@ end
 if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespace>0)],1) )
     cprintf('*[0,0.7,1]*','* Steering between nearest and random sample *\n');
     [feasible,cost,q,x,time] = prim.steering(z_nearest,z_rand); % uniform interface! Yeay!
-    dim_z_new = prim.dimensions;
+    dim_z_new = prim.dimensions_imagespace;
     if prim.ID == 2
         keyboard
     end
     if feasible
+        
         % collision checking
         cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
         disp(['before collisionfree with primitive ' prim.name])
-        feasible=CollisionFree(x,Ptree,Obstacles);
+                [x_complete] = complete_trajectories(z_nearest,time,x,Ptree,prim.ID);
+        %         x = x_complete;
+        %         z_new(prim.dimensions==0) = x(prim.dimensions==0,end);
+%         feasible=CollisionFree(x,Ptree,Obstacles);
+        feasible = CollisionFree(x_complete,Ptree,Obstacles);
         disp(['after  collisionfree with primitive ' prim.name])
         if checkdiscontinuity(T,Edges,Ptree)
             keyboard
@@ -84,16 +89,20 @@ if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespa
     if checkdiscontinuity(T,Edges,Ptree)
         keyboard
     end
-    if feasible && ~isequal(z_nearest(1:2),x(1:2,1))
-        disp('WTF?')
-        keyboard
-    end
+%     if feasible && ~isequal(z_nearest(1:2),x(1:2,1))
+%         disp('WTF?')
+%         keyboard
+%     end
     if feasible
         cprintf('*[0,0.7,1]*','* Search for Near samples in the tree *\n');
         
         cardV = T.nnodes; % number of vertices in the graph
-        
-        [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
+        try
+            [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
+        catch ME
+            disp(ME.message);
+            keyboard
+        end
         if ~isempty(goal_node)
             idx_near_bubble(idx_near_bubble==goal_node) = [];
         end
@@ -246,8 +255,8 @@ if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespa
                     keyboard
                 end
                 
-                                cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                                rewire_enable = false;
+                cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+                rewire_enable = false;
                 if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enable
                     cprintf('*[0,0.7,1]*','* ReWire *\n');
                     %                     z_min = T.get(idx_min);
