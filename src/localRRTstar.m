@@ -182,7 +182,18 @@ if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespa
                 if ~added_intermediate_node
                     %                     if idx_prim==1
                     % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
-                    if all(prim.chi.P.contains(x(prim.dimensions>0,:)))
+                    if prim.ID == 2
+                        xplottraj = x(prim.dimensions_imagespace>0,:);
+                        figure(33),clf;prim.chi.P.plot('color','lightblue','alpha',0.5); hold on; plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
+                        idx_inside_primitive = find(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)));
+                        cost = cost*time(idx_inside_primitive(end))/time(end);
+                        time = time(idx_inside_primitive);
+                        x = x(:,idx_inside_primitive);
+                        xplottraj = x(prim.dimensions_imagespace>0,:);
+                        plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
+                        keyboard
+                    end
+                    if all(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)))
                         z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                         if isempty(idx_min)
                             keyboard
