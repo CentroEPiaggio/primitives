@@ -8,6 +8,9 @@ function [feasible] = CollisionFree(x,Ptree,Obstacles)
 % NOTE: the function ObstacleFree does more or less the same thing. Don't
 % remember why, but in the end use just one of it.
 feasible = true; % NOTE: default is true because it is intended that we always check for feasibility of the arguments traj_pos and traj_vel before calling this function.
+if isempty(Obstacles.Node{1}) % no obstacles
+    return
+end
 % cost = costo;
 % keyboard
 %
