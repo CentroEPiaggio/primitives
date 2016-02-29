@@ -23,6 +23,9 @@ end
 for bb=1:length(replicate_with)
     %%
     fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
+    figure(fig_xy);
+    plot3(replicate_with{bb}(1),replicate_with{bb}(2),replicate_with{bb}(5),'rx','linewidth',2)
+                
     % initialization values
     feasible = false;
     rewired = false;
