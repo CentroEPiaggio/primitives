@@ -19,9 +19,9 @@ traj_q = [];
 traj_qp = [];
 tau = [];
 % Tuning parameters for the
-max_joint_speed = 1;
-max_joint_acceleration = 1;
-max_joint_jerk = 1;
+max_joint_speed = 2;
+max_joint_acceleration = 2;
+max_joint_jerk = 2;
 %% Compute final position w.r.t. goal's position
 % R_0: inertial frame of reference
 inertial_for_coordinates = blkdiag(eye(3),0);
@@ -68,7 +68,7 @@ lam = min(1,max(0,lam));
 % p_e_desired_s(3) = p_g_s(3); % constrain the height of the end effector to be the same of the goal
 rest_position_s = [0.15;0;0.15];
 p_e_desired_s = rest_position_s*(lam) + p_g_s*(1-lam);
-
+p_e_desired_s = p_g_s;
 
 % End-effector position in inertial frame of reference
 p_e_desired_0 = A_s_0*[p_e_desired_s;1];
@@ -130,77 +130,78 @@ end
 p_g_e = A_g_0(1:3,4) - A_e_0(1:3,4)
 %% generate trajectory
 % q0 = [0;0;0;0];
-q0 = q0_arm;
-qf = q_arm;
+% q0 = q0_arm;
+% qf = q_arm;
+% 
+% figure(10); clf;
+% jj=1;
+% for ii=1:length(q_arm)
+%     xi{ii} = q0(ii);
+%     xf{ii} = qf(ii);
+%     if xi{ii}==xf{ii}
+%         time{ii} = 0;
+%         traj_q{ii} = xi{ii};
+%         traj_qp{ii} = 0;
+%         retval{ii}=1;
+%         continue;
+%     end
+%     xpi = 0;
+%     xpf = 0;
+%     
+%     vmax = max_joint_speed;
+%     amax = max_joint_acceleration;
+%     jerkmax = max_joint_jerk;
+%     
+%     x_0 = [xi{ii};xpi;0];
+%     x_f = [xf{ii};xpf;0];
+%     state_bounds = [-Inf Inf;
+%         -vmax vmax;
+%         -amax amax];
+%     control_bounds = [-jerkmax;jerkmax];
+%     
+%     [time{ii},traj_q{ii},traj_qp{ii},~,~,retval{ii}] = min_jerk_trajectory_analytic(x_0,x_f,Ts,state_bounds,control_bounds);
+%     
+%     if retval{ii}
+%         time{ii} = time{ii}(:)';
+%         traj_q{ii}  = traj_q{ii} (:)';
+%         traj_qp{ii}  = traj_qp{ii} (:)';
+%     else
+%         disp(['------- Error on trajectory generation of joint ' num2str(ii) ' -------'])
+%         flag = 1;
+%         if debug
+%             keyboard
+%         end
+% %         return
+%     end
+% end
 
-figure(10); clf;
-jj=1;
-for ii=1:length(q_arm)
-    xi{ii} = q0(ii);
-    xf{ii} = qf(ii);
-    if xi{ii}==xf{ii}
-        time{ii} = 0;
-        traj_q{ii} = xi{ii};
-        traj_qp{ii} = 0;
-        retval{ii}=1;
-        continue;
-    end
-    xpi = 0;
-    xpf = 0;
-    
-    vmax = max_joint_speed;
-    amax = max_joint_acceleration;
-    jerkmax = max_joint_jerk;
-    
-    x_0 = [xi{ii};xpi;0];
-    x_f = [xf{ii};xpf;0];
-    state_bounds = [-Inf Inf;
-        -vmax vmax;
-        -amax amax];
-    control_bounds = [-jerkmax;jerkmax];
-    
-    [time{ii},traj_q{ii},traj_qp{ii},~,~,retval{ii}] = min_jerk_trajectory_analytic(x_0,x_f,Ts,state_bounds,control_bounds);
-    
-    if retval{ii}
-        time{ii} = time{ii}(:)';
-        traj_q{ii}  = traj_q{ii} (:)';
-        traj_qp{ii}  = traj_qp{ii} (:)';
-    else
-        disp(['------- Error on trajectory generation of joint ' num2str(ii) ' -------'])
-        flag = 1;
-        if debug
-            keyboard
-        end
-%         return
-    end
-end
-
-flag = 0; % at this point all trajectories have been found
-
-T_max = max([time{:}]); % duration of the slowest joint trajectory
-
-for kk=1:length(q_arm)
-    % extend trajectories to cope with the slowest one
-    time_extension = time{kk}(end)+Ts:Ts:T_max;
-    time{kk} = [time{kk} time_extension]; % extend time
-    traj_q{kk} = [traj_q{kk}, traj_q{kk}(end)*ones(size(time_extension))]; % extend time
-    traj_qp{kk} = [traj_qp{kk}, zeros(size(time_extension))]; % extend time
-end
-% compute trajectories
-q_roomba_f = q_roomba_0;
-q_roomba_f(1:2) = q_roomba_0(1:2) + q_roomba_0(4)*T_max*[cos(q_roomba_0(3));sin(q_roomba_0(3))]; % roomba is traveling at constant speed
-t = time{1}; % all time vectors are equal after being extended to wait for the slowest one
-q_roomba = kron(q_roomba_0(1:3),ones(size(t))) + (q_roomba_0(4)*[cos(q_roomba_0(3));sin(q_roomba_0(3));q_roomba_0(5)])*t; % roomba is traveling at constant speed
-q_arm_traj = [traj_q{:}];
-q_arm_traj = reshape(q_arm_traj,[length(t),length(q_arm)])';
-
-qp_arm_traj = [traj_qp{:}];
-qp_arm_traj = reshape(qp_arm_traj,[length(t),length(q_arm)])';
-
-%% pack data for return
-traj_q = q_arm_traj;
-traj_qp = qp_arm_traj;
-time = t;
+% 
+% flag = 0; % at this point all trajectories have been found
+% 
+% T_max = max([time{:}]); % duration of the slowest joint trajectory
+% 
+% for kk=1:length(q_arm)
+%     % extend trajectories to cope with the slowest one
+%     time_extension = time{kk}(end)+Ts:Ts:T_max;
+%     time{kk} = [time{kk} time_extension]; % extend time
+%     traj_q{kk} = [traj_q{kk}, traj_q{kk}(end)*ones(size(time_extension))]; % extend time
+%     traj_qp{kk} = [traj_qp{kk}, zeros(size(time_extension))]; % extend time
+% end
+% % compute trajectories
+% q_roomba_f = q_roomba_0;
+% q_roomba_f(1:2) = q_roomba_0(1:2) + q_roomba_0(4)*T_max*[cos(q_roomba_0(3));sin(q_roomba_0(3))]; % roomba is traveling at constant speed
+% t = time{1}; % all time vectors are equal after being extended to wait for the slowest one
+% q_roomba = kron(q_roomba_0(1:3),ones(size(t))) + (q_roomba_0(4)*[cos(q_roomba_0(3));sin(q_roomba_0(3));q_roomba_0(5)])*t; % roomba is traveling at constant speed
+% q_arm_traj = [traj_q{:}];
+% q_arm_traj = reshape(q_arm_traj,[length(t),length(q_arm)])';
+% 
+% qp_arm_traj = [traj_qp{:}];
+% qp_arm_traj = reshape(qp_arm_traj,[length(t),length(q_arm)])';
+% 
+% %% pack data for return
+% traj_q = q_arm_traj;
+% traj_qp = qp_arm_traj;
+% time = t;
 %% plot
 if verbose
     figure
@@ -218,6 +219,9 @@ if verbose
     xlabel('x(m)'),ylabel('y(m)'),zlabel('z(m)');
 end
 
+Ts = 0.01;
+time = 0:Ts:1;
+tau = linspace(0,1,length(time));
 %%
 if debug
     disp(' Sampled distance ' )
