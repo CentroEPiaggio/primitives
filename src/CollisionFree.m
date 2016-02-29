@@ -24,8 +24,8 @@ for ii=1:Obstacles.nnodes
 %         checkon = x(Ptree.Node{ii}.dimensions>0,:);
         checkon = x(Obstacles.Node{ii}.dimensions>0,:);
     catch ME
+        disp(ME.message);
         keyboard
-        error(ME.message);
     end
     obstaclehit=obstaclehit & any(Obstacles.Node{ii}.P.contains(checkon,1));
     if obstaclehit
