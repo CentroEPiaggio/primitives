@@ -64,6 +64,7 @@ path_found = false;
 goal_node = [];
 source_node = 1;
 opt_path_edges = {};
+replicate_over_primitive = []; % list of primitives that need replicated points
 global raggio_conta; raggio_conta=1; figure(13); plot(0,0);hold on;
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
@@ -93,21 +94,23 @@ for ii=1:N_sample_max
     
     %% Run sampling algorithm on the Chi0 space
     idx_parent_primitive = [];
-    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
+    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
     %     test_plot_opt
     if added_new && reached(T.Node{end},z_goal,tol) % first time a path is found
-        keyboard
+        %-keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
         disp('Goal reached (via Muovi)!');
         path_found = true;
-        if debug,keyboard,end
+        if debug
+            %-keyboard
+        end
         
         load handel;
         player = audioplayer(y, Fs);
         play(player);
         [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-        %         keyboard
+        %         %-keyboard
         opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
         % save cost and iteration for plotting (anytime) stuff
         if  isempty(cost_vector) || (~isempty(cost_vector) && cost<cost_vector(end))
@@ -118,7 +121,9 @@ for ii=1:N_sample_max
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             %             hold on
             save_test_data
-            if debug,keyboard,end
+            if debug
+                %-keyboard
+            end
         end
         continue % for anytime behavior
     end
@@ -136,7 +141,9 @@ for ii=1:N_sample_max
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             %             hold on
             save_test_data
-            if debug,keyboard,end
+            if debug
+                %-keyboard
+            end
         end
     end
     
@@ -157,8 +164,9 @@ for ii=1:N_sample_max
             prim = Ptree.Node{jj};
             
             %% take the last added point, extend it, and add it to the tree
-            keyboard
-            %%
+            %-keyboard
+            
+            %% TRIGGER ON
             q_trig = [];
             Ts = 0.01; % TODO: once and for all parametrize this
             cost_trig = Ts;
@@ -170,11 +178,13 @@ for ii=1:N_sample_max
                 = InsertExtendedNode(idx_last_added,prim.extend(z_new),T,G,E, prim, q_trig, cost_trig, x_trig , time_trig, verbose, plot_nodes, plot_edges);
             prim.extend(z_new)
             if checkdiscontinuity(T,E,Ptree)
-                keyboard
+                %-keyboard
             end
+            
+            
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
-                keyboard
+                %-keyboard
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
                 % the -1 is a dirty fix for the fact
@@ -187,7 +197,9 @@ for ii=1:N_sample_max
                 disp('Goal reached (via Eleva)!');
                 path_found = true;
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                if debug,keyboard,end
+                if debug
+                    %-keyboard
+                end
                 stop = true;
                 break
             end
@@ -204,7 +216,9 @@ for ii=1:N_sample_max
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
                     %                     hold on
                     save_test_data
-                    if debug,keyboard,end
+                    if debug
+                        %-keyboard
+                    end
                 end
             end
             % RESTART FROM HERE: see if it's better to have z_aug only as
@@ -239,7 +253,19 @@ for ii=1:N_sample_max
             
             idx_parent_primitive = 1;
             
-            [T,G,E,z_new_aug,plot_nodes,plot_edges,idx_last_added] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol);
+            [T,G,E,z_new_aug,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
+            %% set of points with different dimensions along the primitives
+            if added_new
+                %-keyboard
+                z_added = T.get(idx_last_added);
+                %                 z_new(5)==1 % prim.istask % boolean
+                if z_added(5)==1 % TODO: HARDCODED % verify condition on trigger exit
+                    %-keyboard
+                    %                     replicate_over_primitive = [replicate_over_primitive, prim.ID];
+                    replicate_over_primitive = 2;
+                end
+            end
+            
             if added_new && reached(T.Node{end},z_goal,tol)
                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
                 goal_node = idz_Goal;
@@ -253,7 +279,9 @@ for ii=1:N_sample_max
                 disp('Goal reached (via Eleva)!');
                 path_found = true;
                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                if debug,keyboard,end
+                if debug
+                    %-keyboard
+                end
                 stop = true;
                 break
             end
@@ -269,7 +297,9 @@ for ii=1:N_sample_max
                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
                     %                     hold on
                     save_test_data
-                    if debug,keyboard,end
+                    if debug
+                        %-keyboard
+                    end
                 end
             end
             
@@ -288,7 +318,9 @@ for ii=1:N_sample_max
             bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
             %             hold on
             save_test_data
-            if debug,keyboard,end
+            if debug
+                %-keyboard
+            end
             stop=false;
             %             break;
         end

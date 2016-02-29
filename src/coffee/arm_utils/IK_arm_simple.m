@@ -2,7 +2,7 @@ function [theta,flag]=IK_arm_simple(x,y,z,approach)
 clear theta flag
 debug = 1;
 if debug
-    keyboard
+%     keyboard
 end
 
 	a = [0,0.09,0.11,0.11];     %%Parameter A (Convention D-H)

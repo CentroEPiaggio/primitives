@@ -87,7 +87,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
 %             end
             [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_arm_muovi_params);
             tauf = x(end);
-            keyboard
+%             keyboard
             feasible = ~retval; % sick convention, retval is 1 on failure.
             if feasible
                 if isnan(taui)

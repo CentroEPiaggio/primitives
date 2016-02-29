@@ -46,7 +46,7 @@ L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base fra
 if norm(goal_position_s)>L_arm
     disp('Over the hills and far away');
     if debug
-        keyboard
+        %-keyboard
     end
     return
 end
@@ -58,7 +58,7 @@ p_s_0 = A_s_0(1:3,4);
 p_g_0 = A_g_0(1:3,4);
 
 % versore = p_g_s/norm(p_g_s);
-% keyboard
+% %-keyboard
 approach_angle = []; % constrain this to +- 45 degrees. It is done in IK_arm_simple
 
 % End-effector position in shoulder frame of reference
@@ -83,7 +83,7 @@ if flag == 1
         disp('------- Error in IK! -------')
     end
     if debug
-        keyboard
+        %-keyboard
     end
     return
 else
@@ -121,7 +121,7 @@ else
             plot3(p_e_desired_0(1),p_e_desired_0(2),p_e_desired_0(3),'rx','linewidth',2)
             p_rest_position_0 = A_s_0*[rest_position_s;1];
             plot3(p_rest_position_0(1),p_rest_position_0(2),p_rest_position_0(3),'kx','linewidth',2)
-            keyboard
+            %-keyboard
         end
 %         return
     end
@@ -169,7 +169,7 @@ p_g_e = A_g_0(1:3,4) - A_e_0(1:3,4)
 %         disp(['------- Error on trajectory generation of joint ' num2str(ii) ' -------'])
 %         flag = 1;
 %         if debug
-%             keyboard
+%             %-keyboard
 %         end
 % %         return
 %     end

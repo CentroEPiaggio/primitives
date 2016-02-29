@@ -45,11 +45,11 @@ distance_from_goal = L_arm*(1-tau_f);
 q_roomba_0 = [x_i; y_i; th_i; v_i; 0];
 
 % if debug
-%     keyboard
+%     %-keyboard
 % end
 
 [flag,time,tau,traj_q,traj_qp]=arm_trajectory_generator(Ts,q_roomba_0,A_g_0,distance_from_goal,q0_arm);
-keyboard
+%-keyboard
 x=tau;
 retval = flag;
 return

@@ -18,7 +18,7 @@
 % x=fix_nans(x_sampled,[1 1 0 0])
 % we return x=[4 7 2 NaN];
 function x = fix_nans(x_sampled,dimensions)
-keyboard
+% keyboard
 x = zeros(length(dimensions),1);
 if nargin==1 % obtain non-NaN dimensions
     x = x_sampled(~isnan(x_sampled)>0);

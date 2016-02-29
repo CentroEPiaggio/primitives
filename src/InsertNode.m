@@ -32,7 +32,7 @@ else
     % %% debug end
     if ~isinf(cost) && cost>0
         if debug & prim.ID == 2
-            keyboard
+%             keyboard
         end
 %         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
 %         test2 = fix_nans(z_new,prim.dimensions);
