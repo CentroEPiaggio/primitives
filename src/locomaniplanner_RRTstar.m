@@ -21,6 +21,7 @@ load_libraries
 % NaN? We'll see.
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [1.5  ; 0.5 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -150,11 +151,23 @@ for ii=1:N_sample_max
             end
             
             prim = Ptree.Node{jj};
-
+            
             %% take the last added point, extend it, and add it to the tree
             keyboard
-            [T,G,E] = InsertExtendedNode(T,G,E,T) % RESTART FROM HERE!!!
+            %%
+            q_trig = [];
+            cost_trig = 1e-9;
+            Ts = 0.01;
+            time_trig = 0:Ts:Ts;
+            x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
+            [added_new,T,G,E,... % inputs for algorithm stuff
+                plot_nodes,plot_edges, ... % inputs for plotting visual stuff
+                idx_last_added] ... % return index of last added node
+                = InsertExtendedNode(idx_last_added,prim.extend(z_new),T,G,E, prim, q_trig, cost_trig, x_trig , time_trig, verbose, plot_nodes, plot_edges);
             prim.extend(z_new)
+            if checkdiscontinuity(T,E,Ptree)
+                keyboard
+            end
             %%
             if added_new && reached(T.Node{end},z_goal,tol)
                 keyboard
@@ -202,7 +215,7 @@ for ii=1:N_sample_max
                 pushed_in_goal=1;
             else
                 z_aug = prim.chi.sample;
-%                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
+                %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
                 pushed_in_goal=0;
             end
             
