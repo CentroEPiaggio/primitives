@@ -23,11 +23,11 @@ cost_table = rand(10,3);
 xmin = 0; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
 xmax = 10; % meters
 xmax = 2;
-L_arm = 0.31; xmax = L_arm;
+L_arm = 0.31; xmax = 5%L_arm;
 ymin = 0;
 ymax = 10; % meters
 ymax = 2;
-L_arm = 0.31; ymax = L_arm;
+L_arm = 0.31; ymax = 5%L_arm;
 vmin = 0; % linear speed
 vmin = -0.1; % linear speed % FIXME: check if this has to be negative too for the coffee application.
 vmax = 0.1; % TODO: check out this value
