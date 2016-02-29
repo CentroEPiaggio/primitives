@@ -194,7 +194,9 @@ if all( prim.chi.P.contains([z_rand, z_nearest_extended(prim.dimensions_imagespa
                         keyboard
                     end
                     if all(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)))
-                        z_new = round(x(prim.dimensions>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
+                        [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
+                        x = x_complete;
+                        z_new = round(x(prim.dimensions_imagespace>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                         if isempty(idx_min)
                             keyboard
                         end
