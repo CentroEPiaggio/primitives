@@ -59,6 +59,9 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             Ts = 0.1;
             
+            if isnan(z_start(5))
+                q0_arm = [0;0;0;0];
+            end
             %yi = rand; %danilo briccone
             %yf = yi*2;
             % prepare data for muovi
@@ -73,16 +76,21 @@ classdef ARM_move < primitive_library.PrimitiveFun
                 'taui',taui,            ...
                 'tauf',tauf,            ...
                 'A_g_0',obj.A_g_0,      ...
+                'q0_arm',q0_arm,    ...
                 'Ts',Ts            ...
                 ); %                 'Tend',Tend,        ...
             
-            if debug
-                keyboard
-            end
+%             if debug
+%                 keyboard
+%             end
             [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_arm_muovi_params);
-            
+            keyboard
             feasible = ~retval; % sick convention, retval is 1 on failure.
             if feasible
+                if isnan(taui)
+                    taui = 0; % HARDCODED INITIALIZATION
+                end
+                x = linspace(taui,tauf,length(time));
                 cost = time(end);
             end
             return

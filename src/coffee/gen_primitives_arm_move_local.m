@@ -11,6 +11,7 @@ vi = prim_data.vi;
 % vf = prim_data.vf;
 taui = prim_data.taui;
 tauf = prim_data.tauf;
+q0_arm = prim_data.q0_arm;
 
 % Tend = prim_data.Tend; % DONE now it is parameterized
 
@@ -36,7 +37,7 @@ control_bounds = [-vmax;vmax];
 
 %[time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_optimal_trajectory(x0,xf,Ts,state_bounds,control_bounds);
 % [time,traj_pos_cart,traj_vel_cart,~,~,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds);
-[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,A_g_0);
+[time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,A_g_0,q0_arm);
 
 %time = time(:)';
 %traj_pos_cart = traj_pos_cart(:)';

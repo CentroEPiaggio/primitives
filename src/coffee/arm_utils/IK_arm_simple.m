@@ -12,7 +12,8 @@ end
     vector_elevation = acos(dot(vector_3d,vector_planar_projection)/(norm(vector_3d)*norm(vector_planar_projection)));
     
 	orientazione_terna=rad2deg(vector_elevation);% Orientation of Approach of the End-effector in the Plane X1-Z0 
-
+    orientazione_terna = min(45,max(-45,orientazione_terna));
+    
 % compute the angle of the first joint
     theta1=radtodeg(atan2(y,x));
 
@@ -56,17 +57,19 @@ end
 
         theta4=orientazione_terna-theta2-theta3;
 		theta=[theta1,theta2,theta3,theta4];
-        % final offset fix
-        theta(1) = -theta(1);
-        theta(2) = 90-theta(2);
+%         THIS IS FOR HARDWARE SETUP
+%         % final offset fix
+%         theta(1) = -theta(1);
+%         theta(2) = 90-theta(2);
         return
 
     else %if found from inverse Kinematic is acceptable 
         theta4=orientazione_terna-theta2-theta3;
         theta=[theta1,theta2,theta3,theta4];
-        % final offset fix
-        theta(1) = -theta(1);
-        theta(2) = 90-theta(2);
+%         THIS IS FOR HARDWARE SETUP
+%         % final offset fix
+%         theta(1) = -theta(1);
+%         theta(2) = 90-theta(2);
         return
     end
 
