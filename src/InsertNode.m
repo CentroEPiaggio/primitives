@@ -8,6 +8,7 @@ function [added_node,T,G,E,... % inputs for algorithm stuff
     verbose, plot_nodes,plot_edges) % inputs for plotting visual stuff
 disp('Entered inside InsertNode')
 added_node = false;
+debug = true;
 if idx_current==0 % first node
     % add inial state to the tree
     T = T.addnode(0,z_new);
@@ -30,17 +31,21 @@ else
     %     end
     % %% debug end
     if ~isinf(cost) && cost>0
-        test1 = fix_nans(T.Node{idx_current},prim.dimensions);
-        test2 = fix_nans(z_new,prim.dimensions);
-        
-        if isequal(test1,test2) % length(test1)==length(test2) && all(test1==test2)
-            cprintf('error','InsertNode: last node exception. Not adding the node.\n');
+        if debug & prim.ID == 2
             keyboard
-            return
         end
-        z_new=fix_nans(z_new,prim.dimensions);
+%         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
+%         test2 = fix_nans(z_new,prim.dimensions);
+%         
+%         if isequal(test1,test2) % length(test1)==length(test2) && all(test1==test2)
+%             cprintf('error','InsertNode: last node exception. Not adding the node.\n');
+%             keyboard
+%             return
+%         end
+        z_new=fix_nans(z_new,prim.dimensions_imagespace);
         %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
         z_current = T.get(idx_current);
+        z_new(prim.dimensions_imagespace==0) = z_current(prim.dimensions_imagespace==0);
         %         keyboard
         %         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
         % pseudo-code
@@ -59,9 +64,9 @@ else
             z_n(map_z_new_dimensions_not_initialized>0) = z_current(map_z_new_dimensions_not_initialized>0,end);
         end
         z_new = z_n;
-        if length(z_new) < 3
-            keyboard
-        end
+%         if length(z_new) < 3
+%             keyboard
+%         end
         %
 %         if z_current(3) > 1 && z_new(3) == 1 % this condition was used on the pendulum
 %             disp('Strange!!!!')
