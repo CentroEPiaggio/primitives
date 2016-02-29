@@ -18,7 +18,7 @@ feasible = true; % NOTE: default is true because it is intended that we always c
 cprintf('*[0,0.7,1]*','* Collision detection:');
 
 kk=1;
-obstaclehit=true;
+obstaclehit=false;
 for ii=1:Obstacles.nnodes
     try
 %         checkon = x(Ptree.Node{ii}.dimensions>0,:);
@@ -27,7 +27,7 @@ for ii=1:Obstacles.nnodes
         disp(ME.message);
         keyboard
     end
-    obstaclehit=obstaclehit & any(Obstacles.Node{ii}.P.contains(checkon,1));
+    obstaclehit=obstaclehit || any(Obstacles.Node{ii}.P.contains(checkon,1));
     if obstaclehit
         cprintf('*[1,0,0]*',' NOGO, collision detected *\n');
         feasible = false;

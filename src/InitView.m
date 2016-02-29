@@ -12,7 +12,9 @@ if verbose
     plot(z_init(1),z_init(2),'go','linewidth',4) % plot initial point
     plot(z_goal(1),z_goal(2),'ko','linewidth',4) % plot initial point
     xlabel('x [m]'); ylabel('y [m]'); % TODO: parametrize inside the primitive
-    obstacle_wall.P.plot('color','black','alpha',0.5);
+    for i=1:numel(Obstacles.Node)
+        Obstacles.Node{i}.P.plot('color','black','alpha',0.5);
+    end
     
     figure(fig_xy)
     plot3(z_init(1),z_init(2),0,'go','linewidth',4) % plot initial point % HARDFIX 0 in z to represent tau
