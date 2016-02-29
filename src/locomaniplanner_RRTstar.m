@@ -3,6 +3,7 @@ clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
 multiple_primitives = 1; % testing locomotion primitive only for coffee
+obstacles_on = false;
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m
@@ -22,7 +23,10 @@ load_libraries
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 z_goal = [1.5  ; 0.5 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-
+L_arm = 0.31;
+z_init = [0  ; 0 ; pi/4 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
+z_goal = [L_arm  ; L_arm ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+%%
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
@@ -36,7 +40,7 @@ InitObstacles; % initialize obstacles structure
 % z_intermediate_2 = [15;0;1];
 % z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
 if multiple_primitives
-    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/4 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
     bias_points = {z_intermediate_2,z_goal};
 else
     bias_points = {z_goal};

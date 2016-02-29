@@ -23,8 +23,8 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);
-            x_target = 1; % HARDCODED
-            y_target = 1;
+            x_target = 0.1550; % HARDCODED
+            y_target = 0.1550;
             obj.A_g_0(1:3,4) = [x_target;y_target;0.3];
             obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
         end
@@ -86,6 +86,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
 %                 keyboard
 %             end
             [time,x,u,q,retval,cost]=gen_primitives_arm_move_local(primitive_arm_muovi_params);
+            tauf = x(end);
             keyboard
             feasible = ~retval; % sick convention, retval is 1 on failure.
             if feasible
