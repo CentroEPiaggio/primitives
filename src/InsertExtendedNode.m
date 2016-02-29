@@ -3,7 +3,10 @@ function [added_node,T,G,E,... % inputs for algorithm stuff
     idx_last_added] ... % return index of last added node
     = InsertExtendedNode(idx_current,z_new,T,G,E, prim, q, cost, x , time, verbose, plot_nodes, plot_edges)
 %%
-keyboard
+debug = 0;
+if debug
+    keyboard
+end
 disp('Entered inside InsertExtendedNode')
 added_node = false;
 % if idx_current==0 % first node
