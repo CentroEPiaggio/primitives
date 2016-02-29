@@ -59,7 +59,9 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             Ts = 0.1;
             
-            if isnan(z_start(5))
+            if isnan(z_start(5)) % TODO: FIXME!!!
+                q0_arm = [0;0;0;0];
+            else
                 q0_arm = [0;0;0;0];
             end
             %yi = rand; %danilo briccone
