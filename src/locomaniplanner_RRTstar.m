@@ -156,8 +156,8 @@ for ii=1:N_sample_max
             keyboard
             %%
             q_trig = [];
-            cost_trig = 1e-9;
-            Ts = 0.01;
+            Ts = 0.01; % TODO: once and for all parametrize this
+            cost_trig = Ts;
             time_trig = 0:Ts:Ts;
             x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
             [added_new,T,G,E,... % inputs for algorithm stuff
