@@ -20,6 +20,7 @@ if verbose
     figure(fig_xy)
     plot3(z_init(1),z_init(2),0,'go','linewidth',4) % plot initial point % HARDFIX 0 in z to represent tau
     hold on
+    Chi0_viz.plot('color','lightgreen','alpha',0.5);hold on;     % plot search region (piano)
     grid on
     plot3(z_goal(1),z_goal(2),z_goal(5),'ko','linewidth',4) % plot initial point
     xlabel('x axis [m]'); ylabel('y axis [m]'); zlabel('tau [1]'); % TODO: parametrize inside the primitive

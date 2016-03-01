@@ -96,8 +96,11 @@ for bb=1:length(replicate_with)
         [feasible,cost,q,x,time] = prim.steering(z_nearest,z_rand); % uniform interface! Yeay!
         dim_z_new = prim.dimensions_imagespace;
         if prim.ID == 2
-            %-keyboard
+            %keyboard
         end
+%         if prim.ID == 1 && z_nearest_extended(5)==1
+%             keyboard
+%         end
         if feasible
             
             % collision checking
@@ -193,11 +196,11 @@ for bb=1:length(replicate_with)
                         if ~isequaln(round(x(1:length(z_new),end)*100)/100,z_new)%x(1:2,end) ~= z_new(1:2)
                             disp('ChooseParent slightly changed the goal point!')
                             %                         %-keyboard
-                            if pushed_in_goal
-                                if reached(x(1:length(z_new),end),z_new,tol)
-                                    %-keyboard
-                                end
-                            end
+%                             if pushed_in_goal
+%                                 if reached(x(:,end),z_new,tol)
+%                                     %-keyboard
+%                                 end
+%                             end
                         end
                     end
                 end

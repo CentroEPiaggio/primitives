@@ -3,8 +3,13 @@ state = 0;
 diff = NaN;
 % keyboard
 mask = [1,2,5];
-A = A(mask);
-B = B(mask);
+try
+    A = A(mask);
+    B = B(mask);
+catch ME
+    disp(ME.message);
+    keyboard
+end
 % tol=0.05; % custom % TODO: note that if the goal region is big, like tol=1, it can happen that a goal point more far from its center gives a better cost that one at the center
 if isequal(isnan(A),isnan(B)) % check if the two points live in the same subspace
     A = fix_nans(A,~isnan(A));

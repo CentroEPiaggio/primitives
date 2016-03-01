@@ -4,11 +4,14 @@ Obstacles = tree;
 if obstacles_on
     x_wall_min = 4;
     x_wall_max = x_wall_min + 2;
-    x_wall_min = 1;
+    x_wall_min = -0.3;
     x_wall_max = x_wall_min + 0.5;
+    x_wall_max = 0.7;
     % y_wall_min = 2;
     y_wall_min = 1.5;
+    y_wall_min = 0.3;
     y_wall_max = 1.8;
+    y_wall_max = 0.8;
     
     dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
     obstacle_wall = Obstacle(([ ...

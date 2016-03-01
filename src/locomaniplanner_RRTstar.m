@@ -3,11 +3,11 @@ clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
 multiple_primitives = 1; % testing locomotion primitive only for coffee
-obstacles_on = false;
+obstacles_on = true;
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m
-tol=0.05; % tolerance for the goal region distance from the goal point
+tol=0.1;0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
 debug=0; % enable breakpoints
@@ -24,9 +24,9 @@ z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 z_goal = [1.5  ; 0.5 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 L_arm = 0.31;
-z_init = [0  ; 0 ; pi/4 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
+z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [L_arm  ; L_arm ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-z_goal = [5  ; 5 ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [0  ; 1 ; pi ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 %%
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -41,8 +41,11 @@ InitObstacles; % initialize obstacles structure
 % z_intermediate_2 = [15;0;1];
 % z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
 if multiple_primitives
-    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/4 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-    bias_points = {z_intermediate_2,z_goal};
+    z_intermediate_1 = [1; 1; pi/2 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/2 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    z_intermediate_3 = [1; 0.25; pi/2; 0; 0];
+    z_intermediate_4 = [1; 0.55; pi/2; 0; 1];
+    bias_points = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
 else
     bias_points = {z_goal};
 end
@@ -53,7 +56,7 @@ bias_ii = 1;
 InitView; % open figures
 
 % algorithm parameters
-N_sample_max = 3000; % max number of samples
+N_sample_max = 1000; % max number of samples
 
 % These vectors are used to save progress of anytime algorithm
 cost_vector = [];
@@ -67,6 +70,8 @@ source_node = 1;
 opt_path_edges = {};
 replicate_over_primitive = []; % list of primitives that need replicated points
 global raggio_conta; raggio_conta=1; figure(13); plot(0,0);hold on;
+z_rand = Chi0.sample; pushed_in_goal=0;
+z_aug = Ptree.Node{2}.chi.sample;
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
@@ -80,10 +85,21 @@ for ii=1:N_sample_max
         z_rand = Chi0.sample; % sample a point in Chi0.
         pushed_in_goal=0;
     end
+    while ~CollisionFree(fix_nans(z_rand,Ptree.Node{1}.dimensions_imagespace),Ptree,Obstacles)
+        if mod(ii,push_bias_freq)==0 %&& ~path_found
+            z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
+            z_rand = z_bias(Ptree.Node{1}.dimensions>0); % every once in a while push in a known number
+            disp('Pushing in goal')
+            pushed_in_goal=1;
+        else
+            z_rand = Chi0.sample; % sample a point in Chi0.
+            pushed_in_goal=0;
+        end
+    end
     
     % round up to the second decimal
     z_rand = round(z_rand*100)/100;
-    
+        
     if verbose
         disp(['z_rand: ' num2str(z_rand(:)')])
         fig_xv=2; fig_xy = 3; % parametrize
@@ -237,7 +253,17 @@ for ii=1:N_sample_max
                 %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
                 pushed_in_goal=0;
             end
-            
+            while ~CollisionFree(fix_nans([z_aug],Ptree.Node{2}.dimensions_imagespace),Ptree,Obstacles)
+                if mod(ii,push_bias_freq)==0 %&& ~path_found
+                    z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
+                    disp('Pushing in aug goal')
+                    pushed_in_goal=1;
+                else
+                    z_aug = prim.chi.sample;
+                    %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
+                    pushed_in_goal=0;
+                end
+            end
             % rounding up to the second decimal
             z_aug = round(z_aug*100)/100;
             

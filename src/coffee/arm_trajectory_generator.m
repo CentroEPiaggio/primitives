@@ -41,8 +41,10 @@ A_s_0 = A_b_0*A_s_b;
 A_g_s = A_s_0\A_g_0;
 goal_position_s = A_g_s(1:3,4);
 p_g_s = [goal_position_s(1:3)];
-
+%keyboard
 L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
+% disp('*************** WARNING ARM PRIMITIVE TODO: FIX! *******************')
+% TODO: FIX!
 if norm(goal_position_s)>L_arm
     disp('Over the hills and far away');
     if debug
@@ -228,6 +230,7 @@ if debug
     distance_from_goal
     disp(' Calculated distance ' )
     norm(p_g_e)
+    %keyboard
 end
 
 end

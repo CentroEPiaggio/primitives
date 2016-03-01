@@ -20,7 +20,7 @@ radius = 0;
 % Optimal Kinodynamic Motion Planning using Incremental Sampling-based
 % Methods
 % keyboard
-d = 3; % TUNE: this is the dimension of the whole state space (i.e. the maximum length of a sample vector).
+d = 5; % TUNE: this is the dimension of the whole state space (i.e. the maximum length of a sample vector). TODO: FIXME: parametrize
 n = cardV;
 if n<2
     idX_near = 1; % return the index of the root of the tree
@@ -33,8 +33,8 @@ volume = gam*(log(n)/n).^d; % CHECK: we use natural logarithm here, it is not cl
 % radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 % radius = radius_elevated_n^(1/n);
 radius = gamma(1+d/2).^(1./d)/sqrt(pi) .* volume.^(1./d);
-
-global raggio_conta; figure(13); plot(raggio_conta,radius,'bx'); raggio_conta = raggio_conta+1;
+radius = 10;
+% global raggio_conta; figure(13); plot(raggio_conta,radius,'bx'); raggio_conta = raggio_conta+1;
 % TUNE gam graphically with this
 % gam = 100
 % n = 1:1e3;

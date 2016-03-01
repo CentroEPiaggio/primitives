@@ -256,6 +256,17 @@ if retval
     % the values we want to return are the trajectories inside the image
     % space (on which we can perform collision checking).
     speed(:,end+1) = speed(:,end);
+%     if any(abs(th_t)>pi)
+%         keyboard
+%     end
+    for ii=1:length(time)
+        while th_t(ii)>pi
+            th_t(ii) = th_t(ii) - 2*pi;
+        end
+        while th_t(ii)<-pi
+            th_t(ii) = th_t(ii) + 2*pi;
+        end
+    end
     x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:)];
     u = [speed]; % we'll see what to put in here
     if debug
