@@ -328,25 +328,30 @@ for bb=1:length(replicate_with)
                     end
                     
                     cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                    rewire_enable = false;
-                    if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enable
-                        cprintf('*[0,0.7,1]*','* ReWire *\n');
-                        %                     z_min = T.get(idx_min);
-                        idx_new = T.nnodes;
-                        %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
-                        %                         %-keyboard
-                        %                     end
-                        try
-                            [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
-                        catch ME
-                            disp(ME.message);
+                    rewire_enable = true;
+                    try
+                        if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enable
+                            cprintf('*[0,0.7,1]*','* ReWire *\n');
+                            %                     z_min = T.get(idx_min);
+                            idx_new = T.nnodes;
+                            %                     if ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv);
+                            %                         %-keyboard
+                            %                     end
+                            try
+                                [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                            catch ME
+                                disp(ME.message);
+                            end
+                            plot_edges=pedges;
+                            plot_nodes=pnodes;
+                            
+                            if ~isnan(idx_last_added_rewire)
+                                idx_last_added = idx_last_added_rewire;
+                            end
                         end
-                        plot_edges=pedges;
-                        plot_nodes=pnodes;
-                        
-                        if ~isnan(idx_last_added_rewire)
-                            idx_last_added = idx_last_added_rewire;
-                        end
+                    catch MI
+                        disp(MI.message)
+                        keyboard
                     end
                     
                     if checkdiscontinuity(T,Edges,Ptree)

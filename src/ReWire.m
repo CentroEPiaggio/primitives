@@ -1,11 +1,12 @@
 function [rewired, T, G, E , x_rewire ,pn,pe, added_new, idx_last_added] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points,verbose)
 % keyboard
 %REWIRE Summary of this function goes here
+% keyboard
 rewired = false;
 added_new = false;
 idx_last_added = idx_new;
-traj_pos = NaN;
-traj_vel = NaN;
+% traj_pos = NaN;
+% traj_vel = NaN;
 x_rewire = NaN;
 %   Detailed explanation goes here
 idx_I = 1;
@@ -23,14 +24,21 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         % select primitive HARDFIX
         % BUGFIX (*)
         if ~isequal(isnan(z_near),isnan(z_new))
-            return
+            continue
+%             return
         end
-        if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
-            prim = Ptree.Node{2}; % Elevate
-            idx_prim = 2;
-        else
-            prim = Ptree.Node{1}; % Move
-            idx_prim = 1;
+        % finds the primitive space where the points both live
+        prim_found = false;
+        for jj=1:Ptree.nnodes
+            prim = Ptree.Node{jj};
+            if all(prim.chi.P.contains([z_new(prim.dimensions_imagespace>0),z_near(prim.dimensions_imagespace>0)])) && isequaln(z_new(prim.dimensions_imagespace==0),z_near(prim.dimensions_imagespace==0))
+                prim_found = true;
+                break;
+            end
+        end
+        if ~prim_found
+            disp('Could not find a primitive for rewiring!');
+            keyboard
         end
         % calculate feasibility and cost
         %         [feasible,cost_new_edge,q,traj_pos_rewire,traj_vel_rewire] = steering_muovi(X_near(1,i),x_new(1),X_near(2,i),x_new(2));
@@ -49,6 +57,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             continue;
         end
         
+%         keyboard
         [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
 %         if feasible
 %             feasible=CollisionFree(x_rewire,Ptree,Obstacles); % Here
@@ -56,20 +65,27 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
 %             intermediate_node
 %         end
         if feasible
-            if idx_prim == 1 % collision checking only if we are on the Move primitive
-                %             keyboard
-                traj_pos_rewire = x_rewire(1,:);
-                traj_vel_rewire = x_rewire(2,:);
-                %                 keyboard
-                traj_y_rewire   = z_new(3,:)*ones(size(traj_vel_rewire)); % BUG: this line generates NaN trajectories when z_new(3,:) is NaN! FIXED IN BUGFIX (*)
-                %                 x_rewire = [traj_pos_rewire traj_vel_rewire];
-            else % Eleva primitive
-                %             traj_pos = %x(1,:);
-                traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
-                traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
-                traj_y_rewire = x_rewire;
+            [x_rewire] = complete_trajectories(z_new,time_rewire,x_rewire,Ptree,prim.ID);
+            if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100/100),z_near(prim.dimensions>0))
+                feasible = false;
             end
-            x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
+        end
+        if feasible
+            keyboard
+%             if idx_prim == 1 % collision checking only if we are on the Move primitive
+%                 %             keyboard
+%                 traj_pos_rewire = x_rewire(1,:);
+%                 traj_vel_rewire = x_rewire(2,:);
+%                 %                 keyboard
+%                 traj_y_rewire   = z_new(3,:)*ones(size(traj_vel_rewire)); % BUG: this line generates NaN trajectories when z_new(3,:) is NaN! FIXED IN BUGFIX (*)
+%                 %                 x_rewire = [traj_pos_rewire traj_vel_rewire];
+%             else % Eleva primitive
+%                 %             traj_pos = %x(1,:);
+%                 traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
+%                 traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
+%                 traj_y_rewire = x_rewire;
+%             end
+%             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
             %             keyboard
             %             if isequaln(x_rewire(:,1),z_new) && isequaln(x_rewire(:,end),z_near)
             %% here we try to add an intermediate node in case that some trimmered primitive has changed some dimensions of the goal point
