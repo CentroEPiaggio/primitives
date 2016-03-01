@@ -11,7 +11,7 @@
 % idx_near_bubble:  the index of such point in the tree structure (i.e. to
 %                   be able to call Tree.get(idx_near_bubble) to fetch
 %                   that node).
-function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV,gam)
+function [idX_near,radius] = near(T,Graph,Edges,z_new,z_new_dimensions,cardV,gam,prim)
 debug = 0;
 cprintf('*[0,0,0]*','>>> Enter Near\n');
 idX_near=NaN;
@@ -52,8 +52,79 @@ radius = 10;
 %keyboard
 % builds a matrix of the nodes (this can be avoided in a future
 % implementation with a better data structure)
+% keyboard
 points_mat = cell2mat(T.Node');
 
+%% TEST
+if ~isempty(points_mat)
+    % z_new = z_new(z_new_dimensions>0); % retrocompatibility
+    z_test = fix_nans(z_new,prim.dimensions_imagespace);
+    % if z_test(5) == 1 %z_test(5) == 0 || z_test(5) == 1
+    % %     keyboard
+    % end
+    %
+    %
+    if prim.ID == 1 % TODO: HARDCODED
+        %     temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
+        test1 = points_mat(prim.dimensions_imagespace==0,:);
+        
+        test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)))
+        keep_columns = [];
+        for ii=1:length(test1)
+            if isequaln(test1(ii),test2(ii))
+                keep_columns = [keep_columns, ii];
+            end
+        end
+        points_mat_purged = points_mat(:,keep_columns);
+    else % TODO: HARDCODED
+        %     keyboard
+        keep_columns = 1:size(points_mat,2);
+        points_mat_purged = points_mat;
+        
+        
+        test1 = points_mat(prim.dimensions>0,:);
+        
+        test2 = kron(z_test(prim.dimensions>0),ones(1,size(points_mat,2)))
+        keep_columns = [];
+        for ii=1:length(test1)
+            if ~isnan(test1(ii)*test2(ii))
+                keep_columns = [keep_columns, ii];
+            end
+        end
+        points_mat_purged = points_mat(:,keep_columns);
+        
+    end
+    mask = ~isnan(z_test)
+    points_mat_masked = points_mat_purged(mask>0,:);
+    non_nans_col = find(all(~isnan(points_mat_purged(mask>0,:))));
+    try
+        points_mat_masked = points_mat(mask>0,keep_columns(non_nans_col));
+        %     idx_nearest_temp = knnsearch(points_mat_masked',z_rand(mask>0)');
+        idX_near_temp = rangesearch(points_mat_masked',z_new(mask>0)', radius)
+        idX_near_temp = cell2mat(idX_near_temp);
+        if isempty(idX_near_temp)
+            % no close point
+            %         keyboard
+            cprintf('*[0,0,0]*','Near: no close point, maybe radius is too small?\n');
+            idX_near = []
+        else
+            %         idx_compatible = find(~idx_has_nan>0)
+            idX_near = points_mat(:,keep_columns(idX_near_temp));
+        end
+        %     idx_nearest = keep_columns(non_nans_col(idx_nearest_temp));
+        %     z_nearest = T.get(idx_nearest);
+    catch ME
+        disp(ME.message)
+        keyboard
+    end
+else
+    keyboard
+    idX_near = [];
+end
+cprintf('*[0,0,0]*','<<< Exit Near\n');
+return
+
+%%
 % idx_same_dimension = find(any(isnan(points_mat(z_new_dimensions>0,:))));
 idx_has_nan = any(isnan(points_mat(z_new_dimensions>0,:)));
 points_mat(:,idx_has_nan>0) = []
@@ -70,7 +141,7 @@ if ~isempty(points_mat)
     idX_near_temp = cell2mat(idX_near_temp);
     if isempty(idX_near_temp)
         % no close point
-%         keyboard
+        %         keyboard
         cprintf('*[0,0,0]*','Near: no close point, maybe radius is too small?\n');
         idX_near = []
     else

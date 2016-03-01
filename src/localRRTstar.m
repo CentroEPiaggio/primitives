@@ -63,7 +63,8 @@ for bb=1:length(replicate_with)
         E = Edges;
         disp('Do nothing inside localRRTstar');
         %     %-keyboard
-        return
+%         return
+        continue
     end
     % rescale z_rand within a ball of radius \eta centered in z_nearest
     cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
@@ -128,7 +129,11 @@ for bb=1:length(replicate_with)
             
             cardV = T.nnodes; % number of vertices in the graph
             try
-                [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
+%                 keyboard
+                z_new_near = replicate_with{bb};
+                [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new_near,dim_z_new,cardV,gam,prim);     % Check for nearest point inside a certain bubble
+
+%                 [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
             catch ME
                 disp(ME.message);
                 %-keyboard

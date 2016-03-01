@@ -29,8 +29,8 @@ end
     
     
 if prim.ID == 1 % TODO: HARDCODED
-    temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
-    test1 = temp(prim.dimensions_imagespace==0,:);
+%     temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
+    test1 = points_mat(prim.dimensions_imagespace==0,:);
     
     test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)))
     keep_columns = [];
