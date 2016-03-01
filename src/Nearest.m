@@ -32,20 +32,20 @@ if prim.ID == 1 % TODO: HARDCODED
 %     temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
     test1 = points_mat(prim.dimensions_imagespace==0,:);
     
-    test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)))
+    test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)));
     keep_columns = [];
     for ii=1:length(test1)
         if isequaln(test1(ii),test2(ii))
             keep_columns = [keep_columns, ii];
         end
     end
-    points_mat_purged = points_mat(:,keep_columns)
+    points_mat_purged = points_mat(:,keep_columns);
 else
 %     keyboard
     keep_columns = 1:size(points_mat,2);
     points_mat_purged = points_mat;
 end
-mask = ~isnan(z_test)
+mask = ~isnan(z_test);
 points_mat_masked = points_mat_purged(mask>0,:);
 non_nans_col = find(all(~isnan(points_mat_purged(mask>0,:))));
 try

@@ -3,7 +3,7 @@ clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
 multiple_primitives = 1; % testing locomotion primitive only for coffee
-obstacles_on = true;
+obstacles_on = false;
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m

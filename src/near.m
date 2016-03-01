@@ -33,7 +33,7 @@ volume = gam*(log(n)/n).^d; % CHECK: we use natural logarithm here, it is not cl
 % radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 % radius = radius_elevated_n^(1/n);
 radius = gamma(1+d/2).^(1./d)/sqrt(pi) .* volume.^(1./d);
-radius = 10;
+% radius = 10;
 % global raggio_conta; figure(13); plot(raggio_conta,radius,'bx'); raggio_conta = raggio_conta+1;
 % TUNE gam graphically with this
 % gam = 100
@@ -68,7 +68,7 @@ if ~isempty(points_mat)
         %     temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
         test1 = points_mat(prim.dimensions_imagespace==0,:);
         
-        test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)))
+        test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)));
         keep_columns = [];
         for ii=1:length(test1)
             if isequaln(test1(ii),test2(ii))
@@ -84,7 +84,7 @@ if ~isempty(points_mat)
         
         test1 = points_mat(prim.dimensions>0,:);
         
-        test2 = kron(z_test(prim.dimensions>0),ones(1,size(points_mat,2)))
+        test2 = kron(z_test(prim.dimensions>0),ones(1,size(points_mat,2)));
         keep_columns = [];
         for ii=1:length(test1)
             if ~isnan(test1(ii)*test2(ii))
@@ -94,13 +94,13 @@ if ~isempty(points_mat)
         points_mat_purged = points_mat(:,keep_columns);
         
     end
-    mask = ~isnan(z_test)
+    mask = ~isnan(z_test);
     points_mat_masked = points_mat_purged(mask>0,:);
     non_nans_col = find(all(~isnan(points_mat_purged(mask>0,:))));
     try
         points_mat_masked = points_mat(mask>0,keep_columns(non_nans_col));
         %     idx_nearest_temp = knnsearch(points_mat_masked',z_rand(mask>0)');
-        idX_near_temp = rangesearch(points_mat_masked',z_new(mask>0)', radius)
+        idX_near_temp = rangesearch(points_mat_masked',z_new(mask>0)', radius);
         idX_near_temp = cell2mat(idX_near_temp);
         if isempty(idX_near_temp)
             % no close point

@@ -57,7 +57,7 @@ classdef DD_move < primitive_library.PrimitiveFun
             run_filepath = '../example/';
             prim_filepath = [run_filepath 'prim/'];
             
-            Ts = 0.1;
+            Ts = 0.01;
             
             %yi = rand; %danilo briccone
             %yf = yi*2;

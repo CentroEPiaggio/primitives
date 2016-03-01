@@ -338,7 +338,8 @@ for bb=1:length(replicate_with)
                             %                         %-keyboard
                             %                     end
                             try
-                                [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                                z_new_rewire = replicate_with{bb};
+                                [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, z_new_rewire, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
                             catch ME
                                 disp(ME.message);
                             end

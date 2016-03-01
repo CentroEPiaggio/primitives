@@ -69,7 +69,7 @@ end
 % trajectory following
 
 threshold = 1e-2; %this is to check the error between the current and desired position
-threshold = 1e-1;
+% threshold = 1e-1;
 f_threshold = 1e-1; %this is to start execute the last maneuvers before ending the trajectory (e.g. converge to v_f)
 
 x_t=[];
@@ -142,7 +142,7 @@ for i=1:size(wp,2)
             pos_ok = error<threshold;
         else
             if i==size(wp,2) % last wp
-%                 threshold=1e-3; %I want to be more precise than before
+                threshold=1e-3; %I want to be more precise than before
                 if error<threshold
                     pos_ok=true; %the final position has been achieved
                 end

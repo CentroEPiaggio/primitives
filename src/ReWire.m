@@ -1,4 +1,4 @@
-function [rewired, T, G, E , x_rewire ,pn,pe, added_new, idx_last_added] = ReWire( idX_near, idx_min, idx_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points,verbose)
+function [rewired, T, G, E , x_rewire ,pn,pe, added_new, idx_last_added] = ReWire( idX_near, idx_min, idx_new, z_new, T, G, E, Obstacles, Ptree,idx_prim, q, cost_new,pn,pe,fig_points,verbose)
 % keyboard
 %REWIRE Summary of this function goes here
 % keyboard
@@ -11,7 +11,7 @@ x_rewire = NaN;
 %   Detailed explanation goes here
 idx_I = 1;
 % get x_new
-z_new = T.get(idx_new);
+% z_new = T.get(idx_new);
 % keyboard
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if (idX_near(i)==idx_min || idX_near(i)==idx_I) % avoid idx_min and tree root
@@ -57,18 +57,18 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             continue;
         end
         
-%         keyboard
+        keyboard
         [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
-%         if feasible
-%             feasible=CollisionFree(x_rewire,Ptree,Obstacles); % Here
-%             collision checking is guaranteed to happen inside
-%             intermediate_node
-%         end
+
         if feasible
+            keyboard
             [x_rewire] = complete_trajectories(z_new,time_rewire,x_rewire,Ptree,prim.ID);
             if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100/100),z_near(prim.dimensions>0))
                 feasible = false;
             end
+        end
+        if feasible
+            feasible=CollisionFree(x_rewire,Ptree,Obstacles); % Here
         end
         if feasible
             keyboard
