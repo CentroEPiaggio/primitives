@@ -146,10 +146,14 @@ classdef ARM_move < primitive_library.PrimitiveFun
         % trimmed trajectories are constant arm joint angles
         function trimmed_trajectory = trim_trajectory(obj,z_start,time,x)
             verbose = 0;
+%             keyboard
             if isnan(z_start(obj.dimensions>0)) % if this primitive has not been activated yet, just don't use it
                 trimmed_trajectory = nan(size(time));
                 return
             end
+            trimmed_trajectory = kron(z_start(obj.dimensions>0),ones(size(time)));
+            
+            return
             % arm parameters
             L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
             

@@ -33,7 +33,7 @@ volume = gam*(log(n)/n).^d; % CHECK: we use natural logarithm here, it is not cl
 % radius_elevated_n = gamma(1+n/2)/pi^(n/2)*volume;
 % radius = radius_elevated_n^(1/n);
 radius = gamma(1+d/2).^(1./d)/sqrt(pi) .* volume.^(1./d);
-radius = 10;
+% radius = 10;
 % global raggio_conta; figure(13); plot(raggio_conta,radius,'bx'); raggio_conta = raggio_conta+1;
 % TUNE gam graphically with this
 % gam = 100
@@ -109,7 +109,7 @@ if ~isempty(points_mat)
             idX_near = []
         else
             %         idx_compatible = find(~idx_has_nan>0)
-            idX_near = points_mat(:,keep_columns(idX_near_temp));
+            idX_near = keep_columns(idX_near_temp);%points_mat(:,keep_columns(idX_near_temp));
         end
         %     idx_nearest = keep_columns(non_nans_col(idx_nearest_temp));
         %     z_nearest = T.get(idx_nearest);

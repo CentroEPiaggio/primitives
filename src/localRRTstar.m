@@ -25,7 +25,7 @@ for bb=1:length(replicate_with)
     fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
     figure(fig_xy);
     plot3(replicate_with{bb}(1),replicate_with{bb}(2),replicate_with{bb}(5),'rx','linewidth',2)
-                
+    
     % initialization values
     feasible = false;
     rewired = false;
@@ -63,7 +63,7 @@ for bb=1:length(replicate_with)
         E = Edges;
         disp('Do nothing inside localRRTstar');
         %     %-keyboard
-%         return
+        %         return
         continue
     end
     % rescale z_rand within a ball of radius \eta centered in z_nearest
@@ -99,19 +99,29 @@ for bb=1:length(replicate_with)
         if prim.ID == 2
             %keyboard
         end
-%         if prim.ID == 1 && z_nearest_extended(5)==1
-%             keyboard
-%         end
+        %         if prim.ID == 1 && z_nearest_extended(5)==1
+        %             keyboard
+        %         end
         if feasible
             
             % collision checking
             cprintf('*[0,0.7,1]*','* Collision detection between nearest and random sample *\n');
             disp(['before collisionfree with primitive ' prim.name])
-            [x_complete] = complete_trajectories(z_nearest,time,x,Ptree,prim.ID);
+            try
+                [x_complete] = complete_trajectories(z_nearest,time,x,Ptree,prim.ID);
+            catch ME
+                disp(ME.message)
+                keyboard
+            end
             %         x = x_complete;
             %         z_new(prim.dimensions==0) = x(prim.dimensions==0,end);
             %         feasible=CollisionFree(x,Ptree,Obstacles);
-            feasible = CollisionFree(x_complete,Ptree,Obstacles);
+            try
+                feasible = CollisionFree(x_complete,Ptree,Obstacles);
+            catch ME
+                disp(ME.message)
+                keyboard
+            end
             disp(['after  collisionfree with primitive ' prim.name])
             if checkdiscontinuity(T,Edges,Ptree)
                 %-keyboard
@@ -129,11 +139,11 @@ for bb=1:length(replicate_with)
             
             cardV = T.nnodes; % number of vertices in the graph
             try
-%                 keyboard
+                %                 keyboard
                 z_new_near = replicate_with{bb};
                 [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new_near,dim_z_new,cardV,gam,prim);     % Check for nearest point inside a certain bubble
-
-%                 [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
+                
+                %                 [idx_near_bubble,raggio] = near(T,Graph,Edges,z_new,dim_z_new,cardV,gam);     % Check for nearest point inside a certain bubble
             catch ME
                 disp(ME.message);
                 %-keyboard
@@ -167,19 +177,33 @@ for bb=1:length(replicate_with)
                     [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
                     x = x_complete;
                 else                                                        % otherwise look for possibly more convenient paths
-                    [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new,...
-                        parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
-                        q_list,cost_list,z_intermediate_list,feasible_chooseparent] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
+                    %                     if bb==3
+                    %                         keyboard
+                    %                     end
+                    z_new_chooseparent = replicate_with{bb};
+                    try
+                        [idx_min,q,cost_new,x_chooseparent,time_chooseparent,z_new_chooseparent,...
+                            parent_found,added_intermediate_node,intermediate_primitives_list,x_list,time_list,...
+                            q_list,cost_list,z_intermediate_list,feasible_chooseparent] = ChooseParentMultiple(idx_near_bubble, idx_nearest, T, Graph, Edges, z_new_chooseparent,cost_from_z_nearest_to_new,Obstacles,q,Ptree,idx_prim,idx_parent_primitive);
+                    catch ME
+                        disp(ME.message)
+                        keyboard
+                    end
                     %                 if ~parent_found
-                    if ~feasible_chooseparent
+                    if ~parent_found
                         idx_min = idx_nearest;
                         cost_new = cost_from_z_nearest_to_new;
                         [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
                         x = x_complete;
                     else
-                        [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
+                        try
+                            [x_complete] = complete_trajectories(T.get(idx_min),time_chooseparent,x_chooseparent,Ptree,prim.ID);
+                        catch ME
+                            disp(ME.message)
+                            keyboard
+                        end
                         x = x_complete;
-                        z_new = round(z_new*100)/100;
+                        z_new = round(z_new_chooseparent*100)/100;
                     end
                     if isinf(cost_new) % no feasible neighbor found
                         feasible=false;
@@ -201,11 +225,11 @@ for bb=1:length(replicate_with)
                         if ~isequaln(round(x(1:length(z_new),end)*100)/100,z_new)%x(1:2,end) ~= z_new(1:2)
                             disp('ChooseParent slightly changed the goal point!')
                             %                         %-keyboard
-%                             if pushed_in_goal
-%                                 if reached(x(:,end),z_new,tol)
-%                                     %-keyboard
-%                                 end
-%                             end
+                            %                             if pushed_in_goal
+                            %                                 if reached(x(:,end),z_new,tol)
+                            %                                     %-keyboard
+                            %                                 end
+                            %                             end
                         end
                     end
                 end

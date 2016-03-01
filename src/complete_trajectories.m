@@ -18,19 +18,21 @@
 % the others are computed from the starting node with a constant input
 % (trimmered) for the same time.
 function [x_complete] = complete_trajectories(z_start,time,x,Ptree,primitive_ID)
-if size(x,1) == length(Ptree.Node{1}.dimensions)
+% keyboard
+if size(x,1) == length(Ptree.Node{1}.dimensions) && isequaln(z_start(Ptree.Node{1}.dimensions==0), x(Ptree.Node{1}.dimensions==0,1))
     x_complete = x;
     return
 end
 
-x_complete = zeros(size(x,1),length(time));
+x_complete = zeros(length(Ptree.Node{1}.dimensions),length(time));
 
 for ii=1:Ptree.nnodes
     prim = Ptree.get(ii);
+%     keyboard
     if ii==primitive_ID % this is the primitive that is active in this moment
         x_complete(prim.dimensions>0,:) = x;
         continue
     end
-    x_complete(prim.dimensions>0,:) = prim.trim_trajectory(z_start,time,x);
+    x_complete(prim.dimensions>0,:) = prim.trim_trajectory(z_start,time,x_complete);
 end
 end

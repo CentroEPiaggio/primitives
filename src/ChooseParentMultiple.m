@@ -40,10 +40,15 @@ cost_list = {};
 z_intermediate_list = {};
 if debug
     keyboard
-en
+end
 for i=1:length(idX_near) % for every point btw the nearby vertices
     if ~isempty(idX_near(i))
-        z_near=T.get(idX_near(i));
+        try
+            z_near=T.get(idX_near(i));
+        catch ME
+            disp(ME.message);
+            keyboard
+        end
         %         % select primitive HARDFIX
         %         if length(z_new)>=3 && z_near(3) ~= z_new(3) && ~isnan(z_new(3)) && ~isnan(z_near(3))
         %             prim = Ptree.Node{2}; % Elevate
@@ -64,13 +69,10 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         if feasible
             [x_complete] = complete_trajectories(z_near,time_chooseparent,x_chooseparent,Ptree,prim.ID);
             x_chooseparent = x_complete;
-            if ~all(prim.chi.P.contains(x_chooseparent(prim.dimensions>0,:),1))
+            if ~all(prim.chi.P.contains(x_chooseparent(prim.dimensions_imagespace>0,:),1))
                 feasible = false;
             end
-            if feasible
-                feasible=CollisionFree(x_chooseparent,Ptree,Obstacles);
-            end
-            if feasible && (~isequal(z_near(1:2),x_chooseparent(1:2,1)) || ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
+            if feasible && ~isequal(z_near(1:2),x_chooseparent(1:2,1)) %|| ~isequaln(round(x_chooseparent(1:length(z_new),end)*100)/100,z_new))
                 disp('WTF ChooseParent is doing?')
                 %                                 keyboard
                 if isempty(idx_parent_primitive)
@@ -90,7 +92,8 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             end
         end
         if feasible && ~isinf(cost_new_edge) && ~isnan(cost_new_edge) % last two conditions are useless, could be probably removed without problems
-            if ~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree % TODO: obstacle avoidance here with multiple primitives
+            feasible = CollisionFree(x_chooseparent,Ptree,Obstacles);
+            if feasible %~any(Obstacles.Node{1}.P.contains([traj_pos_chooseparent(:)'; traj_vel_chooseparent(:)'],1)) % ObstacleFree % TODO: obstacle avoidance here with multiple primitives
                 % cost up to near vertex
                 %                 cost_up_to_z_near = G(idx_I,idX_near(i));%graphshortestpath(G,idx_I,idX_near(i));
                 cost_up_to_z_near = graphshortestpath(G,idx_I,idX_near(i)); % TODO this line or the one above?
@@ -110,6 +113,8 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     c_min = c_prime;
                     x=x_chooseparent;
                     time = time_chooseparent;
+%                     keyboard
+                    z_new_tentative = x(prim.dimensions_imagespace>0,end); % return z_new as the last point of the steering trajectory found from the node
                     parent_found = true;
                 else % cost not good enough
                     if feasible_extend
@@ -124,39 +129,45 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         end
     end
 end
-if ~isnan(x) & ~isequaln(z_new(1:2),round(x(1:2,end)*100/100))
-    if norm((x(1:2,end) - z_new(1:2)))/norm(z_new(1:2)) < 1e-9 % raw accuracy measure
-        disp('ChooseParent is changing the goal point by a slight bit, no worries.')
-    else
-        disp('ChooseParent is changing the goal point by a significant amount, worry.')
-        disp('If speed is constant then it''s normal')
-        disp('x is')
-        x(:,end)
-        disp('while z_new is')
-        z_new
-        %         keyboard
-    end
-end
 
-if ~isnan(x)
-    if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
-        disp('ChooseParent slightly changed the goal point!')
-        x(1:length(z_new),end)
-        z_new
-    else
-        disp('ChooseParent was actually good!')
-        keyboard
-    end
+if parent_found
+    z_new = z_new_tentative;
+else
+    feasible = false;
 end
+% if ~isnan(x) & ~isequaln(z_new(1:2),round(x(1:2,end)*100/100))
+%     if norm((x(1:2,end) - z_new(1:2)))/norm(z_new(1:2)) < 1e-9 % raw accuracy measure
+%         disp('ChooseParent is changing the goal point by a slight bit, no worries.')
+%     else
+%         disp('ChooseParent is changing the goal point by a significant amount, worry.')
+%         disp('If speed is constant then it''s normal')
+%         disp('x is')
+%         x(:,end)
+%         disp('while z_new is')
+%         z_new
+%         %         keyboard
+%     end
+% end
 
-% is this really needed now?
-if any(any(~isnan(x_chooseparent)))
-    %     disp('fix this')
-    %     keyboard
-    z_new = round(x_chooseparent(prim.dimensions>0,end)*100)/100; % HACK to ensure continuity in the trajectories stored in the tree
-end
+% if ~isnan(x)
+%     if ~isequaln(x(1:length(z_new),end),z_new)%x(1:2,end) ~= z_new(1:2)
+%         disp('ChooseParent slightly changed the goal point!')
+%         x(1:length(z_new),end)
+%         z_new
+%     else
+%         disp('ChooseParent was actually good!')
+%         keyboard
+%     end
+% end
 
-if ~feasible
+% % is this really needed now?
+% if any(any(~isnan(x_chooseparent)))
+%     %     disp('fix this')
+%     %     keyboard
+%     z_new = round(x_chooseparent(prim.dimensions>0,end)*100)/100; % HACK to ensure continuity in the trajectories stored in the tree
+% end
+
+if ~parent_found
     cost_new_edge = Inf;
 end
 
