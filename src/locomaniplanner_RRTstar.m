@@ -1,9 +1,9 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_bias_freq = 5;
+push_bias_freq = 9;
 
 multiple_primitives = 1; % testing locomotion primitive only for coffee
-obstacles_on = false;
+obstacles_on = true;
 
 % Algorithm's parameters
 gam = 1000; % constant for radius of search of near nodes in near.m
@@ -45,10 +45,11 @@ if multiple_primitives
     z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/2 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
     z_intermediate_3 = [1; 0.25; pi/2; 0; 0];
     z_intermediate_4 = [1; 0.55; pi/2; 0; 1];
-    bias_points = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
+    bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
 else
-    bias_points = {z_goal};
+    bias_points_generic = {z_goal};
 end
+bias_points = bias_points_generic;
 % bias_points = {z_goal, z_intermediate_2};
 % bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
@@ -72,6 +73,10 @@ replicate_over_primitive = []; % list of primitives that need replicated points
 global raggio_conta; raggio_conta=1; figure(13); plot(0,0);hold on;
 z_rand = Chi0.sample; pushed_in_goal=0;
 z_aug = Ptree.Node{2}.chi.sample;
+
+bag_bias = {};
+bias_points = [bias_points_generic];
+%return
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
@@ -81,9 +86,16 @@ for ii=1:N_sample_max
         z_rand = z_bias(Ptree.Node{1}.dimensions>0); % every once in a while push in a known number
         disp('Pushing in goal')
         pushed_in_goal=1;
+    elseif ~isempty(bag_bias)
+        z_rand = bag_bias{1};
+        bag_bias = {bag_bias{2:end}};
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         pushed_in_goal=0;
+        z_rand1 = z_rand; z_rand1(3) = 0;
+        z_rand2 = z_rand; z_rand2(3) = pi/4;
+        z_rand3 = z_rand; z_rand3(3) = pi/2;
+        bag_bias = {z_rand1, z_rand2, z_rand3};
     end
     while ~CollisionFree(fix_nans(z_rand,Ptree.Node{1}.dimensions_imagespace),Ptree,Obstacles)
         if mod(ii,push_bias_freq)==0 %&& ~path_found

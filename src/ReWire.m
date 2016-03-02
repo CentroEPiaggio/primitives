@@ -25,7 +25,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         % BUGFIX (*)
         if ~isequal(isnan(z_near),isnan(z_new))
             continue
-%             return
+            %             return
         end
         % finds the primitive space where the points both live
         prim_found = false;
@@ -57,14 +57,23 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             continue;
         end
         
-        keyboard
-        [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
-
-        if feasible
+        %keyboard
+        try
+            [feasible,cost_rewire,q,x_rewire,time_rewire] = prim.steering(z_new,z_near); % uniform interface! Yeay!
+        catch ERR
+            disp(ERR.message)
             keyboard
-            [x_rewire] = complete_trajectories(z_new,time_rewire,x_rewire,Ptree,prim.ID);
-            if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100/100),z_near(prim.dimensions>0))
-                feasible = false;
+        end
+        if feasible
+            %keyboard
+            try
+                [x_rewire] = complete_trajectories(z_new,time_rewire,x_rewire,Ptree,prim.ID);
+                if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100/100),z_near(prim.dimensions>0))
+                    feasible = false;
+                end
+            catch ERR
+                disp(ERR.message)
+                keyboard
             end
         end
         if feasible
@@ -72,30 +81,30 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
         end
         if feasible
             keyboard
-%             if idx_prim == 1 % collision checking only if we are on the Move primitive
-%                 %             keyboard
-%                 traj_pos_rewire = x_rewire(1,:);
-%                 traj_vel_rewire = x_rewire(2,:);
-%                 %                 keyboard
-%                 traj_y_rewire   = z_new(3,:)*ones(size(traj_vel_rewire)); % BUG: this line generates NaN trajectories when z_new(3,:) is NaN! FIXED IN BUGFIX (*)
-%                 %                 x_rewire = [traj_pos_rewire traj_vel_rewire];
-%             else % Eleva primitive
-%                 %             traj_pos = %x(1,:);
-%                 traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
-%                 traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
-%                 traj_y_rewire = x_rewire;
-%             end
-%             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
+            %             if idx_prim == 1 % collision checking only if we are on the Move primitive
+            %                 %             keyboard
+            %                 traj_pos_rewire = x_rewire(1,:);
+            %                 traj_vel_rewire = x_rewire(2,:);
+            %                 %                 keyboard
+            %                 traj_y_rewire   = z_new(3,:)*ones(size(traj_vel_rewire)); % BUG: this line generates NaN trajectories when z_new(3,:) is NaN! FIXED IN BUGFIX (*)
+            %                 %                 x_rewire = [traj_pos_rewire traj_vel_rewire];
+            %             else % Eleva primitive
+            %                 %             traj_pos = %x(1,:);
+            %                 traj_vel_rewire = z_new(2)*ones(size(x_rewire));%x(2,:);
+            %                 traj_pos_rewire = z_new(1)+cumtrapz(time_rewire,traj_vel_rewire);
+            %                 traj_y_rewire = x_rewire;
+            %             end
+            %             x_rewire = [traj_pos_rewire(:)'; traj_vel_rewire(:)'; traj_y_rewire(:)';]; % assign arc-path
             %             keyboard
             %             if isequaln(x_rewire(:,1),z_new) && isequaln(x_rewire(:,end),z_near)
             %% here we try to add an intermediate node in case that some trimmered primitive has changed some dimensions of the goal point
             if idx_prim>1
-%                 keyboard
-%                 figure,plot(time_rewire,x_rewire,time_rewire(1)*ones(3,1),z_new,'ro',time_rewire(end)*ones(3,1),z_near,'bo')
+                %                 keyboard
+                %                 figure,plot(time_rewire,x_rewire,time_rewire(1)*ones(3,1),z_new,'ro',time_rewire(end)*ones(3,1),z_near,'bo')
             end
             idx_parent_primitive = 1; % HARDCODED
             [added_intermediate_node,intermediate_primitives_list,x_list,time_list,cost_list,q_list,z_list] = intermediate_node(time_rewire,x_rewire,z_new,z_near,prim,Ptree,idx_parent_primitive,Obstacles);
-
+            
             %%
             if added_intermediate_node || ( isequaln(round(x_rewire(prim.dimensions>0,1)*100)/100,round(z_new(prim.dimensions>0)*100)/100) && isequaln(round(x_rewire(prim.dimensions>0,end)*100)/100,z_near(prim.dimensions>0)))
                 % do the rest of the rewiring, otherwise do not allow
@@ -132,7 +141,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 cprintf('*[1 0.5 0]*','ReConnect cost: %f < %f ??? ',cost_tentative,cost_up_to_z_near_without_rewiring);
                 if cost_tentative < cost_up_to_z_near_without_rewiring
                     cprintf('*[0 1 0]*','YES!!!\n');
-%                     keyboard
+                    %                     keyboard
                 else
                     cprintf('*[1 0 0]*','NO!!!\n');
                 end
@@ -147,20 +156,20 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                         cprintf('*[1 0.5 0]*','ReConnect node through intermediate nodes\n');
                         if any(any(isnan([x_list{:}])))
                             disp('NaNs!!!!')
-                        keyboard
-                    end
+                            keyboard
+                        end
                     else
                         cprintf('*[1 0.5 0]*','ReConnect node: %d to pass through node %d instead of node %d\n',idX_near(i),idx_new,T.Parent(idX_near(i)));
                         if any(any(isnan(x_rewire)))
                             disp('NaNs!!!!')
-                        keyboard
-                    end
+                            keyboard
+                        end
                     end
                     %                     tmp=line([z_new(1) z_near(1)],[z_new(2) z_near(2)],'color','yellow','linewidth',2,'linestyle','-.');
-%                     oldparents = T.Parent;
+                    %                     oldparents = T.Parent;
                     
                     [T,G,E,pn,pe,added_new] = ReConnect(idx_new,idX_near(i),T,G,E,Ptree, intermediate_primitives_list, q_list, cost_list, x_list, time_list, z_list, pn,pe,fig_points,verbose);
-%                     [oldparents,T.Parent]
+                    %                     [oldparents,T.Parent]
                     %                     keyboard
                     %                     delete(tmp);
                     if checkdiscontinuity(T,E,Ptree)
