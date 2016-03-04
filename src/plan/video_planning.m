@@ -1,3 +1,6 @@
+load test_a_2016_03_02_07_31_06.mat;
+
+%%
 close all
 
 InitView
@@ -9,7 +12,8 @@ formatOut = 'yyyy_mm_dd_hh_MM_SS';
 str_date=datestr(now,formatOut);
 vidObj=VideoWriter(['plan_' str_date '.avi']);
 vidObj.Quality = 100;
-vidObj.FrameRate = 2;
+desired_time = 15; %sec
+vidObj.FrameRate = numel(T.Node)/desired_time;
 open(vidObj);
 
 view([-50 30])
