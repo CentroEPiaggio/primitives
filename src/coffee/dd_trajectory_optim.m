@@ -10,7 +10,7 @@ end
 
 time = [];
 
-Tf = 10;
+Tf = 20;
 N = 20;
 u_1 = sdpvar(1,N);
 u_2 = sdpvar(1,N);
@@ -24,7 +24,7 @@ retval = 1;
 
 Constraints_control = [u_1<=100, u_1>=-100, u_2<=100, u_2>=-100];
 Constraints_state = [x_var(:,1) == x_0; x_var(:,end) == x_f];
-v_max = 1;
+v_max = 0.1;
 w_max = 1;
 Constraints_state = [Constraints_state, -v_max <= x_var(4,:) <= v_max, -w_max <= x_var(5,:) <= w_max];
 
