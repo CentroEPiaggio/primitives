@@ -26,7 +26,7 @@ z_goal = [1.5  ; 0.5 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effect
 L_arm = 0.31;
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [L_arm  ; L_arm ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-z_goal = [0  ; 1 ; pi ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [1  ; 1 ; pi/2 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 %%
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
