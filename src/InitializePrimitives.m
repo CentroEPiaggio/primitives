@@ -79,7 +79,7 @@ if multiple_primitives
     x_target = mean([xmin_grasping,xmax_grasping]);
     y_target = mean([ymin_grasping,ymax_grasping]);
     L_arm = 0.31;
-    x_target = 1;%1+L_arm/2;
+    x_target = 0.8;%1+L_arm/2;
     y_target = 0.4;%1+L_arm/2;
     xmin_grasping = x_target-L_arm/2;
     xmax_grasping = x_target+L_arm/2;

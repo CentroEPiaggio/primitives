@@ -10,8 +10,8 @@
 % A_b^0 is base frame expressed in inertial coordinates
 
 function [flag,time,tau,traj_q,traj_qp]=arm_trajectory_generator(Ts,q_roomba_0,A_g_0,distance_from_goal,q0_arm)
-debug = 1;
-verbose = 1;
+debug = 0;
+verbose = 0;
 % Initialization
 flag = 1; % initialize with failed state
 time = [];

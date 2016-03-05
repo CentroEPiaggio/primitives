@@ -84,7 +84,16 @@ classdef PrimitiveFun
             % here we need to initialize some nan values to the
             % initial_extend value
             extended_state = z_test;
-            extended_state((~isnan(obj.initial_extend))>0) = obj.initial_extend((~isnan(obj.initial_extend))>0);
+            
+            if obj.name == 'ARM_move' % HARDCODED
+                extended_state(5) = 0;
+            else
+                if isnan(z_test(isnan(obj.initial_extend)>0))
+                    extended_state((~isnan(obj.initial_extend))>0) = obj.initial_extend((~isnan(obj.initial_extend))>0);
+                end
+            end
+            
+            %             keyboard
         end
     end
     methods (Abstract)

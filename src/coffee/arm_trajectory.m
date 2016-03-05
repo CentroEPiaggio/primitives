@@ -1,7 +1,7 @@
 % function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
 function [time,x,u,retval,cost] = arm_trajectory(x0,xf,Ts,state_bounds,control_bounds,A_g_0,q0_arm)
-debug = 1;
-verbose = 1;
+debug = 0;
+verbose = 0;
 % arm parameters
 L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
 
