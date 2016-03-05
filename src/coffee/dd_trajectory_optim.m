@@ -40,7 +40,7 @@ for k = 1:N-1
     objective = objective + norm(u_1(k)) + norm(u_2(k));
 end
 Global_constraints = [Constraints_control, Constraints_state];
-diagnostics = optimize(Global_constraints,objective,sdpsettings('solver','fmincon','debug','On'));
+diagnostics = optimize(Global_constraints,objective,sdpsettings('solver','fmincon','fmincon.MaxIter',200,'fmincon.TolFun',0.1));
 
 if diagnostics.problem ~= 0
     retval = 0;
