@@ -68,7 +68,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             %keyboard
             try
                 [x_rewire] = complete_trajectories(z_new,time_rewire,x_rewire,Ptree,prim.ID);
-                if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100/100),z_near(prim.dimensions>0))
+                if ~isequaln(round(x_rewire(prim.dimensions>0,end)*100)/100,z_near(prim.dimensions>0))
                     feasible = false;
                 end
             catch ERR
