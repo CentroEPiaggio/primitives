@@ -80,7 +80,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
             feasible=CollisionFree(x_rewire,Ptree,Obstacles); % Here
         end
         if feasible
-            keyboard
+%             keyboard
             %             if idx_prim == 1 % collision checking only if we are on the Move primitive
             %                 %             keyboard
             %                 traj_pos_rewire = x_rewire(1,:);
@@ -102,9 +102,14 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 %                 keyboard
                 %                 figure,plot(time_rewire,x_rewire,time_rewire(1)*ones(3,1),z_new,'ro',time_rewire(end)*ones(3,1),z_near,'bo')
             end
-            idx_parent_primitive = 1; % HARDCODED
-            [added_intermediate_node,intermediate_primitives_list,x_list,time_list,cost_list,q_list,z_list] = intermediate_node(time_rewire,x_rewire,z_new,z_near,prim,Ptree,idx_parent_primitive,Obstacles);
-            
+            try
+                keyboard
+                idx_parent_primitive = 1; % HARDCODED
+                [added_intermediate_node,intermediate_primitives_list,x_list,time_list,cost_list,q_list,z_list] = intermediate_node(time_rewire,x_rewire,z_new,z_near,prim,Ptree,idx_parent_primitive,Obstacles);
+            catch MINTPRIM
+                disp(MINTPRIM.message)
+                keyboard
+            end
             %%
             if added_intermediate_node || ( isequaln(round(x_rewire(prim.dimensions>0,1)*100)/100,round(z_new(prim.dimensions>0)*100)/100) && isequaln(round(x_rewire(prim.dimensions>0,end)*100)/100,z_near(prim.dimensions>0)))
                 % do the rest of the rewiring, otherwise do not allow
