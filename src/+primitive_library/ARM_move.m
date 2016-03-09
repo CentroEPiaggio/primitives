@@ -12,19 +12,21 @@ classdef ARM_move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID)
+        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters)
             cprintf('*[.6,0.1,1]*','dentro costruttore di ARM_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID);
+            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters);
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);
-            x_target = 1; % HARDCODED
-            y_target = 0.4;
+%             x_target = 1; % HARDCODED
+%             y_target = 0.4;
+            x_target = setup_parameters.x_target;
+            y_target = setup_parameters.y_target;
             obj.A_g_0(1:3,4) = [x_target;y_target;0.3];
             obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
         end
