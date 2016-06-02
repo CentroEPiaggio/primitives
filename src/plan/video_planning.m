@@ -12,7 +12,7 @@ formatOut = 'yyyy_mm_dd_hh_MM_SS';
 str_date=datestr(now,formatOut);
 vidObj=VideoWriter(['plan_' str_date '.avi']);
 vidObj.Quality = 100;
-desired_time = 15; %sec
+desired_time = 7; %sec
 vidObj.FrameRate = numel(T.Node)/desired_time;
 open(vidObj);
 

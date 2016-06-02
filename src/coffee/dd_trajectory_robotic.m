@@ -1,0 +1,378 @@
+% function [time,pos,speed,acc,jerk,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
+function [time,x,u,retval,cost] = dd_trajectory(x0,xf,Ts,state_bounds,control_bounds)
+debug = 0;
+verbose = 1;
+retval = 0;
+x = [];
+u = [];
+
+if verbose
+    tic
+end
+
+time = [];
+pos = [];
+speed = [];
+acc = [];
+jerk = [];
+
+% ensure vectors are column
+x0 = x0(:);
+xf = xf(:);
+
+cost=Inf;
+
+x_i=x0(1);
+y_i=x0(2);
+th_i=x0(3);
+v_i=x0(4);
+
+x_f=xf(1);
+y_f=xf(2);
+th_f=xf(3);
+v_f=xf(4);
+
+if v_f==0
+    v_f=1e-5; %numerical stuff
+end
+
+% Using Bezier curves
+
+control_factor = 0.7;
+
+% the trick of the century: I add a control point after the start, and a
+% control point before the end, to enforce bezier starting and ending
+% orientation
+
+P = [x_i x_i+control_factor*cos(th_i) x_f-control_factor*cos(th_f) x_f;
+    y_i y_i+control_factor*sin(th_i) y_f-control_factor*sin(th_f) y_f];
+
+pt1 = P(:,1);
+pt2 = P(:,2);
+pt3 = P(:,3);
+pt4 = P(:,4);
+
+t = linspace(0,1,101);
+c_u = kron((1-t).^3,pt1) + kron(3*(1-t).^2.*t,pt2) + kron(3*(1-t).*t.^2,pt3) + kron(t.^3,pt4); % nominal trajectory
+
+if debug
+    figure
+    subplot(1,3,1)
+    hold on
+    set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+    plot(P(1,1),P(2,1),'*r'), title('Trajectory with waypoints')
+    plot(P(1,end),P(2,end),'+r')
+    plot(P(1,2:end-1),P(2,2:end-1),'*b')
+    plot(c_u(1,:),c_u(2,:),'Linewidth',2) % nominal trajectory
+    axis equal
+end
+
+% trajectory following
+
+threshold = 1e-2; %this is to check the error between the current and desired position
+% threshold = 1e-1;
+f_threshold = 1e-1; %this is to start execute the last maneuvers before ending the trajectory (e.g. converge to v_f)
+
+x_t=[];
+x_t = [x_t x_i];
+y_t=[];
+y_t = [y_t y_i];
+th_t=[];
+th_t = [th_t th_i];
+
+K1=1;
+K2=1;
+b=0.1;
+
+index = 1;
+wp=[];
+for i=1:numel(t)
+    if mod(i,10)==0
+        wp = [wp c_u(:,i+1)];
+    end
+end
+
+w_max=1;
+w_sat = saturation([-w_max w_max]);
+v_max=0.1;
+v_sat = saturation([-v_max v_max]);
+v=v_i;
+w=0;
+
+%% NEW VERSION
+% keyboard
+% %%
+% path = wp';
+% figure
+% plot(path(:,1),path(:,2),'k--d')
+% grid on
+% robotCurrentLocation = path(1,:);
+% robotGoal = path(end,:);
+% initialOrientation = th_i;
+% robotCurrentPose = [robotCurrentLocation initialOrientation];
+% figure
+% robot = ExampleHelperDifferentialDriveRobot(robotCurrentPose);
+% controller = robotics.PurePursuit;
+% controller.Waypoints = path;
+% controller.DesiredLinearVelocity = 0.1;
+% controller.MaxAngularVelocity = 0.5;
+% controller.LookaheadDistance = 0.05;
+% goalRadius = 0.01;
+% distanceToGoal = norm(robotCurrentLocation - robotGoal);
+
+%%
+
+%%
+k=0.1;
+keepgoing = 1;
+v = zeros(1,length(t));
+v(1) = v_i;
+ii = 1;
+n = length(t);
+while keepgoing && ii<1000
+    ttt = 0:Ts*k:(n-1)*Ts*k;
+    px = c_u(1,:);
+    py = c_u(2,:);
+    px(end) = x_f;
+    py(end) = y_f;
+    % v = sqrt(vx.^2+vy.^2);
+    theta = [];
+    theta = atan2(py(2:end)-py(1:end-1),px(2:end)-px(1:end-1));
+    px = linspace(x_i,x_f,n);
+    py = linspace(y_i,y_f,n);
+    theta = [theta(:)' th_f];
+    theta(1) = th_i;
+    theta = linspace(th_i,th_f,n);
+    w = gradient(theta,ttt);
+    v = linspace(v_i,v_f,n);
+    maxabsw = max(abs(w));
+    maxabsv = max(abs(v));
+    if maxabsw > w_max %|| maxabsv > v_max
+        %         k = k*max(maxabsw/w_max,maxabsv/v_max);
+        k = k*maxabsw/w_max;
+        %         k = k+Ts;
+    else
+        keepgoing = false;
+        retval = 1;
+        time = ttt;
+        x = [px(:)'; py(:)'; theta(:)'; v(:)'];
+        u = [v(:)'; w(:)'];
+        cost = time(end);
+    end
+end
+disp('ok')
+return
+%%
+% wp_sampled = interp1(,wp,)
+n = length(ttt);
+wp=[];
+for i=1:numel(t)
+    if mod(i,10)==0
+        wp = [wp c_u(:,i+1)];
+    end
+end
+cc_uu = zeros(2,n);
+cc_uu(1,:) = linspace(c_u(1,1),c_u(1,end),n);%interp1(1:length(t),c_u(1,:),1:n);
+cc_uu(2,:) = linspace(c_u(2,1),c_u(2,end),n);%interp1(1:length(t),c_u(2,:),1:n);
+theta = atan2(cc_uu(2,:),cc_uu(1,:))
+figure
+plot(c_u(1,:)',c_u(2,:)',cc_uu(1,:)',cc_uu(2,:)','r')
+% w = gradient(atan2(cc_uu(2,:)./cc_uu(1,)));
+
+% %%
+% while (distanceToGoal > goalRadius)
+%     distanceToGoal
+%     % compute the controller outputs, i.e. inputs to the robot
+%     [v,omega] = step(controller,robot.CurrentPose)
+%
+%     % simulate the robot using controller outputs
+%     drive(robot, v, omega);
+%
+%     % extract current location info
+%     robotCurrentLocation = robot.CurrentPose(1:2);
+%
+%     % re-compute distance to the goal
+%     distanceToGoal = norm(robotCurrentLocation - robotGoal);
+% end
+% keyboard
+%% OLD VERSION
+pos_ok = false;
+vel_ok = true;
+
+retval=1;
+
+for i=1:size(wp,2)
+    error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+    pos_ok = error<threshold;
+    if i==size(wp,2)
+        vel_ok=false;
+    end
+    
+    while ~pos_ok || ~vel_ok
+        
+        speed = [speed, [v; w]];
+        
+        % integration
+        % x(t) = x0 + int[0,T]{ v cos(th) }
+        % y(t) = y0 + int[0,T]{ v sin(th) }
+        % th(t) = th0 + int[0,T]{ w }
+        
+        x_t = [x_t x_t(index) + Ts*v*cos(th_t(index))];
+        y_t = [y_t y_t(index) + Ts*v*sin(th_t(index))];
+        th_t = [th_t th_t(index) + Ts*w];
+        
+        new_error = norm(wp(:,i)-[x_t(end) y_t(end)].');
+        
+        if i==size(wp,2)
+            if new_error > error % integration brings me after the point, making the algorithm believe I am far from it (MEGATRICK)
+                pos_ok=true;
+            end
+        end
+        
+        error=new_error;
+        
+        if i<size(wp,2)-1 %not one before last wp
+            error_next = norm(wp(:,i+1)-[x_t(end) y_t(end)].');
+            if error_next<error %jump to the next wp if I am near enough (avoid turnback)
+                i=i+1;
+                error = error_next;
+            end
+            pos_ok = error<threshold;
+        else
+            if i==size(wp,2) % last wp
+                threshold=1e-3; %I want to be more precise than before
+                if error<threshold
+                    pos_ok=true; %the final position has been achieved
+                end
+            else
+                pos_ok = error<threshold;
+            end
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        %%% COMPUTE CONTROLS %%%
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        
+        % - w
+        
+        if ~pos_ok %if my position is >= the last one i keep going straight, this is to achieve the v_f
+            w = K1 * sin( ( th_t(index) - atan2(y_t(index)-wp(2,i),x_t(index)-wp(1,i)) ) );
+            
+            w = w_sat.evaluate(w);
+        else
+            w=0;
+        end
+        
+        % - v
+        
+        if i<size(wp,2) %not last wp
+            % general case, v depending on w
+            if w>0 % fixing right wheel velocity to the max
+                v = ( v + v_max-b*w ) / 2;
+            else % fixing left wheel velocity to the max
+                v = ( v + v_max+b*w ) / 2;
+            end
+        else
+            %last wp
+            if error < f_threshold %If I am close enough I want to converge to v_f
+                alpha = abs(error-threshold) / f_threshold;
+                v=(alpha)*v_max + (1 - alpha)*v_f;
+                if norm(v-v_f)<1e-1%1e-3;
+                    vel_ok = true;
+                end
+            end
+        end
+        
+        v = v_sat.evaluate(v);
+        
+        %%%%%%%%%%%%%%%%%%%%%%
+        
+        index = index +1;
+        
+        if index > 10000
+            if verbose
+                cprintf('*[1,0,0]*','!! Excedeed maximum number of itereations !!\n');
+            end
+            if debug
+                plot(x_t,y_t,'r','linewidth',2)
+                keyboard
+            end
+            retval=0;
+            break
+        end
+    end
+    
+    if retval==0
+        if verbose
+            cprintf('*[1,0,0]*','!! Error !!\n');
+        end
+        break;
+    end
+    
+end
+
+
+
+if debug
+    plot(wp(1,:),wp(2,:),'og')
+    plot(x_t,y_t)
+    axis equal
+    legend('start point','end point','control points','nominal trajectory','way points','computed reference trajectory','location','best')
+    subplot(1,3,2)
+    plot((0:numel(speed(1,:))-1)*Ts,speed(1,:)), title('Linear Velocity')
+    subplot(1,3,3)
+    plot((0:numel(speed(2,:))-1)*Ts,speed(2,:)), title('Angular Velocity')
+end
+
+pos=[x_t(1:end-1); y_t(1:end-1); th_t(1:end-1)];
+%q
+time=[Ts*(1:index)];
+
+if index <= 10000
+    cost=index*Ts;
+end
+
+% retval=0; % TODO set all variables so the algorithm can go on
+
+if verbose
+    disp([' - Planned in ' num2str(index) ' steps.'])
+    disp([' - Cost is ' num2str(cost) ' steps.'])
+    disp([' - Execution time is ' num2str(time(end))])
+    toc
+end
+
+if debug
+    pos_ok
+    vel_ok
+    retval
+    i
+    error
+    pos(:,end)
+end
+
+if retval
+    % the values we want to return are the trajectories inside the image
+    % space (on which we can perform collision checking).
+    speed(:,end+1) = speed(:,end);
+    %     if any(abs(th_t)>pi)
+    %         keyboard
+    %     end
+    for ii=1:length(time)
+        while th_t(ii)>pi
+            th_t(ii) = th_t(ii) - 2*pi;
+        end
+        while th_t(ii)<-pi
+            th_t(ii) = th_t(ii) + 2*pi;
+        end
+    end
+    x = [x_t(:)'; y_t(:)'; th_t(:)'; speed(1,:)];
+    u = [speed]; % we'll see what to put in here
+    if debug
+        figure
+        plot(time,x),grid on,legend('x','y','th','v') % TODO: acausal filtering might be used to smooth these trajectories, which are not continuous in their time derivatives.
+        keyboard
+    end
+end
+
+
+end
