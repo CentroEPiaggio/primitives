@@ -22,7 +22,7 @@ end
 
 list = recv.get(0).asList();
 
-frame = list.get(1).asString()
+frame = list.get(1).asString();
 
 x = list.get(2).asDouble();
 y = list.get(3).asDouble();
