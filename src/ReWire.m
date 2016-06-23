@@ -103,12 +103,12 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 %                 figure,plot(time_rewire,x_rewire,time_rewire(1)*ones(3,1),z_new,'ro',time_rewire(end)*ones(3,1),z_near,'bo')
             end
             try
-                keyboard
+                %keyboard
                 idx_parent_primitive = 1; % HARDCODED
                 [added_intermediate_node,intermediate_primitives_list,x_list,time_list,cost_list,q_list,z_list] = intermediate_node(time_rewire,x_rewire,z_new,z_near,prim,Ptree,idx_parent_primitive,Obstacles);
             catch MINTPRIM
                 disp(MINTPRIM.message)
-                keyboard
+                %keyboard
             end
             %%
             if added_intermediate_node || ( isequaln(round(x_rewire(prim.dimensions>0,1)*100)/100,round(z_new(prim.dimensions>0)*100)/100) && isequaln(round(x_rewire(prim.dimensions>0,end)*100)/100,z_near(prim.dimensions>0)))

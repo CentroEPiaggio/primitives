@@ -20,21 +20,15 @@ cost_table = rand(10,3);
 
 % Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
 
-xmin = 0; % it was 0, now it is -10 to allow primitives that start by going backwards and then move onwards
 xmin = -0.3;
-xmax = 10; % meters
-xmax = 2;
-L_arm = 0.31; xmax = 1.3%L_arm;
-ymin = 0;
-ymin = -0.3;
-ymax = 10; % meters
-ymax = 2;
-L_arm = 0.31; ymax = 1.4%L_arm;
-vmin = 0; % linear speed
-vmin = -0.1; % linear speed % FIXME: check if this has to be negative too for the coffee application.
-vmax = 0.1; % TODO: check out this value
-thetamin = pi/4 - 0.1*pi;
-thetamax = pi/4 + 0.1*pi;
+xmax = 1.5;
+
+ymin = -0.5;
+ymax = 0.5;
+
+vmin = 0;
+vmax = 0.1;
+
 thetamin = -pi;
 thetamax = pi;
 
@@ -67,20 +61,13 @@ Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
 if multiple_primitives
-    %
-    % % xmin = -1;
-    % % xmax = +1;
-    % % vmin = -5;
-    % % vmax = +5;
-    xmin_grasping = 6;
-    xmax_grasping = 7;
-    ymin_grasping = 6;
-    ymax_grasping = 7;
-    x_target = mean([xmin_grasping,xmax_grasping]);
-    y_target = mean([ymin_grasping,ymax_grasping]);
-    L_arm = 0.31;
-    x_target = 0.8;%1+L_arm/2;
-    y_target = 0.4;%1+L_arm/2;
+    if ~using_yarp
+        x_target = 0.8;%1+L_arm/2;
+        y_target = 0.4;%1+L_arm/2;
+    else
+        x_target = x_obj;
+        y_target = y_obj;
+    end
     xmin_grasping = x_target-L_arm/2;
     xmax_grasping = x_target+L_arm/2;
     ymin_grasping = y_target-L_arm/2;

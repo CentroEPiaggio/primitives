@@ -22,21 +22,25 @@ end
 
 list = recv.get(0).asList();
 
-frame = list.get(1).asString();
+command_obj = list.get(0).asString();
 
-x = list.get(2).asDouble();
-y = list.get(3).asDouble();
-z = list.get(4).asDouble();
-qx = list.get(5).asDouble();
-qy = list.get(6).asDouble();
-qz = list.get(7).asDouble();
-qw = list.get(8).asDouble();
+frame_obj = list.get(1).asString();
 
-sx = list.get(9).asDouble();
-sy = list.get(10).asDouble();
-sz = list.get(11).asDouble();
+x_obj = list.get(2).asDouble();
+y_obj = list.get(3).asDouble();
+z_obj = list.get(4).asDouble();
+qx_obj = list.get(5).asDouble();
+qy_obj = list.get(6).asDouble();
+qz_obj = list.get(7).asDouble();
+qw_obj = list.get(8).asDouble();
 
-disp(['data: ', char(frame), ' ', num2str(x), ' ', num2str(y), ' ', num2str(z), ' ', num2str(qx), ' ', num2str(qy), ' ', num2str(qz), ' ', num2str(qw), ' ', num2str(sx), ' ', num2str(sy), ' ', num2str(sz),])
+sx_obj = list.get(9).asDouble();
+sy_obj = list.get(10).asDouble();
+sz_obj = list.get(11).asDouble();
+
+disp([char(command_obj), ': ', char(frame_obj), ' ', num2str(x_obj), ' ', num2str(y_obj), ' ', num2str(z_obj), ' ', num2str(qx_obj), ' ', num2str(qy_obj), ' ', num2str(qz_obj), ' ', num2str(qw_obj), ' ', num2str(sx_obj), ' ', num2str(sy_obj), ' ', num2str(sz_obj),])
+
+using_yarp=1;
 
 %%
 read_port.close;

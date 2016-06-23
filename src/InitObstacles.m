@@ -2,16 +2,10 @@
 Obstacles = tree;
 
 if obstacles_on
-    x_wall_min = 4;
-    x_wall_max = x_wall_min + 2;
-    x_wall_min = -0.3;
-    x_wall_max = x_wall_min + 0.5;
-    x_wall_max = 0.7;
-    % y_wall_min = 2;
-    y_wall_min = 1.5;
-    y_wall_min = 0.3;
-    y_wall_max = 1.8;
-    y_wall_max = 0.8;
+    x_wall_min = 0.5;
+    x_wall_max = 1.5;
+    y_wall_min = 0.5;
+    y_wall_max = 1;
     
     dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
     obstacle_wall = Obstacle(([ ...
@@ -20,6 +14,19 @@ if obstacles_on
         x_wall_max y_wall_max; ...
         x_wall_max y_wall_min]'*1)', dimensions_wall);
     Obstacles = Obstacles.addnode(0,obstacle_wall);
+    
+    x_wall_min = 0.5;
+    x_wall_max = 1.5;
+    y_wall_min = -0.5;
+    y_wall_max = -1;
+    
+    dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
+    obstacle_wall = Obstacle(([ ...
+        x_wall_min y_wall_min; ...
+        x_wall_min y_wall_max; ...
+        x_wall_max y_wall_max; ...
+        x_wall_max y_wall_min]'*1)', dimensions_wall);
+    Obstacles = Obstacles.addnode(1,obstacle_wall);
     %
     % speed_limit_bottom = (vmin+vmax)/2;
     % speed_limit_top = vmax;

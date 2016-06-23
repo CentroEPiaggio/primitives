@@ -352,11 +352,11 @@ for bb=1:length(replicate_with)
                         end
                     catch MI
                         disp(MI.message)
-                        keyboard
+                        %keyboard
                     end
                     
                     if checkdiscontinuity(T,Edges,Ptree)
-                        %-keyboard
+                        %keyboard
                     end
                     if added_new && rewired % && any(~any(isnan(x_rewire)))
                         %                     traj_pos_rewire=x_rewire(1,:);

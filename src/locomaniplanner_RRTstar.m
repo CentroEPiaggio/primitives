@@ -1,7 +1,8 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_bias_freq = 9;
+push_bias_freq = 5;
 
+using_yarp = 1;
 multiple_primitives = 1; % testing locomotion primitive only for coffee
 obstacles_on = true;
 
@@ -20,13 +21,65 @@ load_libraries
 
 % actually instead of NaN we could use a value. Why is it better to use
 % NaN? We'll see.
+L_arm = 0.5;
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
-z_goal = [9  ; 9 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-z_goal = [1.5  ; 0.5 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-L_arm = 0.31;
-z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
-z_goal = [L_arm  ; L_arm ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
-z_goal = [1  ; 1 ; pi/2 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [1.5  ; 0 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+%%
+% initializing yarp
+
+if using_yarp
+    LoadYarp;
+
+    read_port=yarp.Port;
+    read_port.close;
+    read_port.open('/locomanipulation/command:i');
+
+    recv=yarp.Bottle;
+
+    write_port=yarp.Port;
+    write_port.close;
+    write_port.open('/locomanipulation/solution:o');
+    
+    send=yarp.Bottle;
+
+    pause(1);
+end
+%%
+% receving data from yarp, start this after opening the write port
+if using_yarp
+    
+    if(~read_port.isOpen)
+        read_port.open('/locomanipulation/command:i');
+    end
+    
+    recv.fromString('');
+    while(strcmp(recv.toString, ''))
+        read_port.read(recv);
+        pause(0.01);
+    end
+
+    list = recv.get(0).asList();
+
+    command_obj = list.get(0).asString();
+
+    frame_obj = list.get(1).asString();
+
+    x_obj = list.get(2).asDouble();
+    y_obj = list.get(3).asDouble();
+    z_obj = list.get(4).asDouble();
+    qx_obj = list.get(5).asDouble();
+    qy_obj = list.get(6).asDouble();
+    qz_obj = list.get(7).asDouble();
+    qw_obj = list.get(8).asDouble();
+
+    sx_obj = list.get(9).asDouble();
+    sy_obj = list.get(10).asDouble();
+    sz_obj = list.get(11).asDouble();
+
+    disp([char(command_obj), ': ', char(frame_obj), ' ', num2str(x_obj), ' ', num2str(y_obj), ' ', num2str(z_obj), ' ', num2str(qx_obj), ' ', num2str(qy_obj), ' ', num2str(qz_obj), ' ', num2str(qw_obj), ' ', num2str(sx_obj), ' ', num2str(sy_obj), ' ', num2str(sz_obj),])
+
+    read_port.close;
+end
 %%
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -41,10 +94,8 @@ InitObstacles; % initialize obstacles structure
 % z_intermediate_2 = [15;0;1];
 % z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
 if multiple_primitives
-    z_intermediate_1 = [0.8; 1; pi/2 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-    z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/2 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-    z_intermediate_3 = [0.8; 0.25; pi/2; 0; 0];
-    z_intermediate_4 = [0.8; 0.55; pi/2; 0; 1];
+    z_intermediate_1 = [x_target; y_target; 0; 0; 0];
+    z_intermediate_2 = [x_target; y_target; 0; 0; 1];
     %     z_intermediate_5 = [1; 0.6; pi/2; 0; 1];
     %     z_intermediate_6 = [1; 0.65; pi/2; 0; 1];
     %     z_intermediate_7 = [1; 0.7; pi/2; 0; 1];
@@ -54,7 +105,7 @@ if multiple_primitives
     %     z_intermediate_11 = [1; 0.9; pi/2; 0; 1];
     %     z_intermediate_12 = [1; 0.95; pi/2; 0; 1];
     %     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_intermediate_5,z_intermediate_6,z_intermediate_7,z_intermediate_8,z_intermediate_9,z_intermediate_10,z_intermediate_11,z_intermediate_12,z_goal};
-    bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
+    bias_points_generic = {z_intermediate_1,z_intermediate_2,z_goal};
 else
     bias_points_generic = {z_goal};
 end
@@ -385,6 +436,32 @@ for ii=1:N_sample_max
 end
 
 disp('PLANNING COMPLETED')
+
+
+%% sending the solution through YARP
+
+if using_yarp
+    if(~write_port.isOpen)
+        write_port.open('/locomanipulation/solution:o');
+    end
+    
+    cmd = 'solution';
+
+    temp_str='';
+    for i=1:numel(opt_path)
+        for j=1:numel(T.Node{opt_path(i)})
+            temp_str = [temp_str ' ' num2str(T.Node{opt_path(i)}(j))];
+        end
+    end
+    temp_str = [cmd ' ' temp_str];
+    
+    send.fromString(temp_str);
+    
+    write_port.write(send);
+    
+    write_port.close;
+end
+
 
 %% simulate the optimal plan that has been found
 
