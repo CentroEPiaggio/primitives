@@ -38,7 +38,7 @@ if using_yarp
 
     write_port=yarp.Port;
     write_port.close;
-    write_port.open('/locomanipulation/solution:o');
+    write_port.open('/locomanipulation_solution/command:o');
     
     send=yarp.Bottle;
 
