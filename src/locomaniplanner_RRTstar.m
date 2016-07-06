@@ -2,7 +2,7 @@
 clear all; clear import; close all; clc;
 push_bias_freq = 5;
 
-using_yarp = 1;
+using_yarp = 0;
 multiple_primitives = 1; % testing locomotion primitive only for coffee
 obstacles_on = true;
 
@@ -19,8 +19,6 @@ movie=1; % to save video of stuff. Movie has been modified into a
 % load libraries
 load_libraries
 
-% actually instead of NaN we could use a value. Why is it better to use
-% NaN? We'll see.
 L_arm = 0.5;
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [1.5  ; 0 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
@@ -80,7 +78,7 @@ if using_yarp
 
     read_port.close;
 end
-%%
+%% Initialization scripts
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
@@ -90,28 +88,14 @@ InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
 % solution to pass by.
-%z_intermediate_1 = [0;0;0;];
-% z_intermediate_2 = [15;0;1];
-% z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
 if multiple_primitives
     z_intermediate_1 = [x_target; y_target; 0; 0; 0];
     z_intermediate_2 = [x_target; y_target; 0; 0; 1];
-    %     z_intermediate_5 = [1; 0.6; pi/2; 0; 1];
-    %     z_intermediate_6 = [1; 0.65; pi/2; 0; 1];
-    %     z_intermediate_7 = [1; 0.7; pi/2; 0; 1];
-    %     z_intermediate_8 = [1; 0.75; pi/2; 0; 1];
-    %     z_intermediate_9 = [1; 0.8; pi/2; 0; 1];
-    %     z_intermediate_10 = [1; 0.85; pi/2; 0; 1];
-    %     z_intermediate_11 = [1; 0.9; pi/2; 0; 1];
-    %     z_intermediate_12 = [1; 0.95; pi/2; 0; 1];
-    %     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_intermediate_5,z_intermediate_6,z_intermediate_7,z_intermediate_8,z_intermediate_9,z_intermediate_10,z_intermediate_11,z_intermediate_12,z_goal};
     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_goal};
 else
     bias_points_generic = {z_goal};
 end
 bias_points = bias_points_generic;
-% bias_points = {z_goal, z_intermediate_2};
-% bias_points = {z_goal, z_intermediate_1, z_intermediate_2};
 bias_ii = 1;
 
 InitView; % open figures

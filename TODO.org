@@ -1,6 +1,0 @@
-* DONE Complete class structure
-** DONE Define (possibly abstrcta) functions over the sets to be used in PrimitiveFun class
-
-* TODO Script for figures and videos
-** TODO Fully-actuated case
-** TODO Under-actuated case
