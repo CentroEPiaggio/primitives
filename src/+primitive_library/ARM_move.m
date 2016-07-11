@@ -12,14 +12,16 @@ classdef ARM_move < primitive_library.PrimitiveFun
         %         PrimitiveFun f; % The function that maps the params q to the imagespace chi.
     end
     methods
-        function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters)
+%         function obj = ARM_move(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters)
+        function obj = ARM_move(V,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters)
             cprintf('*[.6,0.1,1]*','dentro costruttore di ARM_move\n');
             % Next line is a BITTERness! There are troubles inheriting the
             % PrimitiveFun constructor (which is executed before the DD_move constructor and apperas
             % not to read function arguments, i.e. always nargin=0). To
             % avoid this I used the function PrimitiveFun.Initialize to act
             % as a constructor.
-            obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters);
+%             obj = obj.Initialize(V,cost_coeff,cost_table,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters);
+            obj = obj.Initialize(V,name,dimensions,default_extend,dimensions_imagespace,edge_color,ID,setup_parameters);
             
             % initialize goal position in inertial frame of reference
             obj.A_g_0 = eye(4);

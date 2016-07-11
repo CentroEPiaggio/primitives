@@ -56,7 +56,8 @@ DD_move_vertices_nuvoletta = [xmin ymin thetamin vmin;
     xmax ymax thetamin vmax;
     xmax ymax thetamax vmax];
 
-Muovi = DD_move(DD_move_vertices_nuvoletta,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,dimensioni_nuvoletta,'blue',ID,[]);
+% Muovi = DD_move(DD_move_vertices_nuvoletta,[1 0],cost_table,'DD_Muovi',dimensioni,initial_extend,dimensioni_nuvoletta,'blue',ID,[]);
+Muovi = DD_move(DD_move_vertices_nuvoletta,'DD_Muovi',dimensioni,initial_extend,dimensioni_nuvoletta,'blue',ID,[]);
 Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 
 idx_primitive_next = idx_primitive_next+1;
