@@ -20,7 +20,7 @@ classdef PrimitiveFun
 %             function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID,setup_parameters) % TODO: PrimitiveFun(chi,q,f)
 function obj = Initialize(obj,V,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID,setup_parameters) % TODO: PrimitiveFun(chi,q,f)
 %             disp('Dentro costruttore di PrimitiveFun');
-            if nargin >= 9 % obj takes one argument, the others are our parameters
+            if nargin >= 7 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
 %                 obj.cost_coeff = cost_coeff;
 %                 obj.cost_table = cost_table;
@@ -35,10 +35,10 @@ function obj = Initialize(obj,V,name,dimensions,initial_extend,dimensions_images
             else
                 error('Error in initialization of primitives!');
             end
-            if nargin >= 10
+%             if nargin >= 10
                 obj.edge_color = edge_color;
                 obj.ID = ID;
-            end
+%             end
         end
         function string = getName(obj)
             string = obj.name;

@@ -16,6 +16,7 @@ function [idx_nearest,z_nearest] = Nearest(z_rand,T,prim,parent_prim)
 % convert nodes in trees from cells to matrix keyboard
 % keyboard
 debug = 1;
+
 if prim.ID == 2 && debug
 %     keyboard
 end

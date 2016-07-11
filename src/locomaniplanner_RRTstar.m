@@ -107,7 +107,6 @@ N_sample_max = 1000; % max number of samples
 cost_vector = [];
 N_cost_vector = [];
 
-return
 %% Main loop
 stop=false;
 path_found = false;
