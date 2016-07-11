@@ -52,7 +52,12 @@ for k = 1:N
 end
 objective = Tf;
 Global_constraints = [Constraints_control, Constraints_state];
-diagnostics = optimize(Global_constraints,objective,sdpsettings('solver','fmincon','fmincon.MaxIter',200,'fmincon.TolFun',0.00001));
+if verbose>0
+    verbosity_level = 1;
+else
+    verbosity_level = 0;
+end
+diagnostics = optimize(Global_constraints,objective,sdpsettings('solver','fmincon','fmincon.MaxIter',200,'fmincon.TolFun',0.00001,'verbose',verbosity_level));
 
 
 if diagnostics.problem ~= 0 % FAIL STATE
