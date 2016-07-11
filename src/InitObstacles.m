@@ -2,9 +2,10 @@
 Obstacles = tree;
 
 if obstacles_on
+    % Wall on the right of the robot
     x_wall_min = 0.5;
-    x_wall_max = 1.5;
-    y_wall_min = 0.5;
+    x_wall_max = 2;
+    y_wall_min = 0.75;
     y_wall_max = 1;
     
     dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions
@@ -15,9 +16,10 @@ if obstacles_on
         x_wall_max y_wall_min]'*1)', dimensions_wall);
     Obstacles = Obstacles.addnode(0,obstacle_wall);
     
+    % Wall on the left of the robot
     x_wall_min = 0.5;
-    x_wall_max = 1.5;
-    y_wall_min = -0.5;
+    x_wall_max = 2;
+    y_wall_min = -0.75;
     y_wall_max = -1;
     
     dimensions_wall = [1 1 0 0]; % walls affect x and y dimensions

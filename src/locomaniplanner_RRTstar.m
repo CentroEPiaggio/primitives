@@ -21,7 +21,7 @@ load_libraries
 
 L_arm = 0.5;
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
-z_goal = [1.5  ; 0 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [2  ; 0 ; 0 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 %%
 % initializing yarp
 
@@ -107,6 +107,7 @@ N_sample_max = 1000; % max number of samples
 cost_vector = [];
 N_cost_vector = [];
 
+return
 %% Main loop
 stop=false;
 path_found = false;

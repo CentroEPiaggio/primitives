@@ -1,6 +1,6 @@
 % function [Ptree,Chi0]=InitializePrimitives()
 
-dimensioni = [0 0 0 0]; % [x_carrello v_carrello y_pendolo pulsante]
+% dimensioni = [0 0 0 0]; % [x_carrello v_carrello y_pendolo pulsante]
 % the vector dimensioni could be built automatically each time a primitive
 % is added to the tree. This is surely an improvement to make. For the time
 % being (FTTB) there are more urgent things to do. The solution implemented here
@@ -21,13 +21,13 @@ cost_table = rand(10,3);
 % Forward = PrimitiveFun([-1 -1 0; -1 1 0; 1 -1 0; 1 1 0;-1 -1 1; -1 1 1; 1 -1 1; 1 1 1]*0.3,[1 0],cost_table,'Forward');
 
 xmin = -0.3;
-xmax = 1.5;
+xmax = 2.5;
 
-ymin = -0.5;
-ymax = 0.5;
+ymin = -1;
+ymax = 1;
 
 vmin = 0;
-vmax = 0.1;
+vmax = 0.2;
 
 thetamin = -pi;
 thetamax = pi;
@@ -36,7 +36,6 @@ dimensioni = [1 1 1 1 0]; % only sample in x and v cart.
 initial_extend = [0 0 0 0 NaN];
 ID = 1; % WARNING: this has to coincide with the index of the primitive in the primitive node! So that by calling primitive.Parent(primitive.ID) returns the primitive's parent. It has to maintain the same order of
 % insertion in the tree
-% Muovi = Move([xmin vmin; xmin vmax; xmax vmax; xmax vmin],[1 0],cost_table,'Muovi',dimensioni,initial_extend,'blue',ID); % instantiate the primitive Move in Muovi
 
 dimensioni_nuvoletta = [1 1 1 1 0]; % only sample in x cart and y pendulum and v cart.
 DD_move_vertices_nuvoletta = [xmin ymin thetamin vmin;
@@ -63,16 +62,18 @@ Ptree = Ptree.addnode(idx_primitive_next,Muovi);
 idx_primitive_next = idx_primitive_next+1;
 if multiple_primitives
     if ~using_yarp
-        x_target = 0.8;%1+L_arm/2;
-        y_target = 0.4;%1+L_arm/2;
+        x_target = 1.5;%0.8;%1+L_arm/2;
+        y_target = 0;%0.4;%1+L_arm/2;
     else
         x_target = x_obj;
         y_target = y_obj;
     end
-    xmin_grasping = x_target-L_arm/2;
-    xmax_grasping = x_target+L_arm/2;
-    ymin_grasping = y_target-L_arm/2;
-    ymax_grasping = y_target+L_arm/2;
+    L_arm = 0.5;
+    L_bar = 2;
+    xmin_grasping = x_target-L_arm;
+    xmax_grasping = x_target+L_arm*0.1;
+    ymin_grasping = y_target-L_bar/2;
+    ymax_grasping = y_target+L_bar/2;
     taumin = 0; % here ymin is the minimum height for the end effector
     taumax = 1;% here ymax is the maximum height for the end effector
     dimensioni = [0 0 0 0 1]; % only sample in x cart and y pendulum and v cart.
@@ -91,7 +92,8 @@ if multiple_primitives
         xmax_grasping ymax_grasping taumax];
     
     arm_setup_parameters = struct('x_target',x_target,'y_target',y_target);
-    Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID,arm_setup_parameters);
+%     Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID,arm_setup_parameters);
+    Manipulate = ARM_move(ARM_move_vertices_nuvoletta,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID,arm_setup_parameters);
     Ptree = Ptree.addnode(idx_primitive_next,Manipulate);
     
     idx_primitive_next = idx_primitive_next+1;
