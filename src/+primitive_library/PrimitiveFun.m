@@ -2,7 +2,7 @@ classdef PrimitiveFun
     properties
         name; % string
         chi; % Imagespace
-        %         Params q;
+%         Params q;
         q; % primitive parameters
         %         Mapping f;
         cost_coeff;  % replace with an abstract function or sth else
@@ -12,13 +12,14 @@ classdef PrimitiveFun
         initial_extend; % initial value used when expanding the primitive (i.e. the hyperplane where the projection happens)
         edge_color; % color of the edges when plotting the tree
         ID;
+        setup_parameters; % parameters that are used to specify i.e. primitive's activation point or other peculiarities of each instance of a primitive
     end
     methods
         % constructor
-        %         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
-        function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID) % TODO: PrimitiveFun(chi,q,f)
-            %             disp('Dentro costruttore di PrimitiveFun');
-            if nargin >= 8 % obj takes one argument, the others are our parameters
+%         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
+            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID,setup_parameters) % TODO: PrimitiveFun(chi,q,f)
+%             disp('Dentro costruttore di PrimitiveFun');
+            if nargin >= 9 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
                 obj.cost_coeff = cost_coeff;
                 obj.cost_table = cost_table;
@@ -27,12 +28,13 @@ classdef PrimitiveFun
                 obj.dimensions_imagespace = dimensions_imagespace;
                 obj.initial_extend = initial_extend;
                 obj.edge_color = 'blue';
+                obj.setup_parameters = setup_parameters;
             elseif nargin < 1
                 obj.chi = Imagespace([-1 -1; -1 1; 1 -1; 1 1]*0.3);
             else
                 error('Error in initialization of primitives!');
             end
-            if nargin == 10
+            if nargin >= 10
                 obj.edge_color = edge_color;
                 obj.ID = ID;
             end
