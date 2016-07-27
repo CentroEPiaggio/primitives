@@ -139,16 +139,9 @@ for ii=1:N_sample_max
         else
             pushed_in_goal=0;
         end
-        %     elseif ~isempty(bag_bias)
-        %         z_rand = bag_bias{1};
-        %         bag_bias = {bag_bias{2:end}};
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         pushed_in_goal=0;
-        %         z_rand1 = z_rand; z_rand1(3) = 0;
-        %         z_rand2 = z_rand; z_rand2(3) = pi/4;
-        %         z_rand3 = z_rand; z_rand3(3) = pi/2;
-        %         bag_bias = {z_rand1, z_rand2, z_rand3};
     end
     while ~CollisionFree(fix_nans(z_rand,Ptree.Node{1}.dimensions_imagespace),Ptree,Obstacles)
         if mod(ii,push_bias_freq)==0 %&& ~path_found
