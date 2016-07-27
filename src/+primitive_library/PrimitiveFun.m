@@ -2,9 +2,9 @@ classdef PrimitiveFun
     properties
         name; % string
         chi; % Imagespace
-%         Params q;
+        %         Params q;
         q; % primitive parameters
-%         Mapping f;
+        %         Mapping f;
         cost_coeff;  % replace with an abstract function or sth else
         cost_table;
         dimensions; % tracks what dimensions are used by a primitive with its control % dimensions that are directly changed when this primitive is active (others are trimmed by other primitives)
@@ -15,9 +15,9 @@ classdef PrimitiveFun
     end
     methods
         % constructor
-%         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
-            function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID) % TODO: PrimitiveFun(chi,q,f)
-%             disp('Dentro costruttore di PrimitiveFun');
+        %         function obj = PrimitiveFun(V,cost_coeff,cost_table,name,dimensions,initial_extend) % TODO: PrimitiveFun(chi,q,f)
+        function obj = Initialize(obj,V,cost_coeff,cost_table,name,dimensions,initial_extend,dimensions_imagespace,edge_color,ID) % TODO: PrimitiveFun(chi,q,f)
+            %             disp('Dentro costruttore di PrimitiveFun');
             if nargin >= 8 % obj takes one argument, the others are our parameters
                 obj.chi = primitive_library.Imagespace(V);
                 obj.cost_coeff = cost_coeff;
@@ -54,7 +54,7 @@ classdef PrimitiveFun
             x_f = x_f-x_i;
             x_i = 0*x_i;
             path_to_xf = x_f;
-%             path_to_x_f = norm(x_f);
+            %             path_to_x_f = norm(x_f);
             tol = 0.01;
             idx = find(abs(obj.cost_table(:,3)-path_to_x_f)<=tol);
             while isempty(idx) && tol < 0.2
@@ -74,7 +74,7 @@ classdef PrimitiveFun
         % extend a point in the current primitive image space by replacing
         % (if there are) NaN values with initial_extend values
         function extended_state = extend(obj,z_test) % z_test must be already with its own NaNs
-%             keyboard
+            %             keyboard
             nans = isnan(z_test);
             nans_wholedimensions = [~nans(:); zeros(length(obj.dimensions)-length(nans),1)];
             if isequal(nans_wholedimensions,obj.dimensions(:)) %|| ~any(nans)
@@ -84,7 +84,16 @@ classdef PrimitiveFun
             % here we need to initialize some nan values to the
             % initial_extend value
             extended_state = z_test;
-            extended_state((~isnan(obj.initial_extend))>0) = obj.initial_extend((~isnan(obj.initial_extend))>0);
+            
+            if obj.name == 'ARM_move' % HARDCODED
+                extended_state(5) = 0;
+            else
+                if isnan(z_test(isnan(obj.initial_extend)>0))
+                    extended_state((~isnan(obj.initial_extend))>0) = obj.initial_extend((~isnan(obj.initial_extend))>0);
+                end
+            end
+            
+            %             keyboard
         end
     end
     methods (Abstract)

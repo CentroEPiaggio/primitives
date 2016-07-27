@@ -27,6 +27,7 @@ L_arm = 0.31;
 z_init = [0  ; 0 ; 0 ; 0 ; NaN]; % initial state: [x,y,theta,v, tau].
 z_goal = [L_arm  ; L_arm ; pi/4 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 z_goal = [0  ; 1 ; pi ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
+z_goal = [1  ; 1 ; pi/2 ; 0 ;   1]; % goal state:    [position,speed,end-effector height, object grasped].
 %%
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
@@ -41,10 +42,19 @@ InitObstacles; % initialize obstacles structure
 % z_intermediate_2 = [15;0;1];
 % z_intermediate_1 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); 0 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
 if multiple_primitives
-    z_intermediate_1 = [1; 1; pi/2 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
+    z_intermediate_1 = [0.8; 1; pi/2 ; 0 ; 0 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
     z_intermediate_2 = [mean([xmin_grasping,xmax_grasping]); mean([ymin_grasping,ymax_grasping]); pi/2 ; 0 ; 1 ]; % TODO: how to bias only on [x,y,tau] for any value of [v,w]?
-    z_intermediate_3 = [1; 0.25; pi/2; 0; 0];
-    z_intermediate_4 = [1; 0.55; pi/2; 0; 1];
+    z_intermediate_3 = [0.8; 0.25; pi/2; 0; 0];
+    z_intermediate_4 = [0.8; 0.55; pi/2; 0; 1];
+    %     z_intermediate_5 = [1; 0.6; pi/2; 0; 1];
+    %     z_intermediate_6 = [1; 0.65; pi/2; 0; 1];
+    %     z_intermediate_7 = [1; 0.7; pi/2; 0; 1];
+    %     z_intermediate_8 = [1; 0.75; pi/2; 0; 1];
+    %     z_intermediate_9 = [1; 0.8; pi/2; 0; 1];
+    %     z_intermediate_10 = [1; 0.85; pi/2; 0; 1];
+    %     z_intermediate_11 = [1; 0.9; pi/2; 0; 1];
+    %     z_intermediate_12 = [1; 0.95; pi/2; 0; 1];
+    %     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_intermediate_5,z_intermediate_6,z_intermediate_7,z_intermediate_8,z_intermediate_9,z_intermediate_10,z_intermediate_11,z_intermediate_12,z_goal};
     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
 else
     bias_points_generic = {z_goal};
@@ -85,17 +95,24 @@ for ii=1:N_sample_max
         z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
         z_rand = z_bias(Ptree.Node{1}.dimensions>0); % every once in a while push in a known number
         disp('Pushing in goal')
-        pushed_in_goal=1;
-    elseif ~isempty(bag_bias)
-        z_rand = bag_bias{1};
-        bag_bias = {bag_bias{2:end}};
+        if bias_ii == length(bias_points)
+            pushed_in_goal=1;
+        else
+            pushed_in_goal=0;
+        end
+        %     elseif ~isempty(bag_bias)
+        %         z_rand = bag_bias{1};
+        %         bag_bias = {bag_bias{2:end}};
     else
         z_rand = Chi0.sample; % sample a point in Chi0.
         pushed_in_goal=0;
-        z_rand1 = z_rand; z_rand1(3) = 0;
-        z_rand2 = z_rand; z_rand2(3) = pi/4;
-        z_rand3 = z_rand; z_rand3(3) = pi/2;
-        bag_bias = {z_rand1, z_rand2, z_rand3};
+        %         z_rand1 = z_rand; z_rand1(3) = 0;
+        %         z_rand2 = z_rand; z_rand2(3) = pi/4;
+        %         z_rand3 = z_rand; z_rand3(3) = pi/2;
+        %         bag_bias = {z_rand1, z_rand2, z_rand3};
+    end
+    if bias_ii >= 4 && bias_ii <=12
+        %         keyboard
     end
     while ~CollisionFree(fix_nans(z_rand,Ptree.Node{1}.dimensions_imagespace),Ptree,Obstacles)
         if mod(ii,push_bias_freq)==0 %&& ~path_found
@@ -111,7 +128,7 @@ for ii=1:N_sample_max
     
     % round up to the second decimal
     z_rand = round(z_rand*100)/100;
-        
+    
     if verbose
         disp(['z_rand: ' num2str(z_rand(:)')])
         fig_xv=2; fig_xy = 3; % parametrize
@@ -200,7 +217,12 @@ for ii=1:N_sample_max
             Ts = 0.01; % TODO: once and for all parametrize this
             cost_trig = Ts;
             time_trig = 0:Ts:Ts;
-            x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
+            try
+                x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
+            catch MTRIG
+                disp(MTRIG.message);
+                keyboard
+            end
             [added_new,T,G,E,... % inputs for algorithm stuff
                 plot_nodes,plot_edges, ... % inputs for plotting visual stuff
                 idx_last_added] ... % return index of last added node

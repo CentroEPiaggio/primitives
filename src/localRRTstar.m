@@ -2,7 +2,7 @@ function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added
 debug = 1;
 
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
-
+% keyboard
 % select current primitive
 prim = Ptree.get(idx_prim);
 
@@ -13,6 +13,7 @@ if length(replicate_over_primitive)>0
             prim_replicate = Ptree.Node{replicate_over_primitive(cc)};
             %     replicate_with = {cell2mat(replicate_with), prim_replicate.replicate(z_rand)}; % TODO: generic implementation
             replicate_with = {cell2mat(replicate_with), [z_rand;0], [z_rand;1]}; % TODO: HARDCODED
+%             replicate_with = {[z_rand;1]}; % TODO: HARDCODED
             %-keyboard
         end
     end
@@ -21,6 +22,10 @@ else
     replicate_with = {fix_nans(z_rand,prim.dimensions_imagespace)};
 end
 for bb=1:length(replicate_with)
+%     if bb==1 && pushed_in_goal
+%         disp('Let''s fix this motherfucker');
+%         keyboard
+%     end
     %%
     fig_xv=2; fig_xy = 3; fig_yv = 4; % stuff to plot
     figure(fig_xy);

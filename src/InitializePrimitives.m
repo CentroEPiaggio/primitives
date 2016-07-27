@@ -35,8 +35,8 @@ vmin = -0.1; % linear speed % FIXME: check if this has to be negative too for th
 vmax = 0.1; % TODO: check out this value
 thetamin = pi/4 - 0.1*pi;
 thetamax = pi/4 + 0.1*pi;
-thetamin = -pi;
-thetamax = pi;
+thetamin = -pi/4;
+thetamax = pi*3/2;
 
 dimensioni = [1 1 1 1 0]; % only sample in x and v cart.
 initial_extend = [0 0 0 0 NaN];
@@ -79,7 +79,7 @@ if multiple_primitives
     x_target = mean([xmin_grasping,xmax_grasping]);
     y_target = mean([ymin_grasping,ymax_grasping]);
     L_arm = 0.31;
-    x_target = 1;%1+L_arm/2;
+    x_target = 0.8;%1+L_arm/2;
     y_target = 0.4;%1+L_arm/2;
     xmin_grasping = x_target-L_arm/2;
     xmax_grasping = x_target+L_arm/2;
