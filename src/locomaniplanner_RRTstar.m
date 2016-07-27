@@ -84,6 +84,8 @@ end
 
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
+active_primitives = [Ptree.Node{1}.ID]; % initialize the activated primitives with the first one (locomotion)
+
 InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
@@ -124,6 +126,9 @@ bias_points = [bias_points_generic];
 for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
+    cprintf('*[0,0.7,1]*','* Choosing the sampling image space: ');
+    sample_image_space = datasample(active_primitives,1); % uniformly randomly selects the primitive from where to sample from
+    cprintf('*[0,0.7,1]*','%d: %s*\n',sample_image_space,Ptree.Node{sample_image_space}.name);
     %% sampling
     if mod(ii,push_bias_freq)==0 %&& ~path_found
         z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
