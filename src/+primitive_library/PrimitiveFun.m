@@ -11,7 +11,7 @@ classdef PrimitiveFun
         dimensions_imagespace; % i.e. where the sampling is allowed, used in CheckAvailablePrimitives
         initial_extend; % initial value used when expanding the primitive (i.e. the hyperplane where the projection happens)
         edge_color; % color of the edges when plotting the tree
-        ID;
+        ID; % NOTE: this has to correspond to the index of the primitive in the tree! e.g. if a primitive is the 3-rd one added to the tree, this ID has to be 3!!!
         setup_parameters; % parameters that are used to specify i.e. primitive's activation point or other peculiarities of each instance of a primitive
     end
     methods
