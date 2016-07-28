@@ -84,7 +84,10 @@ end
 
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
-active_primitives = [Ptree.Node{1}.ID]; % initialize the activated primitives with the first one (locomotion)
+% active_primitives = zeros(1,Ptree.nnodes); % initialize the activated primitives with the first one (locomotion)
+% the variable active_primitives has boolean values, where the {i}-th element true means that
+% the primitive with the ID {i} is active
+active_primitives = CheckAvailablePrimitives(z_init,Ptree); % initialize the activated primitives
 
 InitObstacles; % initialize obstacles structure
 
@@ -127,8 +130,9 @@ for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
     cprintf('*[0,0.7,1]*','* Choosing the sampling image space: ');
-    sample_image_space = datasample(active_primitives,1); % uniformly randomly selects the primitive from where to sample from
+    sample_image_space = RandSelectActivePrimitive(active_primitives); % uniformly randomly selects the primitive from where to sample from
     cprintf('*[0,0.7,1]*','%d: %s*\n',sample_image_space,Ptree.Node{sample_image_space}.name);
+%     keyboard
     Chi_ii = Ptree.Node{sample_image_space}.chi; % select current image space where to sample from
     %% sampling
     if mod(ii,push_bias_freq)==0 %&& ~path_found
@@ -166,6 +170,7 @@ for ii=1:N_sample_max
         plot(z_rand(1),z_rand(2),'rx','linewidth',2)
         figure(fig_xy)
         plot3(z_rand(1),z_rand(2),0,'rx','linewidth',2) % TODO: this has to be parametrized
+%         keyboard
     end
     
     % Run steering function algorithm on the given image space space
@@ -227,6 +232,7 @@ for ii=1:N_sample_max
         end
     end
     
+    %% internal loop
     if feasible && added_new % last call to localRRTstart has produced a new
         % node z_new which was added to the tree?
         % Check for available primitives to extend the last sampled point in a new dimension
@@ -234,178 +240,179 @@ for ii=1:N_sample_max
         idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
         
         cprintf('*[0,0.7,1]*','Found new primitive?')
-        if any(idx_avail_prim)
+        if ~isequal(idx_avail_prim,active_primitives)
             cprintf('*[0,0.7,1]*','Found new primitive!')
+            active_primitives(idx_avail_prim>0) = 1; % activate new primitives
             keyboard
         else
             cprintf('*[0,0.7,1]*','No :(')
         end
         %% Iterate over available primitives
-        for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
-            cprintf('*[0,.7,0.5]*','* Iterate over all available primitives *\n');
-            if ~idx_avail_prim(jj)
-                % this primitive jj is not available for this point. Keep going.
-                continue;
-            end
-            
-            prim = Ptree.Node{jj};
-            
-            %% take the last added point, extend it, and add it to the tree
-            %-keyboard
-            
-            %% TRIGGER ON
-            q_trig = [];
-            Ts = 0.01; % TODO: once and for all parametrize this
-            cost_trig = Ts;
-            time_trig = 0:Ts:Ts;
-            try
-                x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
-            catch MTRIG
-                disp(MTRIG.message);
-                keyboard
-            end
-            [added_new,T,G,E,... % inputs for algorithm stuff
-                plot_nodes,plot_edges, ... % inputs for plotting visual stuff
-                idx_last_added] ... % return index of last added node
-                = InsertExtendedNode(idx_last_added,prim.extend(z_new),T,G,E, prim, q_trig, cost_trig, x_trig , time_trig, verbose, plot_nodes, plot_edges);
-            prim.extend(z_new)
-            if checkdiscontinuity(T,E,Ptree)
-                %-keyboard
-            end
-            
-            
-            %%
-            if added_new && reached(T.Node{end},z_goal,tol)
-                %-keyboard
-                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-                goal_node = idz_Goal;
-                % the -1 is a dirty fix for the fact
-                % that this node is inserted two
-                % times, once via prim.extend and
-                % one from localRRT*(Chi_aug). Does
-                % not happen always but still it
-                % needs this workaround for those
-                % times.
-                disp('Goal reached (via Eleva)!');
-                path_found = true;
-                %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                if debug
-                    %-keyboard
-                end
-                stop = true;
-                break
-            end
-            if path_found
-                %         [path,cost]=plot_biograph(source_node,goal_node,G);
-                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-                % save cost and iteration for plotting (anytime) stuff
-                if ~isempty(cost_vector) && cost<cost_vector(end)
-                    cost_vector = [cost_vector, cost];
-                    N_cost_vector = [N_cost_vector, ii];
-                    plot_biograph(source_node,goal_node,G);
-                    figure(10)
-                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    %                     hold on
-                    save_test_data
-                    if debug
-                        %-keyboard
-                    end
-                end
-            end
-            % RESTART FROM HERE: see if it's better to have z_aug only as
-            % the extra-dimensions, to augment it with the point on the
-            % base space, or a mix of the two.
-            % for the moment being, we just keep it as a sample in the
-            % primitive's image space, i.e., the size of the sample is
-            % given by the dimension of the image space
-            if mod(ii,push_bias_freq)==0 %&& ~path_found
-                z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
-                disp('Pushing in aug goal')
-                pushed_in_goal=1;
-            else
-                z_aug = prim.chi.sample;
-                %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
-                pushed_in_goal=0;
-            end
-            while ~CollisionFree(fix_nans([z_aug],Ptree.Node{2}.dimensions_imagespace),Ptree,Obstacles)
-                if mod(ii,push_bias_freq)==0 %&& ~path_found
-                    z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
-                    disp('Pushing in aug goal')
-                    pushed_in_goal=1;
-                else
-                    z_aug = prim.chi.sample;
-                    %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
-                    pushed_in_goal=0;
-                end
-            end
-            % rounding up to the second decimal
-            z_aug = round(z_aug*100)/100;
-            
-            Chi_aug = prim.chi;
-            
-            if verbose
-                disp(['z_aug: ' num2str(z_aug(:)')])
-                figure(fig_chi0)
-                plot(z_rand(1),z_rand(2),'rx','linewidth',2)
-                figure(fig_xy);
-                plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
-                cprintf('red','Sto per provare con la %s\n',prim.name)
-            end
-            
-            idx_parent_primitive = 1;
-            
-            [T,G,E,z_new_aug,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
-            %% set of points with different dimensions along the primitives
-            if added_new
-                %-keyboard
-                z_added = T.get(idx_last_added);
-                %                 z_new(5)==1 % prim.istask % boolean
-                if z_added(5)==1 % TODO: HARDCODED % verify condition on trigger exit
-                    %-keyboard
-                    %                     replicate_over_primitive = [replicate_over_primitive, prim.ID];
-                    replicate_over_primitive = 2;
-                end
-            end
-            
-            if added_new && reached(T.Node{end},z_goal,tol)
-                idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
-                goal_node = idz_Goal;
-                % the -1 is a dirty fix for the fact
-                % that this node is inserted two
-                % times, once via prim.extend and
-                % one from localRRT*(Chi_aug). Does
-                % not happen always but still it
-                % needs this workaround for those
-                % times.
-                disp('Goal reached (via Eleva)!');
-                path_found = true;
-                %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
-                if debug
-                    %-keyboard
-                end
-                stop = true;
-                break
-            end
-            if path_found
-                [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
-                opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
-                % save cost and iteration for plotting (anytime) stuff
-                if ~isempty(cost_vector) && cost<cost_vector(end)
-                    cost_vector = [cost_vector, cost];
-                    N_cost_vector = [N_cost_vector, ii];
-                    plot_biograph(source_node,goal_node,G);
-                    figure(10)
-                    bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
-                    %                     hold on
-                    save_test_data
-                    if debug
-                        %-keyboard
-                    end
-                end
-            end
-            
-        end
+%         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
+%             cprintf('*[0,.7,0.5]*','* Iterate over all available primitives *\n');
+%             if ~idx_avail_prim(jj)
+%                 % this primitive jj is not available for this point. Keep going.
+%                 continue;
+%             end
+%             
+%             prim = Ptree.Node{jj};
+%             
+%             %% take the last added point, extend it, and add it to the tree
+%             %-keyboard
+%             
+%             %% TRIGGER ON
+%             q_trig = [];
+%             Ts = 0.01; % TODO: once and for all parametrize this
+%             cost_trig = Ts;
+%             time_trig = 0:Ts:Ts;
+%             try
+%                 x_trig = [T.Node{idx_last_added} prim.extend(z_new)];
+%             catch MTRIG
+%                 disp(MTRIG.message);
+%                 keyboard
+%             end
+%             [added_new,T,G,E,... % inputs for algorithm stuff
+%                 plot_nodes,plot_edges, ... % inputs for plotting visual stuff
+%                 idx_last_added] ... % return index of last added node
+%                 = InsertExtendedNode(idx_last_added,prim.extend(z_new),T,G,E, prim, q_trig, cost_trig, x_trig , time_trig, verbose, plot_nodes, plot_edges);
+%             prim.extend(z_new)
+%             if checkdiscontinuity(T,E,Ptree)
+%                 %-keyboard
+%             end
+%             
+%             
+%             %%
+%             if added_new && reached(T.Node{end},z_goal,tol)
+%                 %-keyboard
+%                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+%                 goal_node = idz_Goal;
+%                 % the -1 is a dirty fix for the fact
+%                 % that this node is inserted two
+%                 % times, once via prim.extend and
+%                 % one from localRRT*(Chi_aug). Does
+%                 % not happen always but still it
+%                 % needs this workaround for those
+%                 % times.
+%                 disp('Goal reached (via Eleva)!');
+%                 path_found = true;
+%                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+%                 if debug
+%                     %-keyboard
+%                 end
+%                 stop = true;
+%                 break
+%             end
+%             if path_found
+%                 %         [path,cost]=plot_biograph(source_node,goal_node,G);
+%                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+%                 opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+%                 % save cost and iteration for plotting (anytime) stuff
+%                 if ~isempty(cost_vector) && cost<cost_vector(end)
+%                     cost_vector = [cost_vector, cost];
+%                     N_cost_vector = [N_cost_vector, ii];
+%                     plot_biograph(source_node,goal_node,G);
+%                     figure(10)
+%                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+%                     %                     hold on
+%                     save_test_data
+%                     if debug
+%                         %-keyboard
+%                     end
+%                 end
+%             end
+%             % RESTART FROM HERE: see if it's better to have z_aug only as
+%             % the extra-dimensions, to augment it with the point on the
+%             % base space, or a mix of the two.
+%             % for the moment being, we just keep it as a sample in the
+%             % primitive's image space, i.e., the size of the sample is
+%             % given by the dimension of the image space
+%             if mod(ii,push_bias_freq)==0 %&& ~path_found
+%                 z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
+%                 disp('Pushing in aug goal')
+%                 pushed_in_goal=1;
+%             else
+%                 z_aug = prim.chi.sample;
+%                 %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
+%                 pushed_in_goal=0;
+%             end
+%             while ~CollisionFree(fix_nans([z_aug],Ptree.Node{2}.dimensions_imagespace),Ptree,Obstacles)
+%                 if mod(ii,push_bias_freq)==0 %&& ~path_found
+%                     z_aug = z_bias(prim.dimensions_imagespace>0); % every once in a while push in a known number
+%                     disp('Pushing in aug goal')
+%                     pushed_in_goal=1;
+%                 else
+%                     z_aug = prim.chi.sample;
+%                     %                 z_aug(Ptree.Node{1}.dimensions>0) = z_rand; % BUGFIX DISCONT: only sample in the third dimension, starting from the already added point
+%                     pushed_in_goal=0;
+%                 end
+%             end
+%             % rounding up to the second decimal
+%             z_aug = round(z_aug*100)/100;
+%             
+%             Chi_aug = prim.chi;
+%             
+%             if verbose
+%                 disp(['z_aug: ' num2str(z_aug(:)')])
+%                 figure(fig_chi0)
+%                 plot(z_rand(1),z_rand(2),'rx','linewidth',2)
+%                 figure(fig_xy);
+%                 plot3(z_aug(1),z_aug(2),z_aug(3),'rx','linewidth',2)
+%                 cprintf('red','Sto per provare con la %s\n',prim.name)
+%             end
+%             
+%             idx_parent_primitive = 1;
+%             
+%             [T,G,E,z_new_aug,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_aug,Ptree,jj,z_aug,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
+%             %% set of points with different dimensions along the primitives
+%             if added_new
+%                 %-keyboard
+%                 z_added = T.get(idx_last_added);
+%                 %                 z_new(5)==1 % prim.istask % boolean
+%                 if z_added(5)==1 % TODO: HARDCODED % verify condition on trigger exit
+%                     %-keyboard
+%                     %                     replicate_over_primitive = [replicate_over_primitive, prim.ID];
+%                     replicate_over_primitive = 2;
+%                 end
+%             end
+%             
+%             if added_new && reached(T.Node{end},z_goal,tol)
+%                 idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
+%                 goal_node = idz_Goal;
+%                 % the -1 is a dirty fix for the fact
+%                 % that this node is inserted two
+%                 % times, once via prim.extend and
+%                 % one from localRRT*(Chi_aug). Does
+%                 % not happen always but still it
+%                 % needs this workaround for those
+%                 % times.
+%                 disp('Goal reached (via Eleva)!');
+%                 path_found = true;
+%                 %         plot(traj_pos,traj_vel,'linewidth',2,'color','yellow')
+%                 if debug
+%                     %-keyboard
+%                 end
+%                 stop = true;
+%                 break
+%             end
+%             if path_found
+%                 [cost,opt_path,~] = graphshortestpath(G,source_node,goal_node);
+%                 opt_path_edges = plot_opt_path(T,opt_path,opt_path_edges);
+%                 % save cost and iteration for plotting (anytime) stuff
+%                 if ~isempty(cost_vector) && cost<cost_vector(end)
+%                     cost_vector = [cost_vector, cost];
+%                     N_cost_vector = [N_cost_vector, ii];
+%                     plot_biograph(source_node,goal_node,G);
+%                     figure(10)
+%                     bar(N_cost_vector,cost_vector); xlabel('Iterations'); ylabel('cost');
+%                     %                     hold on
+%                     save_test_data
+%                     if debug
+%                         %-keyboard
+%                     end
+%                 end
+%             end
+%             
+%         end
         
         if stop
             disp('Found a feasible path!');
