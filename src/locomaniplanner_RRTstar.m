@@ -129,6 +129,7 @@ for ii=1:N_sample_max
     cprintf('*[0,0.7,1]*','* Choosing the sampling image space: ');
     sample_image_space = datasample(active_primitives,1); % uniformly randomly selects the primitive from where to sample from
     cprintf('*[0,0.7,1]*','%d: %s*\n',sample_image_space,Ptree.Node{sample_image_space}.name);
+    Chi_ii = Ptree.Node{sample_image_space}.chi; % select current image space where to sample from
     %% sampling
     if mod(ii,push_bias_freq)==0 %&& ~path_found
         z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
@@ -140,7 +141,7 @@ for ii=1:N_sample_max
             pushed_in_goal=0;
         end
     else
-        z_rand = Chi0.sample; % sample a point in Chi0.
+        z_rand = Chi_ii.sample; % sample a point in Chi_i.
         pushed_in_goal=0;
     end
     while ~CollisionFree(fix_nans(z_rand,Ptree.Node{1}.dimensions_imagespace),Ptree,Obstacles)
@@ -150,7 +151,7 @@ for ii=1:N_sample_max
             disp('Pushing in goal')
             pushed_in_goal=1;
         else
-            z_rand = Chi0.sample; % sample a point in Chi0.
+            z_rand = Chi_ii.sample; % sample a point in Chi_i.
             pushed_in_goal=0;
         end
     end
@@ -167,9 +168,13 @@ for ii=1:N_sample_max
         plot3(z_rand(1),z_rand(2),0,'rx','linewidth',2) % TODO: this has to be parametrized
     end
     
-    %% Run sampling algorithm on the Chi0 space
-    idx_parent_primitive = [];
-    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi0,Ptree,1,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
+    % Run steering function algorithm on the given image space space
+    if sample_image_space == 1
+        idx_parent_primitive = [];
+    else
+        idx_parent_primitive = 1; % TODO: automatize this with the primitive tree
+    end
+    [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_ii,Ptree,Ptree.Node{sample_image_space}.ID,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
     %     test_plot_opt
     if added_new && reached(T.Node{end},z_goal,tol) % first time a path is found
         %-keyboard
@@ -228,6 +233,13 @@ for ii=1:N_sample_max
         cprintf('*[0,0.7,1]*','* Check for available primitives to extend the last point in new dimensions *\n');
         idx_avail_prim = CheckAvailablePrimitives(z_new,Ptree);
         
+        cprintf('*[0,0.7,1]*','Found new primitive?')
+        if any(idx_avail_prim)
+            cprintf('*[0,0.7,1]*','Found new primitive!')
+            keyboard
+        else
+            cprintf('*[0,0.7,1]*','No :(')
+        end
         %% Iterate over available primitives
         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0
             cprintf('*[0,.7,0.5]*','* Iterate over all available primitives *\n');
