@@ -48,7 +48,7 @@ L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base fra
 if norm(goal_position_s)>L_arm
     disp('Over the hills and far away');
     if debug
-        %-keyboard
+        keyboard
     end
     return
 end

@@ -32,7 +32,7 @@ end
 if prim.ID == 1 % TODO: HARDCODED
 %     temp = points_mat(~isnan(prim.dimensions_imagespace==0),:);
     test1 = points_mat(prim.dimensions_imagespace==0,:);
-    
+%     test1(~isnan(test1)) = 1; % Possible fix if trying to connect a point with tau=0 and tau=1 with MOVE, which should not happen anyway though
     test2 = kron(z_test(prim.dimensions_imagespace==0),ones(1,size(points_mat,2)));
     keep_columns = [];
     for ii=1:length(test1)
@@ -53,7 +53,12 @@ try
     points_mat_masked = points_mat(mask>0,keep_columns(non_nans_col));
     idx_nearest_temp = knnsearch(points_mat_masked',z_rand(mask>0)');
     idx_nearest = keep_columns(non_nans_col(idx_nearest_temp));
-    z_nearest = T.get(idx_nearest);
+    if ~isempty(idx_nearest)
+        z_nearest = T.get(idx_nearest);
+    else
+        disp('***Nearest.m: No near point in this image space yet! Try to activate some more primitives!***');
+        z_nearest = [];
+    end
 catch ME
     disp(ME.message)
     keyboard

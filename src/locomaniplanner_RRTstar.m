@@ -1,6 +1,6 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_bias_freq = 5;
+push_bias_freq = 1;
 
 using_yarp = 0;
 multiple_primitives = 1; % testing locomotion primitive only for coffee
@@ -98,6 +98,7 @@ if multiple_primitives
     z_intermediate_1 = [x_target; y_target; 0; 0; 0];
     z_intermediate_2 = [x_target; y_target; 0; 0; 1];
     bias_points_generic = {z_intermediate_1,z_intermediate_2,z_goal};
+    bias_points_image_space = {1, 2, 1};
 else
     bias_points_generic = {z_goal};
 end
@@ -131,20 +132,32 @@ for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
     cprintf('*[0,0.7,1]*','* Choosing the sampling image space: ');
-    sample_image_space = RandSelectActivePrimitive(active_primitives); % uniformly randomly selects the primitive from where to sample from
+    if mod(ii,push_bias_freq)==0 % if we want to push in a goal state in a certain primitive space, we have to force sampling in that primitive space
+        sample_image_space = bias_points_image_space{bias_ii}; % DD_move primitive space
+    else
+        sample_image_space = RandSelectActivePrimitive(active_primitives); % uniformly randomly selects the primitive from where to sample from
+    end
     cprintf('*[0,0.7,1]*','%d: %s*\n',sample_image_space,Ptree.Node{sample_image_space}.name);
     %     keyboard
     Chi_ii = Ptree.Node{sample_image_space}.chi; % select current image space where to sample from
     %% sampling
     if mod(ii,push_bias_freq)==0 %&& ~path_found
-        z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
+        z_bias = bias_points{bias_ii};
         z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions_imagespace>0); % every once in a while push in a known number
-        disp('Pushing in goal')
+        disp('Pushing in bias')
+        keyboard
         if bias_ii == length(bias_points)
+            disp('Pushing in goal')
             pushed_in_goal=1;
+            if ~isequal(z_rand(1),z_bias(1))
+                disp('Error in assigning z_rand!')
+                keyboard
+            end
+            keyboard
         else
             pushed_in_goal=0;
         end
+        bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
     else
         z_rand = Chi_ii.sample; % sample a point in Chi_i.
         pushed_in_goal=0;
@@ -154,15 +167,17 @@ for ii=1:N_sample_max
 %     end
     try
         while ~CollisionFree(fix_nans(z_rand,Ptree.Node{sample_image_space}.dimensions_imagespace),Ptree,Obstacles)
-            if mod(ii,push_bias_freq)==0 %&& ~path_found
-                z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
-                z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions>0); % every once in a while push in a known number
-                disp('Pushing in goal')
-                pushed_in_goal=1;
-            else
+            % the next if lines should not be needed, and the change the
+            % bias counter generating strange behaviors
+%             if mod(ii,push_bias_freq)==0 %&& ~path_found
+%                 z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
+%                 z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions>0); % every once in a while push in a known number
+%                 disp('Pushing in goal')
+%                 pushed_in_goal=1;
+%             else
                 z_rand = Chi_ii.sample; % sample a point in Chi_i.
                 pushed_in_goal=0;
-            end
+%             end
         end
     catch COLLISIONMESSAGE
         disp(COLLISIONMESSAGE.message);
@@ -186,6 +201,7 @@ for ii=1:N_sample_max
         idx_parent_primitive = [];
     else
         idx_parent_primitive = 1; % TODO: automatize this with the primitive tree
+        keyboard
     end
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_ii,Ptree,Ptree.Node{sample_image_space}.ID,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
     %     test_plot_opt
@@ -276,6 +292,7 @@ for ii=1:N_sample_max
                         idx_last_added] ... % return index of last added node
                         = InsertExtendedNode(idx_last_added,prim.extend(z_new),T,G,E, prim, q_trig, cost_trig, x_trig , time_trig, verbose, plot_nodes, plot_edges);
                     prim.extend(z_new)
+                    replicate_over_primitive = 2; % HARDCODED for testing, easy to generalize
                     if checkdiscontinuity(T,E,Ptree)
                         keyboard
                     end

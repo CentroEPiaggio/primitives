@@ -1,6 +1,6 @@
 function [Tree,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi,Ptree,idx_prim,z_rand,T,Graph,Edges,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive)
 debug = 1;
-
+% keyboard
 cprintf('*[0,0.7,1]*','# entering localRRTstar #\n');
 
 % select current primitive
@@ -56,7 +56,7 @@ for bb=1:length(replicate_with)
     if ~isempty(goal_node)
         idx_nearest(idx_nearest==goal_node) = [];
     end
-    if isempty(idx_nearest) % ... if the goal noad is the only nearest node, then go away
+    if isempty(idx_nearest) % ... if the goal node is the only nearest node, or you sampled a point in an image space where the tree has not grown in yet (might happen if biasing wrongly), then go away
         % do nothing
         Tree = T;
         G = Graph;
@@ -68,7 +68,7 @@ for bb=1:length(replicate_with)
     end
     % rescale z_rand within a ball of radius \eta centered in z_nearest
     cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
-    eta = {1.2;0.1}; % TUNABLE PARAMETER. TODO: replace this with prim.eta inside the primitive's initialization
+    eta = {1.2;1}; % TUNABLE PARAMETER. TODO: replace this with prim.eta inside the primitive's initialization
     if idx_prim>1
         %     error('remember to fix this eta radius bubble stuff!');
         cprintf('*[0,0.7,1]*','* remember to fix this eta radius bubble stuff! *\n');
