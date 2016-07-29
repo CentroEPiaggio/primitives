@@ -30,6 +30,12 @@ cost_new_edge = c_min; % default initialization row 2 algorithm 2
 % traj_vel = NaN;
 x = NaN;
 time = NaN;
+
+best_idx = idx_min;
+best_cost = cost_new_edge; % best cost is the one to the nearest, up to now
+best_x = x;
+best_time = time;
+best_z = [];
 % keyboard
 added_intermediate_node = false;
 intermediate_primitives_list = {};
@@ -104,7 +110,7 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                 % costo fino al near + pezzettino near-new
                 c_prime = cost_up_to_z_near + cost_znear_znew;
                 
-                if ((c_prime < cost_z_new) && (c_prime < c_min)) % cost_z_near) && % && (c_actual < c_x_new)
+                if ((c_prime <= cost_z_new) && (c_prime <= c_min)) % cost_z_near) && % && (c_actual < c_x_new)
                     if feasible_extend
                         disp('Found a new trajectory by adding an intermediate node!')
                         keyboard
@@ -115,6 +121,11 @@ for i=1:length(idX_near) % for every point btw the nearby vertices
                     time = time_chooseparent;
 %                     keyboard
                     z_new_tentative = x(prim.dimensions_imagespace>0,end); % return z_new as the last point of the steering trajectory found from the node
+                    best_idx = idx_min;
+                    best_cost = cost_znear_znew;
+                    best_x = x;
+                    best_time = time;
+                    best_z = z_new_tentative;
                     parent_found = true;
                 else % cost not good enough
                     if feasible_extend
@@ -169,6 +180,13 @@ end
 
 if ~parent_found
     cost_new_edge = Inf;
+else
+    idx_min = best_idx;
+%     q = best_q
+    cost_new_edge = best_cost;
+x = best_x;
+time = best_time;
+z_new = best_z;
 end
 
 end

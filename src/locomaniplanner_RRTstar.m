@@ -1,13 +1,14 @@
 % locomaniplanner
 clear all; clear import; close all; clc;
-push_bias_freq = 1;
+push_bias_freq = 5;
+warm_start = 0;
 
 using_yarp = 0;
 multiple_primitives = 1; % testing locomotion primitive only for coffee
 obstacles_on = true;
 
 % Algorithm's parameters
-gam = 1000; % constant for radius of search of near nodes in near.m
+gam = 1000;%1000; % constant for radius of search of near nodes in near.m
 tol=0.1;0.05; % tolerance for the goal region distance from the goal point
 
 % debug and visualization flags
@@ -83,6 +84,10 @@ end
 [T,G,E] = InitializeTree();
 [~,T,G,E] = InsertNode(0,z_init,T,G,E,[],0,0); % add first node
 
+if warm_start
+    load warm_start_data.mat;
+end
+
 InitializePrimitives; % builds Ptree, which is a list with all available primitives, and Chi0: which is the common space
 
 % active_primitives = zeros(1,Ptree.nnodes); % initialize the activated primitives with the first one (locomotion)
@@ -94,13 +99,18 @@ InitObstacles; % initialize obstacles structure
 
 % These points are added to bias the sampling towards points we want the
 % solution to pass by.
+z_bias = [];
 if multiple_primitives
-    z_intermediate_1 = [x_target; y_target; 0; 0; 0];
+    z_intermediate_1 = [x_target-0.1; y_target; 0; 0; 0];
     z_intermediate_2 = [x_target; y_target; 0; 0; 1];
-    bias_points_generic = {z_intermediate_1,z_intermediate_2,z_goal};
-    bias_points_image_space = {1, 2, 1};
+    z_intermediate_3 = [x_target-0.2; y_target-0.3; 0; 0; 0];
+    z_intermediate_4 = [x_target-0.2; y_target-0.3; 0; 0; 1];
+    bias_points_generic = {z_intermediate_1,z_intermediate_2,z_intermediate_3,z_intermediate_4,z_goal};
+    bias_points_image_space = {1, 2, 2, 2, 1};
 else
-    bias_points_generic = {z_goal};
+    z_goal(end) = NaN;
+    bias_points_generic = {[1,0.4,0,0,NaN]',z_goal,[0.5,0,0,0,NaN]',[0.75,0,0,0,NaN]',[0.8,0,0,0,NaN]',[0.85,0,0,0,NaN]',[1,0,0,0,NaN]',[1.2,0,0,0,NaN]',[1.5,0,0,0,NaN]',[1.6,0,0,0,NaN]',[1.8,0,0,0,NaN]',z_goal};
+    bias_points_image_space = {1,1,1,1,1,1,1,1,1,1,1,1};
 end
 bias_points = bias_points_generic;
 bias_ii = 1;
@@ -122,8 +132,9 @@ source_node = 1;
 opt_path_edges = {};
 replicate_over_primitive = []; % list of primitives that need replicated points
 global raggio_conta; raggio_conta=1; figure(13); plot(0,0);hold on;
-z_rand = Chi0.sample; pushed_in_goal=0;
-z_aug = Ptree.Node{2}.chi.sample;
+pushed_in_goal=0;
+% z_rand = Chi0.sample;
+% z_aug = Ptree.Node{2}.chi.sample;
 
 bag_bias = {};
 bias_points = [bias_points_generic];
@@ -132,7 +143,7 @@ for ii=1:N_sample_max
     cprintf('*[1,0.5,0]*','# %d\n',ii);
     cprintf('*[0,0.7,1]*','* sampling z_rand *\n');
     cprintf('*[0,0.7,1]*','* Choosing the sampling image space: ');
-    if mod(ii,push_bias_freq)==0 % if we want to push in a goal state in a certain primitive space, we have to force sampling in that primitive space
+    if mod(ii,push_bias_freq)==0 && ~isempty(bias_points) % if we want to push in a goal state in a certain primitive space, we have to force sampling in that primitive space
         sample_image_space = bias_points_image_space{bias_ii}; % DD_move primitive space
     else
         sample_image_space = RandSelectActivePrimitive(active_primitives); % uniformly randomly selects the primitive from where to sample from
@@ -141,11 +152,10 @@ for ii=1:N_sample_max
     %     keyboard
     Chi_ii = Ptree.Node{sample_image_space}.chi; % select current image space where to sample from
     %% sampling
-    if mod(ii,push_bias_freq)==0 %&& ~path_found
+    if mod(ii,push_bias_freq)==0 && ~isempty(bias_points)%&& ~path_found
         z_bias = bias_points{bias_ii};
         z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions_imagespace>0); % every once in a while push in a known number
         disp('Pushing in bias')
-        keyboard
         if bias_ii == length(bias_points)
             disp('Pushing in goal')
             pushed_in_goal=1;
@@ -153,7 +163,6 @@ for ii=1:N_sample_max
                 disp('Error in assigning z_rand!')
                 keyboard
             end
-            keyboard
         else
             pushed_in_goal=0;
         end
@@ -162,22 +171,22 @@ for ii=1:N_sample_max
         z_rand = Chi_ii.sample; % sample a point in Chi_i.
         pushed_in_goal=0;
     end
-%     if active_primitives(2)
-%         keyboard
-%     end
+    %     if active_primitives(2)
+    %         keyboard
+    %     end
     try
         while ~CollisionFree(fix_nans(z_rand,Ptree.Node{sample_image_space}.dimensions_imagespace),Ptree,Obstacles)
             % the next if lines should not be needed, and the change the
             % bias counter generating strange behaviors
-%             if mod(ii,push_bias_freq)==0 %&& ~path_found
-%                 z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
-%                 z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions>0); % every once in a while push in a known number
-%                 disp('Pushing in goal')
-%                 pushed_in_goal=1;
-%             else
-                z_rand = Chi_ii.sample; % sample a point in Chi_i.
-                pushed_in_goal=0;
-%             end
+            %             if mod(ii,push_bias_freq)==0 %&& ~path_found
+            %                 z_bias = bias_points{bias_ii}; bias_ii = bias_ii+1; if bias_ii>length(bias_points), bias_ii=1; end
+            %                 z_rand = z_bias(Ptree.Node{sample_image_space}.dimensions>0); % every once in a while push in a known number
+            %                 disp('Pushing in goal')
+            %                 pushed_in_goal=1;
+            %             else
+            z_rand = Chi_ii.sample; % sample a point in Chi_i.
+            pushed_in_goal=0;
+            %             end
         end
     catch COLLISIONMESSAGE
         disp(COLLISIONMESSAGE.message);
@@ -201,11 +210,16 @@ for ii=1:N_sample_max
         idx_parent_primitive = [];
     else
         idx_parent_primitive = 1; % TODO: automatize this with the primitive tree
-        keyboard
+        %         keyboard
     end
     [T,G,E,z_new,plot_nodes,plot_edges,feasible,added_new,idx_last_added] = localRRTstar(Chi_ii,Ptree,Ptree.Node{sample_image_space}.ID,z_rand,T,G,E,Obstacles,verbose,plot_nodes,plot_edges,pushed_in_goal,goal_node,idx_parent_primitive,gam,tol,replicate_over_primitive);
     %     test_plot_opt
-    if added_new && reached(T.Node{end},z_goal,tol) % first time a path is found
+    if multiple_primitives
+        reached_goal = reached(T.Node{end},z_goal,tol,[]);
+    else
+        reached_goal = reached(T.Node{end},z_goal,tol,[1,2]); % for debug, just check on the x-y dimensions
+    end
+    if added_new && reached_goal % first time a path is found
         %-keyboard
         idz_Goal = T.nnodes; % last one is the goal state, for the moment (in anytime version this will change).
         goal_node = idz_Goal;
@@ -271,7 +285,7 @@ for ii=1:N_sample_max
         cprintf('*[0,0.7,1]*','Found new primitive?')
         if ~isequal(idx_avail_prim,active_primitives)
             cprintf('*[0,0.7,1]*','Found new primitive!')
-%             keyboard
+            %             keyboard
             % extend the sampled node in the new image spaces
             for idx_newly_activated=1:length(active_primitives)
                 if active_primitives(idx_newly_activated)==0 && idx_avail_prim(idx_newly_activated)==1 % if a primitive is not active but can be activated
@@ -296,16 +310,49 @@ for ii=1:N_sample_max
                     if checkdiscontinuity(T,E,Ptree)
                         keyboard
                     end
+                    if CheckForDuplicates(T,G,E)
+                        disp('Ugly gesture')
+                        keyboard
+                    end
                 end
             end
             
             active_primitives(idx_avail_prim>0) = 1; % activate new primitives
-%             keyboard
+            %             keyboard
         else
             cprintf('*[0,0.7,1]*','No :(')
         end
         
+        % bias removal for debug
+        if ~isempty(z_bias)
+            temp_T = T;
+            temp_T = temp_T.addnode(temp_T.nnodes,z_bias);
+            if CheckForDuplicates(temp_T,G,E)
+                disp('removing bias from bias_list');
+                idx_bias_to_remove = bias_ii-1;
+                if idx_bias_to_remove==0 && ~isempty(bias_points)
+                    idx_bias_to_remove = 1;
+                end
+                if idx_bias_to_remove~=0
+                    bias_points_generic(idx_bias_to_remove) = [];
+                    bias_points_image_space(idx_bias_to_remove) = [];
+                    bias_points = [bias_points_generic];
+                    if bias_ii > length(bias_points)
+                        bias_ii = 1;
+                    end
+                end
+            end
+        end
         
+        if CheckForDuplicates(T,G,E)
+            disp('Ugly gesture')
+            keyboard
+        end
+        
+        if ~graphisdag(G)
+            disp('Very ugly gesture')
+            keyboard
+        end
         %% INTERNAL LOOP STARTS HERE
         % Iterate over available primitives
         %         for jj=2:length(idx_avail_prim) % first element of idx_avail_prim is conventionally associated with a unique primitive on Chi0

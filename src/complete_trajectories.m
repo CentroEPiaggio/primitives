@@ -18,13 +18,20 @@
 % the others are computed from the starting node with a constant input
 % (trimmered) for the same time.
 function [x_complete] = complete_trajectories(z_start,time,x,Ptree,primitive_ID)
-% keyboard
+% if ~any(isnan(x(:,1)))
+%     x_complete = x;
+%     return
+% end
 if size(x,1) == length(Ptree.Node{1}.dimensions) && isequaln(z_start(Ptree.Node{1}.dimensions==0), x(Ptree.Node{1}.dimensions==0,1))
     x_complete = x;
     return
 end
 
-x_complete = zeros(length(Ptree.Node{1}.dimensions),length(time));
+if Ptree.nnodes > 1
+    x_complete = zeros(length(Ptree.Node{1}.dimensions),length(time));
+else
+    x_complete = zeros(sum(Ptree.Node{1}.dimensions),length(time));
+end
 
 for ii=1:Ptree.nnodes
     prim = Ptree.get(ii);

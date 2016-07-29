@@ -60,7 +60,18 @@ classdef DD_move < primitive_library.PrimitiveFun
             
             Ts = 0.01;
             
-            %yi = rand; %danilo briccone
+            %% Humanoid trajectories
+            robot_speed = 0.1; % mean speed
+            distance = norm(z_end(1:2) - z_start(1:2));
+            time = distance/robot_speed;
+            time = 0:Ts:round(time*100)/100;
+            cost = time(end);
+            feasible = true;
+            x = z_start(obj.dimensions>0)*(time(end)-time)/time(end) + (z_end(obj.dimensions>0))*time/time(end);
+            q = [z_start(:)' z_end(:)'];
+            return
+            %%
+            %yi = rand;
             %yf = yi*2;
             % prepare data for muovi
             % define parameters for primitive muovi
@@ -121,7 +132,6 @@ classdef DD_move < primitive_library.PrimitiveFun
                 %                 runstr = [run_filepath, 'modello -f rsim_tfdata.mat=' run_filepath 'runna.mat -p ' run_filepath 'params_steering.mat -v -tf ',num2str(Tend)];
                 
                 feasible = 1;
-                
             else
                 feasible = 0;
                 q = NaN;

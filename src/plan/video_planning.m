@@ -1,5 +1,5 @@
-load test_a_2016_03_02_07_31_06.mat;
-
+% load test_a_2016_03_02_07_31_06.mat;
+load test_2016_07_28_03_09_00.mat;
 %%
 close all
 
@@ -67,7 +67,7 @@ movie_anima(frames) = getframe(figure(fig_xy));
 frames = frames +1;
 movie_anima(frames) = getframe(figure(fig_xy));
 frames = frames +1;
-
+return
 disp('saving video...');
 
 for iter=1:frames-1

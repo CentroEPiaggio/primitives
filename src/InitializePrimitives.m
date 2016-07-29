@@ -23,8 +23,8 @@ cost_table = rand(10,3);
 xmin = -0.3;
 xmax = 2.5;
 
-ymin = -1;
-ymax = 1;
+ymin = -3;
+ymax = 1.5;
 
 vmin = 0;
 vmax = 0.2;
@@ -68,7 +68,7 @@ if multiple_primitives
         x_target = x_obj;
         y_target = y_obj;
     end
-    L_arm = 0.5;
+    L_arm = 1.1;
     L_bar = 2;
     xmin_grasping = x_target-L_arm;
     xmax_grasping = x_target+L_arm*0.1;
@@ -91,7 +91,7 @@ if multiple_primitives
         xmax_grasping ymin_grasping taumax;
         xmax_grasping ymax_grasping taumax];
     
-    arm_setup_parameters = struct('x_target',x_target,'y_target',y_target);
+    arm_setup_parameters = struct('x_target',x_target,'y_target',y_target,'L_arm',L_arm,'L_bar',L_bar);
 %     Manipulate = ARM_move(ARM_move_vertices_nuvoletta,[1 0],cost_table,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID,arm_setup_parameters);
     Manipulate = ARM_move(ARM_move_vertices_nuvoletta,'ARM_move',dimensioni,initial_extend,dimensioni_nuvoletta,'green',ID,arm_setup_parameters);
     Ptree = Ptree.addnode(idx_primitive_next,Manipulate);

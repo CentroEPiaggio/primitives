@@ -2,6 +2,8 @@ classdef ARM_move < primitive_library.PrimitiveFun
     properties
         A_g_0;    % TODO: this has to be parameterized
         shoulder_displacement; % TODO: this has to be parameterized
+        L_arm;    % TODO: this has to be parameterized
+        L_bar;    % TODO: this has to be parameterized
         %         Control u; % generic control law
         %         Trig xi; % trigger conditions
         %         Duration t; % duration of execution of the primitive
@@ -31,6 +33,8 @@ classdef ARM_move < primitive_library.PrimitiveFun
             y_target = setup_parameters.y_target;
             obj.A_g_0(1:3,4) = [x_target;y_target;0.3];
             obj.shoulder_displacement = [0.1,-0.1,0.1]; % from arm_trajectory.m. TODO: parametrize?
+            obj.L_arm = setup_parameters.L_arm;
+            obj.L_bar = setup_parameters.L_bar;
         end
         function [feasible,cost,q,x,time] = steering(obj,z_start,z_end)
             cprintf('*[.6,0.1,1]*','Steering --> ARM_move\n');
@@ -62,7 +66,26 @@ classdef ARM_move < primitive_library.PrimitiveFun
             u=NaN;
             
             Ts = 0.1;
+            %% Humanoid trajectories
+%             keyboard
+%             arm_speed = 0.5; % mean speed
+%             distance = (norm(z_end(obj.dimensions>0) - z_start(obj.dimensions>0)))*obj.L_arm;
+            time = 0:Ts:1;
+            q = [z_start(:)' z_end(:)'];
+            if tauf == taui
+                feasible = false;
+                return
+            end
+            x = linspace(taui,tauf,length(time));
+            cost = time(end);
+            if cost == 0
+                feasible = false;
+                return
+            end
+            feasible = true;
             
+            return
+            %%
             if isnan(z_start(5)) % TODO: FIXME!!!
                 q0_arm = [0;0;0;0];
             else
@@ -100,7 +123,9 @@ classdef ARM_move < primitive_library.PrimitiveFun
                 tauf = x(end);
                 x = linspace(taui,tauf,length(time));
                 cost = time(end);
+                keyboard
             end
+            
             return
             
             if retval==1
@@ -159,7 +184,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
             
             return
             % arm parameters
-            L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
+%             L_arm = 0.31; % maximum radius of reachability region of the arm w.r.t. base frame, i.e. sum of length of the links
             
             % FIXME: q_arm_trimmered has to come from somewhere else
             q_arm_trimmered = [0;0;0;0;0]; % this primitive, when trimmered, keeps the joints still.
@@ -186,7 +211,7 @@ classdef ARM_move < primitive_library.PrimitiveFun
                 p_e_0 = A_e_0(:,4);
                 
                 dist_euclid_goal_ee = norm(p_g_0 - p_e_0); % euclidean distance
-                distance = 1-dist_euclid_goal_ee/L_arm;
+                distance = 1-dist_euclid_goal_ee/obj.L_arm;
                 tau(ii) = max(0,min(1,distance)); % tau belongs to [0,1]
             end
             

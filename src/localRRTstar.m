@@ -68,7 +68,7 @@ for bb=1:length(replicate_with)
     end
     % rescale z_rand within a ball of radius \eta centered in z_nearest
     cprintf('*[0,0.7,1]*','* rescaling z_rand close to nearest sample *\n');
-    eta = {1.2;1}; % TUNABLE PARAMETER. TODO: replace this with prim.eta inside the primitive's initialization
+    eta = {1.2;1.2}; % TUNABLE PARAMETER. TODO: replace this with prim.eta inside the primitive's initialization
     if idx_prim>1
         %     error('remember to fix this eta radius bubble stuff!');
         cprintf('*[0,0.7,1]*','* remember to fix this eta radius bubble stuff! *\n');
@@ -109,6 +109,10 @@ for bb=1:length(replicate_with)
             disp(['before collisionfree with primitive ' prim.name])
             try
                 [x_complete] = complete_trajectories(z_nearest,time,x,Ptree,prim.ID);
+                if size(x_complete,2)~=length(time)
+                    disp('Wrong assignment of x_complete');
+                    keyboard
+                end
             catch ME
                 disp(ME.message)
                 keyboard
@@ -176,6 +180,10 @@ for bb=1:length(replicate_with)
                     cost_new = cost_from_z_nearest_to_new;
                     [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
                     x = x_complete;
+                    if size(x_complete,2)~=length(time)
+                        disp('Wrong assignment of x_complete');
+                        keyboard
+                    end
                 else                                                        % otherwise look for possibly more convenient paths
                     %                     if bb==3
                     %                         keyboard
@@ -204,6 +212,10 @@ for bb=1:length(replicate_with)
                         end
                         x = x_complete;
                         z_new = round(z_new_chooseparent*100)/100;
+                    end
+                    if size(x_complete,2)~=length(time)
+                        disp('Wrong assignment of x_complete');
+                        keyboard
                     end
                     if isinf(cost_new) % no feasible neighbor found
                         feasible=false;
@@ -242,24 +254,39 @@ for bb=1:length(replicate_with)
                         %                     if idx_prim==1
                         % z_start = x(:,1);z_end = x(:,end); figure,plot(time,x,time(1)*ones(4,1),z_start,'ro',time(end)*ones(4,1),z_end,'ro',time,prim.chi.P.contains(x(prim.dimensions>0,:))),grid on,legend('x','y','th','v','z\_start','z\_end','contains check','location','best')
                         if prim.ID == 2
-                            xplottraj = x(prim.dimensions_imagespace>0,:);
-                            figure(33),clf;prim.chi.P.plot('color','lightblue','alpha',0.5); hold on; plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
-                            idx_inside_primitive = find(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)));
-                            cost = cost*time(idx_inside_primitive(end))/time(end);
-                            time = time(idx_inside_primitive);
-                            x = x(:,idx_inside_primitive);
-                            xplottraj = x(prim.dimensions_imagespace>0,:);
-                            plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
+                            try
+                                xplottraj = x(prim.dimensions_imagespace>0,:);
+                                figure(33),clf;prim.chi.P.plot('color','lightblue','alpha',0.5); hold on; plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
+                                idx_inside_primitive = find(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)));
+                                cost = cost*time(idx_inside_primitive(end))/time(end);
+                                time = time(idx_inside_primitive);
+                                x = x(:,idx_inside_primitive);
+                                xplottraj = x(prim.dimensions_imagespace>0,:);
+                                plot3(xplottraj(1,:),xplottraj(2,:),xplottraj(3,:))
+                            catch PLOTMESSAGE
+                                disp(PLOTMESSAGE.message);
+                                keyboard
+                            end
                             %-keyboard
                         end
                         if all(prim.chi.P.contains(x(prim.dimensions_imagespace>0,:)))
-                            [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
+                            %                             keyboard
+                            try
+                                [x_complete] = complete_trajectories(T.get(idx_min),time,x,Ptree,prim.ID);
+                            catch COMPLETEMESSAGE
+                                disp(COMPLETEMESSAGE.message);
+                                keyboard
+                            end
                             x = x_complete;
                             z_new = round(x(prim.dimensions_imagespace>0,end)*100)/100; % TO FIX DISCONTINUITY PROBLEM
                             if isempty(idx_min)
                                 %-keyboard
                             end
                             [added_new,T,Graph,Edges,plot_nodes,plot_edges,idx_last_added] = InsertNode(idx_min, z_new, T, Graph, Edges, prim, q, cost_new, x, time, verbose, plot_nodes, plot_edges);
+                            if CheckForDuplicates(T,Graph,Edges)
+                                disp('Duplicates!!!');
+                                keyboard
+                            end
                         else
                             disp('Trajectory outside admissible space.')
                         end
@@ -327,10 +354,13 @@ for bb=1:length(replicate_with)
                         %-keyboard
                     end
                     
-                    cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
-                    rewire_enable = true;
+                    rewire_enable = false;
+                    if ~rewire_enable
+                        cprintf('*[0,0.7,1]*','* WARNING: PREVENTING REWIRE! *\n'); % WARNING: PREVENTING REWIRE!
+                    end
                     try
                         if added_new && T.nnodes>2 && ~isempty(idx_near_bubble) && rewire_enable
+                            %                             keyboard
                             cprintf('*[0,0.7,1]*','* ReWire *\n');
                             %                     z_min = T.get(idx_min);
                             idx_new = T.nnodes;
@@ -339,7 +369,12 @@ for bb=1:length(replicate_with)
                             %                     end
                             try
                                 z_new_rewire = replicate_with{bb};
+%                                 keyboard
                                 [rewired,T,Graph,Edges,x_rewire,pnodes,pedges,added_new_rewire,idx_last_added_rewire] = ReWire(idx_near_bubble, idx_min, idx_new, z_new_rewire, T, Graph, Edges, Obstacles, Ptree,idx_prim, q, cost_new,plot_nodes,plot_edges,fig_xv,verbose);
+                                if rewired
+                                    disp('rewired')
+                                    keyboard
+                                end
                             catch ME
                                 disp(ME.message);
                             end

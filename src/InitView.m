@@ -41,6 +41,17 @@ if verbose
         end
     end
     
+    if warm_start
+        keyboard
+        figure(fig_chi0)
+        for ii=1:T.nnodes
+            plot(T.Node{ii}(1),T.Node{ii}(2),'bo','linewidth',2);
+            if T.Parent(ii)~=0
+                plot([T.Node{ii}(1), T.Node{T.Parent(ii)}(1)],[T.Node{ii}(2), T.Node{T.Parent(ii)}(2)],'b','linewidth',2);
+            end
+        end
+    end
+    
 end
 
 

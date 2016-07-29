@@ -16,121 +16,138 @@ if idx_current==0 % first node
     idx_last_added = T.nnodes;
     return
 else
-    % %% debug init
-    %     if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end)) % this check should not be necessary anymore thanks to rounding
-    %         disp('sth strange is happening here')
-    %         keyboard
-    %         disp('forcing them to be equal')
-    %         z_new_old = z_new;
-    %         z_new(1:length(z_new)) = x(1:length(z_new),end);
-    %         if (norm(z_new_old-z_new)) < 1e-9
-    %             % do nothing
-    %         else
-    %             keyboard
-    %         end
-    %     end
-    % %% debug end
-    if ~isinf(cost) && cost>0
-        if debug & prim.ID == 2
-%             keyboard
-        end
-%         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
-%         test2 = fix_nans(z_new,prim.dimensions);
-%         
-%         if isequal(test1,test2) % length(test1)==length(test2) && all(test1==test2)
-%             cprintf('error','InsertNode: last node exception. Not adding the node.\n');
-%             keyboard
-%             return
-%         end
-        z_new=fix_nans(z_new,prim.dimensions_imagespace);
-        %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
-        z_current = T.get(idx_current);
-        z_new(prim.dimensions_imagespace==0) = z_current(prim.dimensions_imagespace==0);
-        %         keyboard
-        %         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
-        % pseudo-code
-        % se il nodo vecchio ha dimensioni diverse da prim.dimensions gia'
-        % inizializzate, allora quelle dimensioni su z_new vanno messe a
-        % x(~prim.dimensions,end). Altrimenti quelle stesse dimensioni vanno messe
-        % come il vecchio nodo.
-        % TODO BUGFIX: this fix probably works good for position variables, not for
-        % speed variables.
-        map_z_new_dimensions_not_initialized = isnan(z_new);
-        map_z_current_dimensions_not_initialized = isnan(z_current);
-        z_n = z_new;
-        if ~isequal(map_z_current_dimensions_not_initialized,map_z_new_dimensions_not_initialized)
-            z_n(map_z_new_dimensions_not_initialized>0) = x(map_z_new_dimensions_not_initialized>0,end);
-        else
-            z_n(map_z_new_dimensions_not_initialized>0) = z_current(map_z_new_dimensions_not_initialized>0,end);
-        end
-        z_new = z_n;
-%         if length(z_new) < 3
-%             keyboard
-%         end
-        %
-%         if z_current(3) > 1 && z_new(3) == 1 % this condition was used on the pendulum
-%             disp('Strange!!!!')
-%             keyboard
-%         end
-        %
-        %         z_new(~prim.dimensions) = current_node(~prim.dimensions);
-        %
-        
-        
-%         if any(any(isnan(x)))
-%             disp('NaNs!!!!')
-%             keyboard
-%         end
-        
-
-        %
-        
-        %%
-        try
-            T = T.addnode(idx_current,z_new);
-        catch
-            keyboard;
-        end
-        idx_last_added_node = T.nnodes;
-        % make the sparse matrix square % is this really needed here?
-        % add new arc to the matrix: this was moved here, before assignig
-        % zeros to null elements, to ensure that G is squared AFTER it has been modified
-        G(idx_current,idx_last_added_node) = cost;
-        sizeG = size(G);
-        [~,shorterDim]=min(sizeG);
-        G(sizeG(shorterDim)+1:max(sizeG),:)=0;
-        actions = struct('source_node', idx_current,...
-            'dest_node', idx_last_added_node,...
-            'primitive',prim.name,...
-            'primitive_ID',prim.ID,...
-            'primitive_q',q,...
-            'x',x,...
-            'time',time);
-        E{idx_current,idx_last_added_node} = actions;
-        added_node = true;
-        disp(['Using primitive: ' prim.name]);
-        disp(['Added node: {' num2str(idx_last_added_node) '} as [' num2str(z_new(:)') ']. Parent: {' num2str(idx_current) '}.'])
-        disp(['From node {' num2str(idx_current) '}: [' num2str(T.get(idx_current)') '] or {' num2str(E{idx_current,idx_last_added_node}.source_node) '}'])
-        disp(['To   node {' num2str(idx_last_added_node) '}: [' num2str(T.get(idx_last_added_node)') '] or {' num2str(E{idx_current,idx_last_added_node}.dest_node) '}'])
-        %%
-        previous = T.get(T.Parent(idx_last_added_node));
-        thisone = T.Node{idx_last_added_node};
-        if ~isequaln(round(E{idx_current,idx_last_added_node}.x(3,end)*100)/100, round(T.Node{idx_last_added_node}(3)*100)/100) && ~isequaln(previous(3),thisone(3))
-            disp('look at this problem!')
-            E{idx_current,idx_last_added_node}.x(3,end), T.Node{idx_last_added_node}(3)
-            keyboard
-        end
-
-%        This check is No more needed
-%         if previous(3)>1 & thisone(3)==1
-%             disp('brought to ground floor... but how?')
-%             keyboard
-%         end
-    else
-        cprintf('error','InsertNode: cost is 0 or Inf.\n');
-        keyboard
+%     keyboard
+    temp_T = T;
+    temp_T = temp_T.addnode(temp_T.nnodes,fix_nans(z_new,prim.dimensions_imagespace));
+    if CheckForDuplicates(temp_T,G,E)
+        added_node = false;
+        idx_last_added = T.nnodes;
+        return
     end
 end
+
+% %% debug init
+%     if ~isnan(x) & length(z_new)>2 & ~isequal(x(3,end), z_new(3,end)) % this check should not be necessary anymore thanks to rounding
+%         disp('sth strange is happening here')
+%         keyboard
+%         disp('forcing them to be equal')
+%         z_new_old = z_new;
+%         z_new(1:length(z_new)) = x(1:length(z_new),end);
+%         if (norm(z_new_old-z_new)) < 1e-9
+%             % do nothing
+%         else
+%             keyboard
+%         end
+%     end
+% %% debug end
+if ~isinf(cost) && cost>0
+    if debug & prim.ID == 2
+        %             keyboard
+    end
+    %         test1 = fix_nans(T.Node{idx_current},prim.dimensions);
+    %         test2 = fix_nans(z_new,prim.dimensions);
+    %
+    %         if isequal(test1,test2) % length(test1)==length(test2) && all(test1==test2)
+    %             cprintf('error','InsertNode: last node exception. Not adding the node.\n');
+    %             keyboard
+    %             return
+    %         end
+    z_new=fix_nans(z_new,prim.dimensions_imagespace);
+    %% this part makes sure that when attaching a new node which has a NaN dimension to a node which is non-NaN in the same dimension, the newly-attached node keeps the same non-NaN values (i.e. is put on the same plane)
+    z_current = T.get(idx_current);
+    z_new(prim.dimensions_imagespace==0) = z_current(prim.dimensions_imagespace==0);
+    %         keyboard
+    %         z_new(~prim.dimensions) = x(~prim.dimensions,end); % this, executed after fix_nans, should fix the problem.
+    % pseudo-code
+    % se il nodo vecchio ha dimensioni diverse da prim.dimensions gia'
+    % inizializzate, allora quelle dimensioni su z_new vanno messe a
+    % x(~prim.dimensions,end). Altrimenti quelle stesse dimensioni vanno messe
+    % come il vecchio nodo.
+    % TODO BUGFIX: this fix probably works good for position variables, not for
+    % speed variables.
+    map_z_new_dimensions_not_initialized = isnan(z_new);
+    map_z_current_dimensions_not_initialized = isnan(z_current);
+    z_n = z_new;
+    if ~isequal(map_z_current_dimensions_not_initialized,map_z_new_dimensions_not_initialized)
+        z_n(map_z_new_dimensions_not_initialized>0) = x(map_z_new_dimensions_not_initialized>0,end);
+    else
+        z_n(map_z_new_dimensions_not_initialized>0) = z_current(map_z_new_dimensions_not_initialized>0,end);
+    end
+    z_new = z_n;
+    %         if length(z_new) < 3
+    %             keyboard
+    %         end
+    %
+    %         if z_current(3) > 1 && z_new(3) == 1 % this condition was used on the pendulum
+    %             disp('Strange!!!!')
+    %             keyboard
+    %         end
+    %
+    %         z_new(~prim.dimensions) = current_node(~prim.dimensions);
+    %
+    
+    
+    %         if any(any(isnan(x)))
+    %             disp('NaNs!!!!')
+    %             keyboard
+    %         end
+    
+    
+    %
+    
+    %%
+    try
+        temp_T = T;
+        temp_T = temp_T.addnode(temp_T.nnodes,fix_nans(z_new,prim.dimensions_imagespace));
+        if CheckForDuplicates(temp_T,G,E)
+            added_node = false;
+            idx_last_added = T.nnodes;
+            return
+        end
+        T = T.addnode(idx_current,z_new);
+    catch
+        keyboard;
+    end
+    idx_last_added_node = T.nnodes;
+    % make the sparse matrix square % is this really needed here?
+    % add new arc to the matrix: this was moved here, before assignig
+    % zeros to null elements, to ensure that G is squared AFTER it has been modified
+    G(idx_current,idx_last_added_node) = cost;
+    sizeG = size(G);
+    [~,shorterDim]=min(sizeG);
+    G(sizeG(shorterDim)+1:max(sizeG),:)=0;
+    actions = struct('source_node', idx_current,...
+        'dest_node', idx_last_added_node,...
+        'primitive',prim.name,...
+        'primitive_ID',prim.ID,...
+        'primitive_q',q,...
+        'x',x,...
+        'time',time);
+    E{idx_current,idx_last_added_node} = actions;
+    added_node = true;
+    disp(['Using primitive: ' prim.name]);
+    disp(['Added node: {' num2str(idx_last_added_node) '} as [' num2str(z_new(:)') ']. Parent: {' num2str(idx_current) '}.'])
+    disp(['From node {' num2str(idx_current) '}: [' num2str(T.get(idx_current)') '] or {' num2str(E{idx_current,idx_last_added_node}.source_node) '}'])
+    disp(['To   node {' num2str(idx_last_added_node) '}: [' num2str(T.get(idx_last_added_node)') '] or {' num2str(E{idx_current,idx_last_added_node}.dest_node) '}'])
+    %%
+    previous = T.get(T.Parent(idx_last_added_node));
+    thisone = T.Node{idx_last_added_node};
+    if ~isequaln(round(E{idx_current,idx_last_added_node}.x(3,end)*100)/100, round(T.Node{idx_last_added_node}(3)*100)/100) && ~isequaln(previous(3),thisone(3))
+        disp('look at this problem!')
+        E{idx_current,idx_last_added_node}.x(3,end), T.Node{idx_last_added_node}(3)
+        keyboard
+    end
+    
+    %        This check is No more needed
+    %         if previous(3)>1 & thisone(3)==1
+    %             disp('brought to ground floor... but how?')
+    %             keyboard
+    %         end
+else
+    cprintf('error','InsertNode: cost is 0 or Inf.\n');
+    keyboard
+end
+
 
 %% Plotting tree in the state space % TODO: this has to be a method specific to each problem.
 if verbose && added_node
@@ -148,9 +165,9 @@ if verbose && added_node
     
     z_start_visual = z_start;
     z_new_visual = z_new;
-%     if length(z_new_visual) == 2
-%         z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
-%     end
+    %     if length(z_new_visual) == 2
+    %         z_new_visual(3) = 1; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
+    %     end
     if isnan(z_start_visual(5))
         z_start_visual(5) = 0; % HARDFIX: formally correct but it has to be generalized to the generic primitive/element
     end

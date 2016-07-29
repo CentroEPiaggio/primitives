@@ -1,8 +1,12 @@
-function [state,diff] = reached(A,B,tol)
+function [state,diff] = reached(A,B,tol,fix_dimensions)
 state = 0;
 diff = NaN;
 % keyboard
-mask = [1,2,5];
+if isempty(fix_dimensions)
+    mask = [1,2,5];
+else
+    mask = fix_dimensions;
+end
 try
     A = A(mask);
     B = B(mask);
